@@ -1,28 +1,88 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:sui/cryptography/secp256.dart';
 import 'package:sui/cryptography/secp256r1_keypair.dart';
 import 'package:sui/utils/sha.dart';
 
 void main() {
   const VALID_SECP256R1_SECRET_KEY = [
-    66, 37, 141, 205, 161, 76, 241, 17, 198, 2, 184, 151, 27, 140, 200, 67, 233,
-    30, 70, 202, 144, 81, 81, 192, 39, 68, 166, 176, 23, 230, 147, 22,
+    66,
+    37,
+    141,
+    205,
+    161,
+    76,
+    241,
+    17,
+    198,
+    2,
+    184,
+    151,
+    27,
+    140,
+    200,
+    67,
+    233,
+    30,
+    70,
+    202,
+    144,
+    81,
+    81,
+    192,
+    39,
+    68,
+    166,
+    176,
+    23,
+    230,
+    147,
+    22,
   ];
 
   /// Corresponding to the secret key above.
   const VALID_SECP256R1_PUBLIC_KEY = [
-    2, 39, 50, 43, 58, 137, 26, 10, 40, 13, 107, 193, 251, 44, 187, 35, 210, 143,
-    84, 144, 111, 214, 64, 127, 95, 116, 31, 109, 239, 87, 98, 96, 154,
+    2,
+    39,
+    50,
+    43,
+    58,
+    137,
+    26,
+    10,
+    40,
+    13,
+    107,
+    193,
+    251,
+    44,
+    187,
+    35,
+    210,
+    143,
+    84,
+    144,
+    111,
+    214,
+    64,
+    127,
+    95,
+    116,
+    31,
+    109,
+    239,
+    87,
+    98,
+    96,
+    154,
   ];
 
   /// Invalid private key with incorrect length
   final INVALID_SECP256R1_SECRET_KEY = Uint8List.fromList(List<int>.filled(31, 1));
 
-  const TEST_MNEMONIC =
-      'open genre century trouble allow pioneer love task chat salt drive income';
+  const TEST_MNEMONIC = 'open genre century trouble allow pioneer love task chat salt drive income';
 
   group('secp256r1-keypair', () {
     test('new keypair', () {
@@ -36,9 +96,7 @@ void main() {
       final pubKeyBase64 = base64Encode(pubKey);
       final keypair = Secp256r1Keypair.fromSecretKey(secretKey);
       expect(
-          base64Encode(keypair.publicKeyBytes()) ==
-              base64Encode(Uint8List.fromList(pubKey)),
-          true);
+          base64Encode(keypair.publicKeyBytes()) == base64Encode(Uint8List.fromList(pubKey)), true);
       expect(keypair.getPublicKey().toBase64() == pubKeyBase64, true);
     });
 
@@ -52,11 +110,8 @@ void main() {
     });
 
     test('generate keypair from random seed', () {
-      final keypair = Secp256r1Keypair.fromSeed(
-          Uint8List.fromList(List<int>.filled(32, 8)));
-      expect(
-          keypair.getPublicKey().toBase64() ==
-              'AzrasV1mJWvxXNcWA1s/BBRE5RL+0d1k1Lp1WX0g42bx',
+      final keypair = Secp256r1Keypair.fromSeed(Uint8List.fromList(List<int>.filled(32, 8)));
+      expect(keypair.getPublicKey().toBase64() == 'AzrasV1mJWvxXNcWA1s/BBRE5RL+0d1k1Lp1WX0g42bx',
           true);
     });
 
@@ -67,7 +122,8 @@ void main() {
       final msgHash = sha256(signData);
       final sig = keypair.signData(signData);
       final signature = SignatureData.fromBytes(sig);
-      int recId = Secp256r1Keypair.secp256r1.recoveryId(signature, msgHash, keypair.publicKeyBytes(false));
+      int recId =
+          Secp256r1Keypair.secp256r1.recoveryId(signature, msgHash, keypair.publicKeyBytes(false));
       final publicKey = Secp256r1Keypair.secp256r1.ecRecover(recId, msgHash, signature);
 
       expect(base64Encode(publicKey) == base64Encode(keypair.publicKeyBytes(false)), true);
@@ -75,17 +131,14 @@ void main() {
 
     test('invalid mnemonics to derive secp256r1 keypair', () {
       expect(() {
-        Secp256r1Keypair.deriveKeypair(
-            DEFAULT_SECP256R1_DERIVATION_PATH, 'aaa');
+        Secp256r1Keypair.deriveKeypair(DEFAULT_SECP256R1_DERIVATION_PATH, 'aaa');
       }, throwsArgumentError);
     });
 
     test('derive secp256r1 keypair from path and mnemonics', () {
-      final keypair = Secp256r1Keypair.deriveKeypair(
-          DEFAULT_SECP256R1_DERIVATION_PATH, TEST_MNEMONIC);
-      expect(
-          keypair.getPublicKey().toBase64() ==
-              'A1s+wioS1h2S+kFEhyB/E16/8nxK6iFzdvc7lrlP9fsM',
+      final keypair =
+          Secp256r1Keypair.deriveKeypair(DEFAULT_SECP256R1_DERIVATION_PATH, TEST_MNEMONIC);
+      expect(keypair.getPublicKey().toBase64() == 'A1s+wioS1h2S+kFEhyB/E16/8nxK6iFzdvc7lrlP9fsM',
           true);
       expect(
           keypair.getPublicKey().toSuiAddress() ==

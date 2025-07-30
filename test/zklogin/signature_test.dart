@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:bcs/bcs.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 
 const aSignature =
@@ -30,10 +30,8 @@ final aSignatureInputs = ZkLoginSignatureInputs(
       '1',
     ],
   ),
-  issBase64Details: Claim(
-      value: 'yJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLC', indexMod4: 1),
-  addressSeed:
-      '13322897930163218532266430409510394316985274769125667290600321564259466511711',
+  issBase64Details: Claim(value: 'yJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLC', indexMod4: 1),
+  addressSeed: '13322897930163218532266430409510394316985274769125667290600321564259466511711',
   headerBase64:
       'eyJhbGciOiJSUzI1NiIsImtpZCI6ImI5YWM2MDFkMTMxZmQ0ZmZkNTU2ZmYwMzJhYWIxODg4ODBjZGUzYjkiLCJ0eXAiOiJKV1QifQ',
 );
@@ -46,8 +44,7 @@ void main() {
     final result = parseZkLoginSignature(fromB64(aSignature).sublist(1));
     final isValid = result.maxEpoch == 174 &&
         toB64(result.userSignature) == anEphemeralSignature &&
-        jsonEncode(result.inputs.toJson()) ==
-            jsonEncode(aSignatureInputs.toJson());
+        jsonEncode(result.inputs.toJson()) == jsonEncode(aSignatureInputs.toJson());
     expect(isValid, true);
   });
 

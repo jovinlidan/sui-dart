@@ -1,9 +1,8 @@
-
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:bcs/utils.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 
 void main() {
@@ -29,9 +28,7 @@ void main() {
     expect(otx.serialize(), isNot(equals(rtx.serialize())));
   });
 
-  test(
-      'can be serialized and deserialized to the same values with onlyTransactionKind',
-      () async {
+  test('can be serialized and deserialized to the same values with onlyTransactionKind', () async {
     final tx = Transaction();
     tx.add(Commands.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]));
     final bytes = await tx.build(BuildOptions(onlyTransactionKind: true));
@@ -172,18 +169,51 @@ void main() {
 
 SuiObjectRef ref() {
   final random = Random();
-	return SuiObjectRef(
-    toB58(Uint8List.fromList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2,])),
-    normalizeSuiAddress(random.nextInt(100000).toString().padRight(64, '0')), 
+  return SuiObjectRef(
+    toB58(Uint8List.fromList([
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      1,
+      2,
+    ])),
+    normalizeSuiAddress(random.nextInt(100000).toString().padRight(64, '0')),
     random.nextInt(100000),
   );
 }
 
 Transaction setup() {
-	final tx = Transaction();
-	tx.setSender('0x2');
-	tx.setGasPrice(BigInt.from(5));
-	tx.setGasBudget(BigInt.from(100));
-	tx.setGasPayment([ref()]);
-	return tx;
+  final tx = Transaction();
+  tx.setSender('0x2');
+  tx.setGasPrice(BigInt.from(5));
+  tx.setGasBudget(BigInt.from(100));
+  tx.setGasPayment([ref()]);
+  return tx;
 }

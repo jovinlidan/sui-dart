@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 
 void main() {
@@ -10,8 +10,7 @@ void main() {
     });
 
     test('Get latest checkpoint sequence number', () async {
-      final checkpointSequenceNumber =
-          await client.getLatestCheckpointSequenceNumber();
+      final checkpointSequenceNumber = await client.getLatestCheckpointSequenceNumber();
       expect(checkpointSequenceNumber > BigInt.zero, true);
     });
 
@@ -33,8 +32,7 @@ void main() {
     });
 
     test('getCheckpoints', () async {
-      final checkpoints =
-          await client.getCheckpoints(descendingOrder: false, limit: 1);
+      final checkpoints = await client.getCheckpoints(descendingOrder: false, limit: 1);
 
       expect(checkpoints.nextCursor, '0');
       expect(checkpoints.data.length, 1);

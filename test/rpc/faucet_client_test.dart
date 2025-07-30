@@ -1,4 +1,4 @@
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 
 void main() {
@@ -20,8 +20,7 @@ void main() {
 
   test('get faucet request status', () async {
     final faucet = FaucetClient(SuiUrls.faucetDev);
-    final resp = await faucet
-        .getFaucetRequestStatus("2442c39e-5cc5-4162-a7ef-e328cdc0332e");
+    final resp = await faucet.getFaucetRequestStatus("2442c39e-5cc5-4162-a7ef-e328cdc0332e");
     expect(resp.status.status, BatchSendStatus.SUCCEEDED);
   });
 }

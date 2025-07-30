@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:bcs/bcs.dart';
-import 'package:flutter/foundation.dart';
 import 'package:sui/sui.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 
 const modules = [
   "oRzrCwYAAAAKAQAMAgwkAzBDBHMOBYEBqAEHqQLdAQiGBGAG5gQPCvUEBQz6BFYADAERAggCFQIWAhcAAgIAAQMHAQAAAgAMAQABAgEMAQABAgQMAQABBAUCAAUGBwAACwABAAAPAgEAAA0DBAAABwUBAAEQAQgBAAIHFRYBAAIJCgsBAgINExQBAAIOEgEBAAMSDQEBDAMTEQEBDAQUDg8ABAcGCQkMChAICQcJBQkCCAAHCAUABAcLBAEIAAMFBwgFAwcLBAEIAAMHCAUBCwIBCAACBwsEAQgACwIBCAACCwMBCAALBAEIAAEIBgELAQEJAAEIAAcJAAIKAgoCCgILAQEIBgcIBQILBAEJAAsDAQkAAQsDAQgAAQkAAQYIBQEFAQsEAQgAAgkABQQHCwQBCQADBQcIBQMHCwQBCQADBwgFAQsCAQkAAgcLBAEJAAsCAQkAAQMEQ29pbgxDb2luTWV0YWRhdGEHTUFOQUdFRAZPcHRpb24LVHJlYXN1cnlDYXAJVHhDb250ZXh0A1VybARidXJuBGNvaW4PY3JlYXRlX2N1cnJlbmN5C2R1bW15X2ZpZWxkBGluaXQHbWFuYWdlZARtaW50EW1pbnRfYW5kX3RyYW5zZmVyB21pbnRfdG8Ebm9uZQZvcHRpb24UcHVibGljX2ZyZWV6ZV9vYmplY3QPcHVibGljX3RyYW5zZmVyBnNlbmRlcgh0cmFuc2Zlcgp0eF9jb250ZXh0A3VybAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgoCCAdNQU5BR0VECgIBAAACAQoBAAAAAAYSCwAxAgcABwEHATgACgE4AQwCDAMLAjgCCwMLAS4RCzgDAgEBBAABBgsACwELAgsDOAQCAgEAAAEFCwALAQsCOAUCAwEEAAEFCwALATgGAQIA"
@@ -17,8 +17,7 @@ void main() {
   const testMnemonics =
       'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss';
 
-  const defaultRecipient =
-      '0x32fa9903c31428579456cc5edcb76f8c09c02a0b5a3b3e94f6fe05bd99405741';
+  const defaultRecipient = '0x32fa9903c31428579456cc5edcb76f8c09c02a0b5a3b3e94f6fe05bd99405741';
 
   const defaultGasBudget = 10000000;
 
@@ -31,8 +30,7 @@ void main() {
   });
 
   test('test secp256k1 account generate from mnemonics', () {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
     expect(
         account.getAddress() ==
             '0x7ec1b6df34a4018c377109851af1cf70db6687dd4a880a51f9119af86d855643',
@@ -40,8 +38,7 @@ void main() {
   });
 
   test('test secp256r1 account generate from mnemonics', () {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256r1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256r1);
     expect(
         account.getAddress() ==
             '0xab1965357f9765022c52f46c3ddd299c7980fbf5ddf63231066d3f27efd54d8e',
@@ -49,8 +46,7 @@ void main() {
   });
 
   test('test ed25519 account generate from mnemonics', () {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     expect(
         account.getAddress() ==
             '0x936accb491f0facaac668baaedcf4d0cfc6da1120b66f77fa6a43af718669973',
@@ -58,16 +54,14 @@ void main() {
   });
 
   test('test secp256k1 account generate', () {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
     final signature = account.signData(data);
     bool success = account.verify(data, signature);
     expect(success, true);
   });
 
   test('test secp256r1 account generate', () {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256r1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256r1);
     final signature = account.signData(data);
     bool success = account.verify(data, signature);
     expect(success, true);
@@ -81,8 +75,7 @@ void main() {
   });
 
   test('test publish package', () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
     final client = SuiClient(SuiUrls.devnet, account: account);
     final modules = [
       "oRzrCwYAAAAKAQAIAggYAyApBEkCBUsnB3LmAQjYAkAKmAMnDL8DRA2DBAIAEAEOARIBEwABAAAAAggAAAUEAAAACAABBAQAAwMCAAAGAAEAABUCAwAAFAQBAAAIBQEAAQcHAQABDQYHAAISCgEBCAMPCAkABgUEAgICBwgFAAEGCAEBAgIHCAECAQgBAQcIBQEIBAEGCAUBBQIJAAUGRm9sZGVyClRyYW5zY3JpcHQQVHJhbnNjcmlwdE9iamVjdAlUeENvbnRleHQDVUlEE1dyYXBwYWJsZVRyYW5zY3JpcHQYY3JlYXRlX3RyYW5zY3JpcHRfb2JqZWN0BmRlbGV0ZRFkZWxldGVfdHJhbnNjcmlwdAdoaXN0b3J5AmlkCmxpdGVyYXR1cmUEbWF0aANuZXcGb2JqZWN0BnNlbmRlcgpzdWlfb2JqZWN0CnRyYW5zY3JpcHQIdHJhbnNmZXIKdHhfY29udGV4dAx1cGRhdGVfc2NvcmUKdmlld19zY29yZQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAgMJAgwCCwIBAgQKCAQJAgwCCwICAgMJAgwCCwIDAgIKCAQRCAIAAQQAAQsKAxEFCwALAQsCEgELAy4RBzgAAgEBAAABBAsAEAAUAgIBBAABBQsBCwAPABUCAwEEAAEHCwATAQEBAREEAgEDAA==",
@@ -102,38 +95,22 @@ void main() {
   });
 
   test('test move contract call', () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
     final client = SuiClient(SuiUrls.devnet, account: account);
     final createSharedCounter = MoveCallTransaction(
-        '0xa1a985ed4ce15503f36625c5996817337dc9e551',
-        'counter',
-        'create',
-        [],
-        [],
-        1000);
+        '0xa1a985ed4ce15503f36625c5996817337dc9e551', 'counter', 'create', [], [], 1000);
     final createCounterResp = await client.executeMoveCall(createSharedCounter);
     final shareObj = createCounterResp.objectChanges?[0]?['objectId'];
     final shareObjId = shareObj.reference.objectId;
 
-    final assertValueCall = MoveCallTransaction(
-        '0xa1a985ed4ce15503f36625c5996817337dc9e551',
-        'counter',
-        'assert_value',
-        [],
-        [shareObjId, 0],
-        1000);
+    final assertValueCall = MoveCallTransaction('0xa1a985ed4ce15503f36625c5996817337dc9e551',
+        'counter', 'assert_value', [], [shareObjId, 0], 1000);
     var assertValueResp = await client.executeMoveCall(assertValueCall);
     var error = assertValueResp.errors;
     expect(error == null, true);
 
-    final incrementValueCall = MoveCallTransaction(
-        '0xa1a985ed4ce15503f36625c5996817337dc9e551',
-        'counter',
-        'increment',
-        [],
-        [shareObjId],
-        1000);
+    final incrementValueCall = MoveCallTransaction('0xa1a985ed4ce15503f36625c5996817337dc9e551',
+        'counter', 'increment', [], [shareObjId], 1000);
     final incrementValueResp = await client.executeMoveCall(incrementValueCall);
     error = incrementValueResp.errors;
     expect(error == null, true);
@@ -144,8 +121,7 @@ void main() {
   });
 
   test('test pay sui with secp256k1', () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256k1);
     final client = SuiClient(SuiUrls.devnet, account: account);
     final coins = await client.getCoins(account.getAddress());
     if (coins.data.isEmpty) {
@@ -154,10 +130,8 @@ void main() {
       assert(resp.transferredGasObjects.isNotEmpty);
     }
 
-    final inputObjectIds =
-        coins.data.take(2).map((x) => x.coinObjectId).toList();
-    final txn = PaySuiTransaction(
-        inputObjectIds, [defaultRecipient], [1000], defaultGasBudget);
+    final inputObjectIds = coins.data.take(2).map((x) => x.coinObjectId).toList();
+    final txn = PaySuiTransaction(inputObjectIds, [defaultRecipient], [1000], defaultGasBudget);
 
     final gasBudget = await client.getGasCostEstimation(txn);
     txn.gasBudget = gasBudget;
@@ -167,8 +141,7 @@ void main() {
   });
 
   test('test pay sui with secp256r1', () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256r1);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Secp256r1);
     final client = SuiClient(SuiUrls.devnet, account: account);
     final coins = await client.getCoins(account.getAddress());
     if (coins.data.isEmpty) {
@@ -177,10 +150,8 @@ void main() {
       assert(resp.transferredGasObjects.isNotEmpty);
     }
 
-    final inputObjectIds =
-        coins.data.take(2).map((x) => x.coinObjectId).toList();
-    final txn = PaySuiTransaction(
-        inputObjectIds, [defaultRecipient], [1000], defaultGasBudget);
+    final inputObjectIds = coins.data.take(2).map((x) => x.coinObjectId).toList();
+    final txn = PaySuiTransaction(inputObjectIds, [defaultRecipient], [1000], defaultGasBudget);
 
     final gasBudget = await client.getGasCostEstimation(txn);
     txn.gasBudget = gasBudget;
@@ -190,8 +161,7 @@ void main() {
   });
 
   test('test pay sui with ed25519', () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final client = SuiClient(SuiUrls.devnet, account: account);
     final coins = await client.getCoins(account.getAddress());
     if (coins.data.isEmpty) {
@@ -200,10 +170,8 @@ void main() {
       assert(resp.transferredGasObjects.isNotEmpty);
     }
 
-    final inputObjectIds =
-        coins.data.take(2).map((x) => x.coinObjectId).toList();
-    final txn = PaySuiTransaction(
-        inputObjectIds, [defaultRecipient], [1000], defaultGasBudget);
+    final inputObjectIds = coins.data.take(2).map((x) => x.coinObjectId).toList();
+    final txn = PaySuiTransaction(inputObjectIds, [defaultRecipient], [1000], defaultGasBudget);
 
     final gasBudget = await client.getGasCostEstimation(txn);
     txn.gasBudget = gasBudget;
@@ -232,8 +200,7 @@ void main() {
 
   test('test transacitonblock transferObjects', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final sender = signer.getAddress();
     final receiver = SuiAccount.ed25519Account().getAddress();
 
@@ -250,13 +217,12 @@ void main() {
       signer,
       txb,
     );
-    debugPrint(resp.digest);
+    print(resp.digest);
   });
 
   test('test transacitonblock SplitCoins', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final sender = signer.getAddress();
 
     final txb = Transaction();
@@ -264,26 +230,22 @@ void main() {
     // final coin = txb.splitCoins(txb.gas, [txb.pureInt(100000000)]);
     // txb.transferObjects([coin], txb.pureAddress(sender));
 
-    final coin = txb
-        .splitCoins(txb.gas, [txb.pureInt(100000000), txb.pureInt(100000000)]);
+    final coin = txb.splitCoins(txb.gas, [txb.pureInt(100000000), txb.pureInt(100000000)]);
     txb.transferObjects([coin[0], coin[1]], txb.pureAddress(sender));
     // txb.transferObjects([coin[0]], txb.pureAddress(sender));
     // txb.transferObjects([coin[1]], txb.pureAddress(sender));
 
     final resp = await client.signAndExecuteTransactionBlock(
-      signer, 
+      signer,
       txb,
-      responseOptions: SuiTransactionBlockResponseOptions(
-        showEffects: true
-      ),
+      responseOptions: SuiTransactionBlockResponseOptions(showEffects: true),
     );
     expect(resp.effects?.status.status, ExecutionStatusType.success);
   });
 
   test('test transacitonblock mergeCoins by objects id', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final sender = signer.getAddress();
     final coins = await client.getGasObjectsOwnedByAddress(sender);
     final destObj = coins.first;
@@ -296,13 +258,12 @@ void main() {
       signer,
       txb,
     );
-    debugPrint(resp.toString());
+    print(resp.toString());
   });
 
   test('test transacitonblock mergeCoins', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final sender = signer.getAddress();
 
     final coins = await client.getGasObjectsOwnedByAddress(sender);
@@ -319,13 +280,12 @@ void main() {
       signer,
       txb,
     );
-    debugPrint(resp.toString());
+    print(resp.toString());
   });
 
   test('test transacitonblock publish package and move call', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final sender = signer.getAddress();
 
     var txb = Transaction();
@@ -333,20 +293,16 @@ void main() {
     txb.transferObjects([cap], txb.pureAddress(sender));
 
     final resp1 = await client.signAndExecuteTransactionBlock(signer, txb,
-        responseOptions:
-            SuiTransactionBlockResponseOptions(showObjectChanges: true));
-    debugPrint(resp1.digest);
+        responseOptions: SuiTransactionBlockResponseOptions(showObjectChanges: true));
+    print(resp1.digest);
 
     await Future.delayed(const Duration(seconds: 3));
 
-    final packageId = resp1.objectChanges!
-        .firstWhere((e) => e["type"] == "published")["packageId"];
+    final packageId = resp1.objectChanges!.firstWhere((e) => e["type"] == "published")["packageId"];
     final capObjectId = resp1.objectChanges!.firstWhere((e) =>
         e["type"] == "created" &&
         e["objectType"] != null &&
-        e["objectType"]
-            .toString()
-            .startsWith("0x2::coin::TreasuryCap"))["objectId"];
+        e["objectType"].toString().startsWith("0x2::coin::TreasuryCap"))["objectId"];
     final capObj = await client.getObject(capObjectId);
 
     txb = Transaction();
@@ -365,14 +321,12 @@ void main() {
       signer,
       txb,
     );
-    debugPrint(resp2.toString());
+    print(resp2.toString());
   });
 
-  test('test transacitonblock publish package and multi mint move call',
-      () async {
+  test('test transacitonblock publish package and multi mint move call', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final sender = signer.getAddress();
 
     var txb = Transaction();
@@ -380,20 +334,16 @@ void main() {
     txb.transferObjects([cap], txb.pureAddress(sender));
 
     final resp1 = await client.signAndExecuteTransactionBlock(signer, txb,
-        responseOptions:
-            SuiTransactionBlockResponseOptions(showObjectChanges: true));
-    debugPrint(resp1.digest);
+        responseOptions: SuiTransactionBlockResponseOptions(showObjectChanges: true));
+    print(resp1.digest);
 
     await Future.delayed(const Duration(seconds: 3));
 
-    final packageId = resp1.objectChanges!
-        .firstWhere((e) => e["type"] == "published")["packageId"];
+    final packageId = resp1.objectChanges!.firstWhere((e) => e["type"] == "published")["packageId"];
     final capObjectId = resp1.objectChanges!.firstWhere((e) =>
         e["type"] == "created" &&
         e["objectType"] != null &&
-        e["objectType"]
-            .toString()
-            .startsWith("0x2::coin::TreasuryCap"))["objectId"];
+        e["objectType"].toString().startsWith("0x2::coin::TreasuryCap"))["objectId"];
     final capObj = await client.getObject(capObjectId);
 
     txb = Transaction();
@@ -411,33 +361,30 @@ void main() {
       signer,
       txb,
     );
-    debugPrint(resp2.toString());
+    print(resp2.toString());
   });
 
   test('test transacitonblock makeMoveVec', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
 
     final txb = Transaction();
 
     final coin = txb.splitCoins(txb.gas, [txb.pureInt(10000)]);
     final vec = txb.makeMoveVec(objects: [coin]);
 
-    txb.moveCall("0x2::pay::join_vec",
-        typeArguments: ["0x2::sui::SUI"], arguments: [txb.gas, vec]);
+    txb.moveCall("0x2::pay::join_vec", typeArguments: ["0x2::sui::SUI"], arguments: [txb.gas, vec]);
 
     final resp = await client.signAndExecuteTransactionBlock(
       signer,
       txb,
     );
-    debugPrint(resp.toString());
+    print(resp.toString());
   });
 
   test('test transacitonblock test publish package', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final signer =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final signer = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final sender = signer.getAddress();
 
     const bytecodeStr =
@@ -450,20 +397,17 @@ void main() {
     final cap = txb.publish(modules, dependencies);
     txb.transferObjects([cap], txb.pureAddress(sender));
 
-    final responseOptions = SuiTransactionBlockResponseOptions(
-        showEffects: true, showObjectChanges: true);
-    final resp = await client.signAndExecuteTransactionBlock(signer, txb,
-        responseOptions: responseOptions);
-    final packageId = resp.objectChanges
-        ?.where((o) => o["type"] == "published")
-        .first["packageId"];
+    final responseOptions =
+        SuiTransactionBlockResponseOptions(showEffects: true, showObjectChanges: true);
+    final resp =
+        await client.signAndExecuteTransactionBlock(signer, txb, responseOptions: responseOptions);
+    final packageId = resp.objectChanges?.where((o) => o["type"] == "published").first["packageId"];
     expect(packageId is String, true);
-    debugPrint("Published package $packageId from address $sender");
+    print("Published package $packageId from address $sender");
   });
 
   test('test transaction block test args', () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final client = SuiClient(SuiUrls.devnet, account: account);
     final receiver = SuiAccount.ed25519Account();
 
@@ -471,27 +415,20 @@ void main() {
     final coin = txb.splitCoins(txb.gas, [txb.pureInt(10000000)]);
     txb.transferObjects([coin], txb.pureAddress(receiver.getAddress()));
 
-    txb.moveCall(
-        '0x69e06dbaf4532817130233a6187d683e5d9eb8364ded9d67ae1bcee6b3d467a::test::test',
-        arguments: [
-          txb.pureString('demo'),
-          txb.pureString('string'),
-          txb.pureString("xyz")
-        ]);
+    txb.moveCall('0x69e06dbaf4532817130233a6187d683e5d9eb8364ded9d67ae1bcee6b3d467a::test::test',
+        arguments: [txb.pureString('demo'), txb.pureString('string'), txb.pureString("xyz")]);
 
     final resp = await client.signAndExecuteTransactionBlock(account, txb);
     expect(resp.confirmedLocalExecution, false);
   });
 
   test('test transaction block move call pure values', () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final client = SuiClient(SuiUrls.devnet, account: account);
 
     final txb = Transaction();
 
-    final emptyVec =
-        txb.moveCall("0x1::vector::empty", typeArguments: [LegacyBCS.U64]);
+    final emptyVec = txb.moveCall("0x1::vector::empty", typeArguments: [LegacyBCS.U64]);
     txb.moveCall("0x1::vector::append", typeArguments: [
       LegacyBCS.U64
     ], arguments: [
@@ -504,8 +441,7 @@ void main() {
   });
 
   test("test restore transaction block data", () async {
-    final account =
-        SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(testMnemonics, SignatureScheme.Ed25519);
     final address = account.getAddress();
     final client = SuiClient(SuiUrls.devnet, account: account);
 
@@ -529,12 +465,7 @@ void main() {
           "objects": [
             {"kind": "Result", "index": 0}
           ],
-          "address": {
-            "kind": "Input",
-            "value": address,
-            "index": 1,
-            "type": "pure"
-          }
+          "address": {"kind": "Input", "value": address, "index": 1, "type": "pure"}
         }
       ]
     };
@@ -542,10 +473,9 @@ void main() {
     final transaction = Transaction.from(jsonEncode(txJson));
     transaction.setSender(address);
     var txBytes = await transaction.build(BuildOptions(client: client));
-    debugPrint(txBytes.toString());
+    print(txBytes.toString());
 
     final resp = await client.signAndExecuteTransaction(transaction: txBytes);
     expect(resp.effects?.status.status, ExecutionStatusType.success);
   });
-
 }

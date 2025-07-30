@@ -1,18 +1,48 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 import 'package:sui/utils/hex.dart';
 
 void main() {
-
   // Corresponding to the secret key above.
   const VALID_SECP256R1_PUBLIC_KEY = [
-    2, 39, 50, 43, 58, 137, 26, 10, 40, 13, 107, 193, 251, 44, 187, 35, 210, 143,
-    84, 144, 111, 214, 64, 127, 95, 116, 31, 109, 239, 87, 98, 96, 154,
+    2,
+    39,
+    50,
+    43,
+    58,
+    137,
+    26,
+    10,
+    40,
+    13,
+    107,
+    193,
+    251,
+    44,
+    187,
+    35,
+    210,
+    143,
+    84,
+    144,
+    111,
+    214,
+    64,
+    127,
+    95,
+    116,
+    31,
+    109,
+    239,
+    87,
+    98,
+    96,
+    154,
   ];
-  
+
   // Invalid public key with incorrect length
   final INVALID_SECP256R1_PUBLIC_KEY = Uint8List.fromList(List<int>.filled(32, 1));
 
@@ -27,7 +57,8 @@ void main() {
   group('Secp256r1PublicKey', () {
     test('invalid', () {
       expect(() {
-        Secp256PublicKey.fromBytes(INVALID_SECP256R1_PUBLIC_KEY, SIGNATURE_SCHEME_TO_FLAG.Secp256r1);
+        Secp256PublicKey.fromBytes(
+            INVALID_SECP256R1_PUBLIC_KEY, SIGNATURE_SCHEME_TO_FLAG.Secp256r1);
       }, throwsArgumentError);
 
       expect(() {
@@ -43,7 +74,6 @@ void main() {
       expect(() {
         Secp256PublicKey.fromString('12345', SIGNATURE_SCHEME_TO_FLAG.Secp256r1);
       }, throwsFormatException);
-
     });
 
     test('toBase64', () {
@@ -57,7 +87,10 @@ void main() {
       final pubKeyBase64 = base64Encode(VALID_SECP256R1_PUBLIC_KEY);
       final key = Secp256PublicKey.fromString(pubKeyBase64, SIGNATURE_SCHEME_TO_FLAG.Secp256r1);
       expect(key.toRawBytes().length == 33, true);
-      expect(Secp256PublicKey.fromBytes(key.toRawBytes(), SIGNATURE_SCHEME_TO_FLAG.Secp256r1).equals(key), true);
+      expect(
+          Secp256PublicKey.fromBytes(key.toRawBytes(), SIGNATURE_SCHEME_TO_FLAG.Secp256r1)
+              .equals(key),
+          true);
     });
 
     SECP_TEST_CASES.forEach((data) {
@@ -75,7 +108,5 @@ void main() {
         expect(key.toSuiPublicKey(), suiPublicKey);
       });
     });
-
   });
-
 }

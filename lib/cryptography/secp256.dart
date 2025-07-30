@@ -1,7 +1,6 @@
-
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sui/cryptography/helper.dart';
 import 'package:sui/utils/hex.dart';
@@ -17,7 +16,6 @@ class Secp256KeypairData {
 }
 
 class Secp256 {
-
   static const magicNum = 27;
 
   ECDomainParametersImpl _ecDomainParams;
@@ -65,13 +63,8 @@ class Secp256 {
   /// Given an arbitrary message hash and an Ethereum message signature encoded in bytes, returns
   /// the public key that was used to sign it.
   /// https://github.com/web3j/web3j/blob/c0b7b9c2769a466215d416696021aa75127c2ff1/crypto/src/main/java/org/web3j/crypto/Sign.java#L241
-  Uint8List ecRecover(
-    int recId,
-    Uint8List messageHash, 
-    SignatureData signature, 
-    [bool isCompressed = false, 
-    bool isEthereum = false]
-  ) {
+  Uint8List ecRecover(int recId, Uint8List messageHash, SignatureData signature,
+      [bool isCompressed = false, bool isEthereum = false]) {
     var header = recId & 0xFF;
     // The header byte: 0x1B = first key with even y, 0x1C = first key with odd y,
     //                  0x1D = second key with even y, 0x1E = second key with odd y
@@ -105,23 +98,25 @@ class Secp256 {
     final key = ECPrivateKey(decodeBigIntToUnsigned(privateKey), _ecDomainParams);
     signer.init(true, PrivateKeyParameter(key));
     var signature = signer.generateSignature(messageHash) as ECSignature;
-    if(!signature.isNormalized(_ecDomainParams)) {
+    if (!signature.isNormalized(_ecDomainParams)) {
       signature = signature.normalize(_ecDomainParams);
     }
 
     return SignatureData(signature.r, signature.s);
   }
 
-  int recoveryId(ECSignature signature, Uint8List messageHash, Uint8List publicKeyBytes, ) {
+  int recoveryId(
+    ECSignature signature,
+    Uint8List messageHash,
+    Uint8List publicKeyBytes,
+  ) {
     final isCompressed = publicKeyBytes.length == 33;
     BigInt publicKey = decodeBigIntToUnsigned(publicKeyBytes);
 
     int recId = -1;
     for (int i = 0; i < 4; i++) {
-      Uint8List? k =
-          recoverFromSignature(i, signature, messageHash, isCompressed);
-      if (k != null &&
-          decodeBigIntToUnsigned(k.sublist(isCompressed ? 0 : 1)) == publicKey) {
+      Uint8List? k = recoverFromSignature(i, signature, messageHash, isCompressed);
+      if (k != null && decodeBigIntToUnsigned(k.sublist(isCompressed ? 0 : 1)) == publicKey) {
         recId = i;
         break;
       }
@@ -136,7 +131,8 @@ class Secp256 {
     return recId;
   }
 
-  Uint8List? recoverFromSignature(int recId, ECSignature sig, Uint8List msg, [bool encoded = false]) {
+  Uint8List? recoverFromSignature(int recId, ECSignature sig, Uint8List msg,
+      [bool encoded = false]) {
     final n = _ecDomainParams.n;
     final i = BigInt.from(recId ~/ 2);
     final x = sig.r + (i * n);
@@ -187,8 +183,7 @@ class Secp256 {
 }
 
 class SignatureData extends ECSignature {
-  
-  SignatureData(BigInt r, BigInt s): super(r, s);
+  SignatureData(BigInt r, BigInt s) : super(r, s);
 
   factory SignatureData.fromBytes(Uint8List data) {
     if (data.length != 64) {
@@ -206,8 +201,4 @@ class SignatureData extends ECSignature {
     buffer.setAll(32, padLeftUint8List(encodeBigIntAsUnsigned(s)));
     return buffer;
   }
-
 }
-
-
-

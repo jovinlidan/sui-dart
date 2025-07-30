@@ -1,13 +1,12 @@
-
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:bcs/bcs.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 
 void main() {
-
   test('can construct and serialize an empty tranaction', () {
     final tx = Transaction();
     expect(() => tx.serialize(), returnsNormally);
@@ -44,7 +43,7 @@ void main() {
     tx.add(Transactions.transferObjects([coin], tx.object('0x2')));
   });
 
-test('can serialize simplified programmable call struct', () {
+  test('can serialize simplified programmable call struct', () {
     Map<String, dynamic> moveCall = {
       'package': '0x2',
       'module': 'display',
@@ -110,7 +109,8 @@ test('can serialize simplified programmable call struct', () {
               {
                 '\$kind': 'Pure',
                 'Pure': {
-                  'bytes': Bcs.vector(SuiBcs.STRING).serialize(['name', 'description', 'img_url']).toBase64(),
+                  'bytes': Bcs.vector(SuiBcs.STRING)
+                      .serialize(['name', 'description', 'img_url']).toBase64(),
                 },
               },
               {
@@ -211,7 +211,6 @@ test('can serialize simplified programmable call struct', () {
   });
 
   group('offline build', () {
-
     late Transaction tx;
 
     setUpAll(() {
@@ -277,25 +276,56 @@ test('can serialize simplified programmable call struct', () {
 
       expect(bytes, bytes2);
     });
-
   });
-
 }
 
 SuiObjectRef ref() {
   final random = Random();
-	return SuiObjectRef(
-    toB58(Uint8List.fromList([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2,])),
-    normalizeSuiAddress(random.nextInt(100000).toString().padRight(64, '0')), 
+  return SuiObjectRef(
+    toB58(Uint8List.fromList([
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      1,
+      2,
+    ])),
+    normalizeSuiAddress(random.nextInt(100000).toString().padRight(64, '0')),
     random.nextInt(100000),
   );
 }
 
 Transaction setup() {
-	final tx = Transaction();
-	tx.setSender('0x2');
-	tx.setGasPrice(BigInt.from(5));
-	tx.setGasBudget(BigInt.from(100));
-	tx.setGasPayment([ref()]);
-	return tx;
+  final tx = Transaction();
+  tx.setSender('0x2');
+  tx.setGasPrice(BigInt.from(5));
+  tx.setGasBudget(BigInt.from(100));
+  tx.setGasPayment([ref()]);
+  return tx;
 }

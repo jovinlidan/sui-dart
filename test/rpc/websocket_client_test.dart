@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 
 void main() {
@@ -10,47 +10,45 @@ void main() {
 
     // final subscription = client.subscribeEvent({"Sender": "0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331"})
     // .listen((event) {
-    //   debugPrint(event);
+    //   print(event);
     // }, onError: (e) {
-    //   debugPrint(e.toString());
+    //   print(e.toString());
     // });
 
     final subscription = client
         .subscribeEventFilter(EventFilter(
-            sender:
-                "0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331"))
+            sender: "0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331"))
         .listen((event) {
-      debugPrint(event);
+      print(event);
     }, onError: (e) {
-      debugPrint(e.toString());
+      print(e.toString());
     });
 
     await Future.delayed(const Duration(seconds: 10));
 
     subscription.cancel();
-    debugPrint("===> cancel");
+    print("===> cancel");
 
     await Future.delayed(const Duration(seconds: 5));
-    debugPrint("===> finished");
+    print("===> finished");
   });
 
   test('test websocket subscribeTransaction', () async {
     final client = WebsocketClient(endpoint);
     final subscription = client.subscribeTransaction({
-      "FromAddress":
-          "0x0000000000000000000000000000000000000000000000000000000000000000"
+      "FromAddress": "0x0000000000000000000000000000000000000000000000000000000000000000"
     }).listen((event) {
-      debugPrint(event);
+      print(event);
     }, onError: (e) {
-      debugPrint(e.toString());
+      print(e.toString());
     });
 
     await Future.delayed(const Duration(seconds: 10));
 
     subscription.cancel();
-    debugPrint("===> cancel");
+    print("===> cancel");
 
     await Future.delayed(const Duration(seconds: 5));
-    debugPrint("===> finished");
+    print("===> finished");
   });
 }

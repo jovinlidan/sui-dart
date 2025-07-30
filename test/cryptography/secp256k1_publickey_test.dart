@@ -1,16 +1,46 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter_test/flutter_test.dart';
+import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 import 'package:sui/utils/hex.dart';
 
 void main() {
-
   // Corresponding to the secret key above.
   const VALID_SECP256K1_PUBLIC_KEY = [
-    2, 29, 21, 35, 7, 198, 183, 43, 14, 208, 65, 139, 14, 112, 205, 128, 231, 245,
-    41, 91, 141, 134, 245, 114, 45, 63, 82, 19, 251, 210, 57, 79, 54,
+    2,
+    29,
+    21,
+    35,
+    7,
+    198,
+    183,
+    43,
+    14,
+    208,
+    65,
+    139,
+    14,
+    112,
+    205,
+    128,
+    231,
+    245,
+    41,
+    91,
+    141,
+    134,
+    245,
+    114,
+    45,
+    63,
+    82,
+    19,
+    251,
+    210,
+    57,
+    79,
+    54,
   ];
 
   // Invalid public key with incorrect length
@@ -42,7 +72,8 @@ void main() {
   group('Secp256k1PublicKey', () {
     test('invalid', () {
       expect(() {
-        Secp256PublicKey.fromBytes(INVALID_SECP256K1_PUBLIC_KEY, SIGNATURE_SCHEME_TO_FLAG.Secp256k1);
+        Secp256PublicKey.fromBytes(
+            INVALID_SECP256K1_PUBLIC_KEY, SIGNATURE_SCHEME_TO_FLAG.Secp256k1);
       }, throwsArgumentError);
 
       expect(() {
@@ -58,7 +89,6 @@ void main() {
       expect(() {
         Secp256PublicKey.fromString('12345', SIGNATURE_SCHEME_TO_FLAG.Secp256k1);
       }, throwsFormatException);
-
     });
 
     test('toBase64', () {
@@ -72,7 +102,10 @@ void main() {
       final pubKeyBase64 = base64Encode(VALID_SECP256K1_PUBLIC_KEY);
       final key = Secp256PublicKey.fromString(pubKeyBase64, SIGNATURE_SCHEME_TO_FLAG.Secp256k1);
       expect(key.toRawBytes().length == 33, true);
-      expect(Secp256PublicKey.fromBytes(key.toRawBytes(), SIGNATURE_SCHEME_TO_FLAG.Secp256k1).equals(key), true);
+      expect(
+          Secp256PublicKey.fromBytes(key.toRawBytes(), SIGNATURE_SCHEME_TO_FLAG.Secp256k1)
+              .equals(key),
+          true);
     });
 
     SECP_TEST_CASES.forEach((data) {
@@ -85,14 +118,10 @@ void main() {
         expect(key.toSuiAddress() == suiAddress, true);
       });
 
-
       test("toSuiPublicKey from base64 public key $suiAddress", () {
         final key = Secp256PublicKey.fromString(rawPublicKey, SIGNATURE_SCHEME_TO_FLAG.Secp256k1);
         expect(key.toSuiPublicKey(), suiPublicKey);
       });
-
     });
-
   });
-
 }

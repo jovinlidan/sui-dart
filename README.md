@@ -1,25 +1,21 @@
-Sui Dart SDK
--
+## Sui Dart SDK
 
 [![Pub](https://img.shields.io/badge/pub-v0.3.7-blue)](https://pub.dev/packages/sui)
 
 > Note: This branch is in active development and may introduce breaking changes. If you don’t need Transaction v2 feature, use the `v1` branch.
 
-Installation
--
+## Installation
 
 ```
 dependencies:
   sui: ^0.3.7
 ```
 
-Demo
--
+## Demo
 
 https://sui-dart.pages.dev/
 
-Usage
--
+## Usage
 
 ### Connecting to Sui Network
 
@@ -37,12 +33,14 @@ final mainnetClient = SuiClient(SuiUrls.mainnet);
 ### Getting coins from the faucet
 
 #### Faucet V0
+
 ```dart
 final faucet = FaucetClient(SuiUrls.faucetDev);
 await faucet.requestSuiFromFaucetV0('0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2');
 ```
 
 #### Faucet V1
+
 ```dart
 final faucet = FaucetClient(SuiUrls.faucetDev);
 await faucet.requestSuiFromFaucetV1('0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2');
@@ -92,7 +90,7 @@ final client = SuiClient(SuiUrls.devnet);
 
 final tx = Transaction();
 tx.transferObjects(
-    [tx.objectId('0x2619f581cb1864d07c89453a69611202669fdc4784fb59b9cb4278ec60756011')], 
+    [tx.objectId('0x2619f581cb1864d07c89453a69611202669fdc4784fb59b9cb4278ec60756011')],
     account.getAddress()
 );
 
@@ -124,7 +122,7 @@ final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
 final client = SuiClient(SuiUrls.devnet);
 
 final tx = Transaction();
-tx.mergeCoins(tx.objectId('0x922ec73939b3288f6da39ebefb0cb88c6c54817441254d448bd2491ac4dd0cbd'), 
+tx.mergeCoins(tx.objectId('0x922ec73939b3288f6da39ebefb0cb88c6c54817441254d448bd2491ac4dd0cbd'),
     [tx.objectId('0x8dafc96dec7f8d635e052a6da9a4153e37bc4d59ed44c45006e4e9d17d07f80d')]
 );
 
@@ -234,14 +232,14 @@ final suiBalance = await client.getBalance('0xa2d8bb82df40770ac5bc8628d8070b041a
 final client = SuiClient(SuiUrls.devnet);
 
 final events = await client.queryEvents(
-    {"Sender": "0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2"}, 
+    {"Sender": "0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2"},
     limit: 2
 );
 
 /// Or with EventFilter
 
 final events = await client.queryEventsByFilter(
-    EventFilter(sender: "0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2"), 
+    EventFilter(sender: "0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2"),
     limit: 2
 );
 ```
@@ -253,8 +251,8 @@ final client = WebsocketClient(SuiUrls.webSocketDevnet);
 
 final subscription = client.subscribeEvent({"Sender": "0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2"})
 .listen((event) {
-    debugPrint(event);
+    print(event);
 }, onError: (e) {
-    debugPrint(e.toString());
+    print(e.toString());
 });
 ```
