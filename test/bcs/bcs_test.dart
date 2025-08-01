@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:bcs/bcs.dart';
-import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 

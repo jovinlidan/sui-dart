@@ -2,6 +2,8 @@ import 'package:example/pages/share/first_share.dart';
 import 'package:flutter/material.dart';
 
 class ShareDemo extends StatelessWidget {
+  const ShareDemo({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

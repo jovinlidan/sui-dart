@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:bcs/bcs.dart';
 import 'package:test/test.dart';
-import 'package:sui/builder/transaction.dart';
 import 'package:sui/sui.dart';
 
 import 'utils/setup.dart';

@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:pointycastle/export.dart';
 import 'package:sui/cryptography/helper.dart';
 import 'package:sui/utils/hex.dart';

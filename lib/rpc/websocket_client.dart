@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
 import 'package:sui/types/event_filter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 

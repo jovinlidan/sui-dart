@@ -26,7 +26,7 @@ class Wave extends StatelessWidget {
     return Container(
       child: Column(
         children: [
-          Expanded(
+          const Expanded(
             flex: 1,
             child: Center(
               child: Column(
@@ -46,7 +46,7 @@ class Wave extends StatelessWidget {
                   durations: _durations,
                   heightPercentages: _heightPercentages,
               ),
-              size: Size(double.infinity, double.infinity),
+              size: const Size(double.infinity, double.infinity),
               waveAmplitude: 0,
             ),
           ),

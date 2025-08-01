@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bcs/bcs.dart';
-import 'package:meta/meta.dart';
 import 'package:sui/sui.dart';
 import 'package:sui/utils/hex.dart';
 import 'package:sui/utils/sha.dart';

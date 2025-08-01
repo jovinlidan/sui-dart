@@ -4,7 +4,6 @@ import 'package:example/widget/markdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sui/sui.dart';
-import 'package:sui/types/faucet.dart';
 
 class FaucetExample extends StatefulWidget {
   const FaucetExample({super.key});

@@ -48,14 +48,14 @@ class _MergeState extends State<Merge> {
 
     final size = MediaQuery.of(context).size;
 
-    return Container(
+    return SizedBox(
       width: size.width > 768 ? size.width / 2 : size.width,
       child: Padding(
-        padding: EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 20),
         child: ListView.builder(itemBuilder: (context, index) {
           if (index == coins.length) {
             return Container(
-              margin: EdgeInsets.only(top: 20),
+              margin: const EdgeInsets.only(top: 20),
               child: Button(sending ? 'Sending' : 'Merge', () async {
       
                 if (sending) return;
@@ -114,7 +114,7 @@ class _MergeState extends State<Merge> {
             title: Column(
               children: [
                 Text(coins[index].coinObjectId, textAlign: TextAlign.center),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text("(${bal.toStringAsFixed(10)} SUI)", textAlign: TextAlign.center),
               ],
             ),

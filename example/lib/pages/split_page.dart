@@ -64,7 +64,7 @@ class _SplitPageState extends State<SplitPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Container(
+    return SizedBox(
       width: 400,
       child: Padding(
         padding: EdgeInsets.only(top: size.height / 4),

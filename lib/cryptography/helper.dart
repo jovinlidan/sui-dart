@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:meta/meta.dart';
 import 'package:pointycastle/api.dart' show KeyParameter;
 import 'package:pointycastle/random/fortuna_random.dart';
 import 'package:pointycastle/src/utils.dart' as utils;

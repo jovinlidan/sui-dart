@@ -5,7 +5,6 @@ import 'package:example/helper/helper.dart';
 import 'package:example/widget/markdown.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:sui/builder/transaction.dart';
 import 'package:sui/sui.dart';
 
 class TransferExample extends StatefulWidget {

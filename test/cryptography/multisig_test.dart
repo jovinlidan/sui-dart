@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 import 'package:sui/sui.dart';
 import 'package:sui/utils/sha.dart';

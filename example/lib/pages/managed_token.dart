@@ -1,4 +1,3 @@
-import 'package:another_flushbar/flushbar.dart';
 import 'package:example/contracts/contract_bytes.dart';
 import 'package:example/helper/helper.dart';
 import 'package:flutter/material.dart';

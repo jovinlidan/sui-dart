@@ -11,7 +11,7 @@ class Home extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(top: size.height / 4),
-      child: Wave(),
+      child: const Wave(),
     );
   }
 }

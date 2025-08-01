@@ -83,7 +83,7 @@ class _FaucetState extends State<Faucet> {
               Padding(
                 padding: const EdgeInsets.only(left: 16, right: 16),
                 child: SelectableText(widget.account.getAddress(),
-                    style: TextStyle(fontSize: 18)),
+                    style: const TextStyle(fontSize: 18)),
               ),
               const SizedBox(height: 20),
               Text(
