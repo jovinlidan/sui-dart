@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:bcs/bcs.dart';
 import 'package:sui/cryptography/keypair.dart';
 import 'package:sui/cryptography/signature.dart';
 import 'package:sui/models/checkpoint.dart';
@@ -239,14 +240,17 @@ mixin JsonRpcProvider {
   }
 
   Future<SuiTransactionBlockResponse> executeTransactionBlock(
-    String transactionBlockBase64,
-    List<String> signature, {
+    dynamic transactionBlock,
+    dynamic signature, {
     SuiTransactionBlockResponseOptions? options,
     @Deprecated('requestType will be ignored by JSON RPC in the future')
     ExecuteTransaction requestType = ExecuteTransaction.WaitForEffectsCert,
   }) async {
-    final data = await client.request(
-        'sui_executeTransactionBlock', [transactionBlockBase64, signature, options?.toJson()]);
+    final data = await client.request('sui_executeTransactionBlock', [
+      transactionBlock is String ? transactionBlock : toB64(transactionBlock),
+      signature is String ? [signature] : signature,
+      options?.toJson()
+    ]);
 
     final result = SuiTransactionBlockResponse.fromJson(data);
 
