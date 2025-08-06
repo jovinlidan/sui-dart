@@ -23,7 +23,7 @@ class SuiPure {
         return Bcs.string();
       case 'id':
       case 'address':
-        return SuiBcs.Address; // You must define this or import from your BCS schema
+        return SuiBcs.Address;
     }
 
     final genericMatch = RegExp(r'^(vector|option)<(.+)>$').firstMatch(name);
