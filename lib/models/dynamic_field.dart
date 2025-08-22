@@ -5,19 +5,18 @@ part 'dynamic_field.freezed.dart';
 part 'dynamic_field.g.dart';
 
 @freezed
-class DynamicFieldPage with _$DynamicFieldPage {
+abstract class DynamicFieldPage with _$DynamicFieldPage {
   const factory DynamicFieldPage({
     required List<DynamicFieldInfo> data,
     String? nextCursor,
     required bool hasNextPage,
   }) = _DynamicFieldPage;
 
-  factory DynamicFieldPage.fromJson(Map<String, dynamic> json) =>
-      _$DynamicFieldPageFromJson(json);
+  factory DynamicFieldPage.fromJson(Map<String, dynamic> json) => _$DynamicFieldPageFromJson(json);
 }
 
 @freezed
-class DynamicFieldInfo with _$DynamicFieldInfo {
+abstract class DynamicFieldInfo with _$DynamicFieldInfo {
   const factory DynamicFieldInfo({
     required DynamicFieldName name,
     required String bcsName,
@@ -28,17 +27,15 @@ class DynamicFieldInfo with _$DynamicFieldInfo {
     required String digest,
   }) = _DynamicFieldInfo;
 
-  factory DynamicFieldInfo.fromJson(Map<String, dynamic> json) =>
-      _$DynamicFieldInfoFromJson(json);
+  factory DynamicFieldInfo.fromJson(Map<String, dynamic> json) => _$DynamicFieldInfoFromJson(json);
 }
 
 @freezed
-class DynamicFieldName with _$DynamicFieldName {
+abstract class DynamicFieldName with _$DynamicFieldName {
   const factory DynamicFieldName({
     required String type,
     dynamic value,
   }) = _DynamicFieldName;
 
-  factory DynamicFieldName.fromJson(Map<String, dynamic> json) =>
-      _$DynamicFieldNameFromJson(json);
+  factory DynamicFieldName.fromJson(Map<String, dynamic> json) => _$DynamicFieldNameFromJson(json);
 }

@@ -4,7 +4,7 @@ version: 0.3.7
 homepage: https://github.com/mofalabs/sui
 
 environment:
-  sdk: ">=3.0.3 <4.0.0"
+  sdk: ^3.8.0
 
 dependencies:
   bip32: 2.0.0
@@ -23,7 +23,7 @@ dependencies:
   meta:
 
 dev_dependencies:
-  build_runner: ^2.3.3
+  build_runner: ^2.7.0
   freezed: ^3.2.0
   json_serializable: ^6.6.1
   test: ^1.26.3
