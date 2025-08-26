@@ -450,7 +450,10 @@ mixin JsonRpcProvider {
   }
 
   Future<SuiObjectResponse> getDynamicFieldObject(
-      String parentObjectId, String nameType, String nameValue) async {
+    String parentObjectId,
+    String nameType,
+    dynamic nameValue,
+  ) async {
     final params = {"type": nameType, "value": nameValue};
     final data = await client.request('suix_getDynamicFieldObject', [parentObjectId, params]);
     return SuiObjectResponse.fromJson(data);
