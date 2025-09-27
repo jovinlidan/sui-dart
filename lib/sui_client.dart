@@ -66,15 +66,15 @@ class SuiClient extends SignerWithProvider {
     BigInt? gasPrice,
     String? epoch,
   }) async {
-    if (transaction is! Transaction && transaction is! Uint8List) {
-      throw ArgumentError("transaction must be Transaction or Uint8List", "transaction");
-    }
-    transaction.setSenderIfNotSet(sender);
+    
     late Uint8List txBytes;
     if (transaction is Transaction) {
+      transaction.setSenderIfNotSet(sender);
       txBytes = await transaction.build(BuildOptions(client: this, onlyTransactionKind: true));
-    } else {
+    } else if (transaction is Uint8List) {
       txBytes = transaction;
+    } else {
+      throw ArgumentError("transaction must be Transaction or Uint8List", "transaction");
     }
     final result = await devInspectTransaction(sender, txBytes, gasPrice: gasPrice, epoch: epoch);
     return result;
