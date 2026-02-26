@@ -56,9 +56,7 @@ class SuiGrpcClient {
     core = GrpcCoreClient(this);
   }
 
-  // ---------------------------------------------------------------------------
-  // Delegate methods
-  // ---------------------------------------------------------------------------
+  
 
   Future<List<GrpcObjectResult>> getObjects(
     List<String> ids, {
