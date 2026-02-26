@@ -25,9 +25,6 @@ import 'package:sui_dart/builder/transaction.dart' show chunk;
 import 'package:sui_dart/types/common.dart';
 
 import 'client.dart';
-import 'types.dart';
-
-export 'types.dart';
 
 // ignore: constant_identifier_names
 const _MAX_OBJECTS_PER_BATCH = 50;

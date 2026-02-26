@@ -1,6 +1,4 @@
-// ---------------------------------------------------------------------------
-// Include options
-// ---------------------------------------------------------------------------
+
 
 class ObjectIncludeOptions {
   final bool owner;
@@ -42,9 +40,7 @@ class TransactionIncludeOptions {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Pagination
-// ---------------------------------------------------------------------------
+
 
 class GrpcPage<T> {
   final List<T> data;
@@ -57,10 +53,6 @@ class GrpcPage<T> {
     this.nextCursor,
   });
 }
-
-// ---------------------------------------------------------------------------
-// Owner
-// ---------------------------------------------------------------------------
 
 sealed class GrpcOwner {
   const GrpcOwner();
@@ -93,10 +85,6 @@ class GrpcConsensusAddressOwner extends GrpcOwner {
     required this.startVersion,
   });
 }
-
-// ---------------------------------------------------------------------------
-// Object
-// ---------------------------------------------------------------------------
 
 sealed class GrpcObjectResult {
   const GrpcObjectResult();
@@ -137,10 +125,6 @@ class GrpcObjectData {
     this.storageRebate,
   });
 }
-
-// ---------------------------------------------------------------------------
-// Coin
-// ---------------------------------------------------------------------------
 
 class GrpcCoinData {
   final String coinType;
@@ -187,10 +171,6 @@ class GrpcCoinMetadata {
     this.iconUrl,
   });
 }
-
-// ---------------------------------------------------------------------------
-// Transaction
-// ---------------------------------------------------------------------------
 
 class GrpcTransactionResponse {
   final String digest;
@@ -310,10 +290,6 @@ class GrpcGasObject {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Execution Error
-// ---------------------------------------------------------------------------
-
 class GrpcExecutionError {
   final String description;
   final String kind;
@@ -395,9 +371,6 @@ class GrpcCongestedObjectsDetail extends GrpcExecutionErrorDetail {
   const GrpcCongestedObjectsDetail(this.objects);
 }
 
-// ---------------------------------------------------------------------------
-// Move Abort
-// ---------------------------------------------------------------------------
 
 class GrpcMoveAbort {
   final String abortCode;
@@ -429,9 +402,6 @@ class GrpcMoveAbortLocation {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Changed / Unchanged Objects
-// ---------------------------------------------------------------------------
 
 class GrpcChangedObject {
   final String objectId;
@@ -477,9 +447,7 @@ class GrpcUnchangedConsensusObject {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Events & Balance Changes
-// ---------------------------------------------------------------------------
+
 
 class GrpcEvent {
   final String packageId;
@@ -533,9 +501,7 @@ class GrpcObjectChange {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Dynamic Fields
-// ---------------------------------------------------------------------------
+
 
 class GrpcDynamicFieldEntry {
   final GrpcDynamicFieldName name;
@@ -558,9 +524,7 @@ class GrpcDynamicFieldName {
   const GrpcDynamicFieldName({this.type, this.value});
 }
 
-// ---------------------------------------------------------------------------
-// System State
-// ---------------------------------------------------------------------------
+
 
 class GrpcSystemState {
   final String epoch;
@@ -576,9 +540,7 @@ class GrpcSystemState {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Verify Signature
-// ---------------------------------------------------------------------------
+
 
 class GrpcVerifySignatureResult {
   final bool isValid;
@@ -590,9 +552,7 @@ class GrpcVerifySignatureResult {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Move Function
-// ---------------------------------------------------------------------------
+
 
 class GrpcMoveFunction {
   final String name;
@@ -617,9 +577,7 @@ class GrpcTypeParameter {
   const GrpcTypeParameter({required this.abilities});
 }
 
-// ---------------------------------------------------------------------------
-// Normalized Move Types
-// ---------------------------------------------------------------------------
+
 
 sealed class NormalizedMoveType {
   const NormalizedMoveType();
@@ -664,9 +622,7 @@ class MoveTypeMutableReference extends NormalizedMoveType {
   const MoveTypeMutableReference(this.body);
 }
 
-// ---------------------------------------------------------------------------
-// Command Output (simulate transaction)
-// ---------------------------------------------------------------------------
+
 
 class GrpcCommandOutput {
   final List<GrpcCommandOutputValue> returnValues;

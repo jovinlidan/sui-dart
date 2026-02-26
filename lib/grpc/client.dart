@@ -1,31 +1,20 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:fixnum/fixnum.dart';
 import 'package:grpc/grpc.dart';
-import 'package:protobuf/protobuf.dart';
-import 'package:protobuf/well_known_types/google/protobuf/field_mask.pb.dart';
 
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/bcs.pb.dart' as grpc_bcs;
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/effects.pb.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/execution_status.pb.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/executed_transaction.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/ledger_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/name_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/object.pb.dart' as grpc_object;
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/owner.pb.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/signature.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/signature_verification_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/state_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/subscription_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction_execution_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction.pb.dart' as grpc_transaction;
 
-import 'package:sui_dart/builder/transaction.dart' show chunk;
-import 'package:sui_dart/types/common.dart';
+import 'core.dart';
+import 'types.dart';
 
+export 'core.dart' show GrpcCoreClient;
+export 'types.dart';
 
 class SuiGrpcClientOptions {
   final String baseUrl;
@@ -37,6 +26,7 @@ class SuiGrpcClientOptions {
 
 class SuiGrpcClient {
   late final ClientChannel _channel;
+  late final GrpcCoreClient core;
 
   late final TransactionExecutionServiceClient transactionExecutionService;
   late final LedgerServiceClient ledgerService;
@@ -62,6 +52,123 @@ class SuiGrpcClient {
     movePackageService = MovePackageServiceClient(_channel);
     signatureVerificationService = SignatureVerificationServiceClient(_channel);
     nameService = NameServiceClient(_channel);
+
+    core = GrpcCoreClient(this);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Delegate methods
+  // ---------------------------------------------------------------------------
+
+  Future<List<GrpcObjectResult>> getObjects(
+    List<String> ids, {
+    ObjectIncludeOptions? include,
+  }) {
+    return core.getObjects(ids, include: include);
+  }
+
+  Future<GrpcPage<GrpcObjectData>> listOwnedObjects(
+    String owner, {
+    String? objectType,
+    String? cursor,
+    int? limit,
+    ObjectIncludeOptions? include,
+  }) {
+    return core.listOwnedObjects(
+      owner,
+      objectType: objectType,
+      cursor: cursor,
+      limit: limit,
+      include: include,
+    );
+  }
+
+  Future<GrpcPage<GrpcCoinData>> listCoins(
+    String owner, {
+    String coinType = '0x2::sui::SUI',
+    String? cursor,
+    int? limit,
+  }) {
+    return core.listCoins(owner, coinType: coinType, cursor: cursor, limit: limit);
+  }
+
+  Future<GrpcBalance> getBalance(String owner, {String coinType = '0x2::sui::SUI'}) {
+    return core.getBalance(owner, coinType: coinType);
+  }
+
+  Future<List<GrpcBalance>> listBalances(String owner) {
+    return core.listBalances(owner);
+  }
+
+  Future<GrpcCoinMetadata?> getCoinMetadata(String coinType) {
+    return core.getCoinMetadata(coinType);
+  }
+
+  Future<GrpcTransactionResponse> getTransaction(
+    String digest, {
+    TransactionIncludeOptions? include,
+  }) {
+    return core.getTransaction(digest, include: include);
+  }
+
+  Future<GrpcTransactionResponse> executeTransaction(
+    Uint8List transactionBytes,
+    List<String> signatures, {
+    TransactionIncludeOptions? include,
+  }) {
+    return core.executeTransaction(transactionBytes, signatures, include: include);
+  }
+
+  Future<GrpcTransactionResponse> simulateTransaction(
+    Uint8List transactionBytes, {
+    TransactionIncludeOptions? include,
+    bool? doGasSelection,
+  }) {
+    return core.simulateTransaction(
+      transactionBytes,
+      include: include,
+      doGasSelection: doGasSelection,
+    );
+  }
+
+  Future<String> getReferenceGasPrice() {
+    return core.getReferenceGasPrice();
+  }
+
+  Future<GrpcSystemState> getCurrentSystemState() {
+    return core.getCurrentSystemState();
+  }
+
+  Future<GrpcPage<GrpcDynamicFieldEntry>> listDynamicFields(
+    String parentId, {
+    String? cursor,
+    int? limit,
+  }) {
+    return core.listDynamicFields(parentId, cursor: cursor, limit: limit);
+  }
+
+  Future<GrpcVerifySignatureResult> verifyZkLoginSignature(
+    Uint8List bytes,
+    String signature, {
+    String? address,
+  }) {
+    return core.verifyZkLoginSignature(bytes, signature, address: address);
+  }
+
+  Future<String?> defaultNameServiceName(String address) {
+    return core.defaultNameServiceName(address);
+  }
+
+  Future<GrpcMoveFunction> getMoveFunction(
+    String packageId,
+    String moduleName,
+    String functionName,
+  ) {
+    return core.getMoveFunction(packageId, moduleName, functionName);
+  }
+
+  Future<String> getChainIdentifier() {
+    return core.getChainIdentifier();
   }
 
   Future<void> shutdown() async {
