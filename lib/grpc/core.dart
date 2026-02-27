@@ -21,6 +21,7 @@ import 'package:sui_dart/grpc/generated/sui/rpc/v2/state_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction_execution_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction.pb.dart' as grpc_transaction;
 
+import 'package:sui_dart/sui.dart' as sui_dart;
 import 'package:sui_dart/builder/transaction.dart' show chunk;
 import 'package:sui_dart/types/common.dart';
 
@@ -217,7 +218,7 @@ class GrpcCoreClient {
 
     final response = await _client.transactionExecutionService.executeTransaction(
       ExecuteTransactionRequest(
-        transaction: grpc_transaction.Transaction()..mergeFromBuffer(transactionBytes),
+        transaction: .new(bcs: .new(value: transactionBytes)),
         signatures: signatures.map((sig) {
           return UserSignature(bcs: grpc_bcs.Bcs(value: base64Decode(sig)));
         }),
@@ -229,7 +230,7 @@ class GrpcCoreClient {
   }
 
   Future<GrpcTransactionResponse> simulateTransaction(
-    Uint8List transactionBytes, {
+    sui_dart.Transaction transactionBlock, {
     TransactionIncludeOptions? include,
     bool? doGasSelection,
   }) async {
@@ -237,7 +238,7 @@ class GrpcCoreClient {
 
     final response = await _client.transactionExecutionService.simulateTransaction(
       SimulateTransactionRequest(
-        transaction: grpc_transaction.Transaction()..mergeFromBuffer(transactionBytes),
+        transaction: transactionBlock.toGrpcTransaction(),
         readMask: readMask,
         doGasSelection: doGasSelection ?? true,
       ),
