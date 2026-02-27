@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'dart:typed_data';
+
+import 'package:sui_dart/types/common.dart';
+import 'package:sui_dart/types/objects.dart';
 
 class ObjectIncludeOptions {
   final bool content;
@@ -118,6 +122,43 @@ class GrpcObjectData {
     this.objectBcs,
     this.json,
   });
+
+  SuiObject toSuiObject() {
+    return SuiObject(
+      objectId,
+      digest,
+      int.parse(version),
+      type,
+      json != null ? SuiMoveObject.fromJson(json!) : null,
+      content != null
+          ? SuiRawMoveObject(
+              'moveObject',
+              type,
+              false,
+              int.parse(version),
+              base64Encode(content!),
+            )
+          : null,
+      _grpcOwnerToObjectOwner(owner),
+      previousTransaction,
+      null, // storageRebate not available in gRPC
+      null, // display not available in gRPC
+    );
+  }
+
+  static ObjectOwner? _grpcOwnerToObjectOwner(GrpcOwner owner) {
+    return switch (owner) {
+      GrpcAddressOwner(address: final addr) =>
+        ObjectOwner(addr, null, null, false),
+      GrpcObjectOwner(address: final addr) =>
+        ObjectOwner(null, addr, null, false),
+      GrpcSharedOwner(initialSharedVersion: final v) =>
+        ObjectOwner(null, null, Shared(int.parse(v)), false),
+      GrpcImmutableOwner() => ObjectOwner(null, null, null, true),
+      GrpcConsensusAddressOwner() => ObjectOwner(null, null, null, false),
+      GrpcUnknownOwner() => null,
+    };
+  }
 }
 
 class GrpcCoinData {
