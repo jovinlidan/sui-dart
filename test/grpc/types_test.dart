@@ -61,9 +61,9 @@ void main() {
     });
   });
 
-  group('GrpcPage', () {
+  group('Page', () {
     test('creates with required fields', () {
-      final page = GrpcPage<String>(
+      final page = Page<String>(
         data: ['a', 'b', 'c'],
         hasNextPage: false,
       );
@@ -73,7 +73,7 @@ void main() {
     });
 
     test('creates with cursor when hasNextPage is true', () {
-      final page = GrpcPage<int>(
+      final page = Page<int>(
         data: [1, 2, 3],
         hasNextPage: true,
         nextCursor: 'abc123',
@@ -84,13 +84,13 @@ void main() {
     });
 
     test('works with complex generic types', () {
-      final page = GrpcPage<GrpcObjectData>(
+      final page = Page<ObjectData>(
         data: [
-          GrpcObjectData(
+          ObjectData(
             objectId: '0x1',
             version: '1',
             digest: 'abc',
-            owner: const GrpcImmutableOwner(),
+            owner: const ImmutableOwner(),
             type: '0x2::coin::Coin<0x2::sui::SUI>',
           ),
         ],
@@ -101,69 +101,69 @@ void main() {
     });
 
     test('handles empty data list', () {
-      final page = GrpcPage<String>(data: [], hasNextPage: false);
+      final page = Page<String>(data: [], hasNextPage: false);
       expect(page.data, isEmpty);
       expect(page.hasNextPage, false);
     });
   });
 
-  group('GrpcOwner sealed class', () {
-    test('GrpcAddressOwner holds address', () {
-      const owner = GrpcAddressOwner('0xabc');
+  group('Owner sealed class', () {
+    test('AddressOwner holds address', () {
+      const owner = AddressOwner('0xabc');
       expect(owner.address, '0xabc');
-      expect(owner, isA<GrpcOwner>());
+      expect(owner, isA<Owner>());
     });
 
-    test('GrpcObjectOwner holds address', () {
-      const owner = GrpcObjectOwner('0xdef');
+    test('ObjectOwner holds address', () {
+      const owner = ObjectOwner('0xdef');
       expect(owner.address, '0xdef');
-      expect(owner, isA<GrpcOwner>());
+      expect(owner, isA<Owner>());
     });
 
-    test('GrpcSharedOwner holds initial shared version', () {
-      const owner = GrpcSharedOwner('42');
+    test('SharedOwner holds initial shared version', () {
+      const owner = SharedOwner('42');
       expect(owner.initialSharedVersion, '42');
-      expect(owner, isA<GrpcOwner>());
+      expect(owner, isA<Owner>());
     });
 
-    test('GrpcImmutableOwner is singleton-like', () {
-      const owner = GrpcImmutableOwner();
-      expect(owner, isA<GrpcOwner>());
+    test('ImmutableOwner is singleton-like', () {
+      const owner = ImmutableOwner();
+      expect(owner, isA<Owner>());
     });
 
-    test('GrpcConsensusAddressOwner holds address and start version', () {
-      const owner = GrpcConsensusAddressOwner(
+    test('ConsensusAddressOwner holds address and start version', () {
+      const owner = ConsensusAddressOwner(
         address: '0x123',
         startVersion: '10',
       );
       expect(owner.address, '0x123');
       expect(owner.startVersion, '10');
-      expect(owner, isA<GrpcOwner>());
+      expect(owner, isA<Owner>());
     });
 
-    test('GrpcUnknownOwner is a valid owner variant', () {
-      const owner = GrpcUnknownOwner();
-      expect(owner, isA<GrpcOwner>());
+    test('UnknownOwner is a valid owner variant', () {
+      const owner = UnknownOwner();
+      expect(owner, isA<Owner>());
     });
 
     test('pattern matching works on all owner variants', () {
-      final owners = <GrpcOwner>[
-        const GrpcAddressOwner('0x1'),
-        const GrpcObjectOwner('0x2'),
-        const GrpcSharedOwner('1'),
-        const GrpcImmutableOwner(),
-        const GrpcConsensusAddressOwner(address: '0x3', startVersion: '5'),
-        const GrpcUnknownOwner(),
+      final owners = <Owner>[
+        const AddressOwner('0x1'),
+        const ObjectOwner('0x2'),
+        const SharedOwner('1'),
+        const ImmutableOwner(),
+        const ConsensusAddressOwner(address: '0x3', startVersion: '5'),
+        const UnknownOwner(),
       ];
 
       final results = owners.map((owner) {
         return switch (owner) {
-          GrpcAddressOwner(:final address) => 'address:$address',
-          GrpcObjectOwner(:final address) => 'object:$address',
-          GrpcSharedOwner(:final initialSharedVersion) => 'shared:$initialSharedVersion',
-          GrpcImmutableOwner() => 'immutable',
-          GrpcConsensusAddressOwner(:final address) => 'consensus:$address',
-          GrpcUnknownOwner() => 'unknown',
+          AddressOwner(:final address) => 'address:$address',
+          ObjectOwner(:final address) => 'object:$address',
+          SharedOwner(:final initialSharedVersion) => 'shared:$initialSharedVersion',
+          ImmutableOwner() => 'immutable',
+          ConsensusAddressOwner(:final address) => 'consensus:$address',
+          UnknownOwner() => 'unknown',
         };
       }).toList();
 
@@ -178,42 +178,42 @@ void main() {
     });
   });
 
-  group('GrpcObjectResult sealed class', () {
-    test('GrpcObjectSuccess wraps object data', () {
-      final result = GrpcObjectSuccess(GrpcObjectData(
+  group('ObjectResult sealed class', () {
+    test('ObjectSuccess wraps object data', () {
+      final result = ObjectSuccess(ObjectData(
         objectId: '0x1',
         version: '5',
         digest: 'abc',
-        owner: const GrpcAddressOwner('0xowner'),
+        owner: const AddressOwner('0xowner'),
         type: 'SomeType',
       ));
-      expect(result, isA<GrpcObjectResult>());
+      expect(result, isA<ObjectResult>());
       expect(result.data.objectId, '0x1');
       expect(result.data.version, '5');
     });
 
-    test('GrpcObjectError wraps error message', () {
-      const result = GrpcObjectError('Object not found');
-      expect(result, isA<GrpcObjectResult>());
+    test('ObjectError wraps error message', () {
+      const result = ObjectError('Object not found');
+      expect(result, isA<ObjectResult>());
       expect(result.error, 'Object not found');
     });
 
     test('pattern matching works on result variants', () {
-      final results = <GrpcObjectResult>[
-        GrpcObjectSuccess(GrpcObjectData(
+      final results = <ObjectResult>[
+        ObjectSuccess(ObjectData(
           objectId: '0x1',
           version: '1',
           digest: 'abc',
-          owner: const GrpcImmutableOwner(),
+          owner: const ImmutableOwner(),
           type: 'Coin',
         )),
-        const GrpcObjectError('not found'),
+        const ObjectError('not found'),
       ];
 
       final messages = results.map((r) {
         return switch (r) {
-          GrpcObjectSuccess(:final data) => 'ok:${data.objectId}',
-          GrpcObjectError(:final error) => 'err:$error',
+          ObjectSuccess(:final data) => 'ok:${data.objectId}',
+          ObjectError(:final error) => 'err:$error',
         };
       }).toList();
 
@@ -221,19 +221,19 @@ void main() {
     });
   });
 
-  group('GrpcObjectData', () {
+  group('ObjectData', () {
     test('creates with required fields only', () {
-      final obj = GrpcObjectData(
+      final obj = ObjectData(
         objectId: '0x1',
         version: '10',
         digest: 'abc123',
-        owner: const GrpcAddressOwner('0xowner'),
+        owner: const AddressOwner('0xowner'),
         type: '0x2::coin::Coin<0x2::sui::SUI>',
       );
       expect(obj.objectId, '0x1');
       expect(obj.version, '10');
       expect(obj.digest, 'abc123');
-      expect(obj.owner, isA<GrpcAddressOwner>());
+      expect(obj.owner, isA<AddressOwner>());
       expect(obj.type, '0x2::coin::Coin<0x2::sui::SUI>');
       expect(obj.content, isNull);
       expect(obj.previousTransaction, isNull);
@@ -242,11 +242,11 @@ void main() {
     });
 
     test('creates with all optional fields', () {
-      final obj = GrpcObjectData(
+      final obj = ObjectData(
         objectId: '0x1',
         version: '10',
         digest: 'abc123',
-        owner: const GrpcAddressOwner('0xowner'),
+        owner: const AddressOwner('0xowner'),
         type: 'SomeType',
         previousTransaction: 'txdigest123',
         content: Uint8List.fromList([1, 2, 3]),
@@ -262,28 +262,28 @@ void main() {
     });
   });
 
-  group('GrpcCoinData', () {
+  group('CoinData', () {
     test('creates with all required fields', () {
-      const coin = GrpcCoinData(
+      const coin = CoinData(
         objectId: '0xabc',
         version: '5',
         digest: 'digest123',
-        owner: GrpcAddressOwner('0xowner'),
+        owner: AddressOwner('0xowner'),
         type: '0x2::sui::SUI',
         balance: '1000000000',
       );
       expect(coin.objectId, '0xabc');
       expect(coin.version, '5');
       expect(coin.digest, 'digest123');
-      expect(coin.owner, isA<GrpcAddressOwner>());
+      expect(coin.owner, isA<AddressOwner>());
       expect(coin.type, '0x2::sui::SUI');
       expect(coin.balance, '1000000000');
     });
   });
 
-  group('GrpcBalance', () {
+  group('Balance', () {
     test('creates with all fields', () {
-      const balance = GrpcBalance(
+      const balance = Balance(
         coinType: '0x2::sui::SUI',
         balance: '5000000000',
         coinBalance: '5000000000',
@@ -296,9 +296,9 @@ void main() {
     });
   });
 
-  group('GrpcCoinMetadata', () {
+  group('CoinMetadata', () {
     test('creates with all fields', () {
-      const meta = GrpcCoinMetadata(
+      const meta = CoinMetadata(
         id: '0x1',
         decimals: 9,
         name: 'Sui',
@@ -315,7 +315,7 @@ void main() {
     });
 
     test('allows null iconUrl', () {
-      const meta = GrpcCoinMetadata(
+      const meta = CoinMetadata(
         id: '0x1',
         decimals: 6,
         name: 'USDC',
@@ -326,9 +326,9 @@ void main() {
     });
   });
 
-  group('GrpcTransactionResponse', () {
+  group('TransactionResponse', () {
     test('creates with digest only', () {
-      const resp = GrpcTransactionResponse(digest: 'txdigest');
+      const resp = TransactionResponse(digest: 'txdigest');
       expect(resp.digest, 'txdigest');
       expect(resp.signatures, isEmpty);
       expect(resp.epoch, isNull);
@@ -345,15 +345,15 @@ void main() {
     });
 
     test('creates with all optional fields', () {
-      final resp = GrpcTransactionResponse(
+      final resp = TransactionResponse(
         digest: 'txdigest',
         signatures: const ['sig1', 'sig2'],
         epoch: '100',
-        status: const GrpcExecutionStatus(success: true),
+        status: const ExecutionStatus(success: true),
         transaction: 'base64tx',
-        effects: const GrpcTransactionEffects(transactionDigest: 'effectsdigest'),
+        effects: const TransactionEffects(transactionDigest: 'effectsdigest'),
         events: [
-          GrpcEvent(
+          Event(
             packageId: '0x2',
             module: 'coin',
             sender: '0xsender',
@@ -362,14 +362,14 @@ void main() {
           ),
         ],
         balanceChanges: const [
-          GrpcBalanceChange(address: '0xowner', coinType: 'SUI', amount: '100'),
+          BalanceChange(address: '0xowner', coinType: 'SUI', amount: '100'),
         ],
         objectTypes: const {'0x1': '0x2::coin::Coin'},
         bcs: Uint8List.fromList([1, 2, 3]),
         checkpoint: '1000',
         timestampMs: '1700000000000',
         commandResults: const [
-          GrpcCommandResult(returnValues: [], mutatedReferences: []),
+          CommandResult(returnValues: [], mutatedReferences: []),
         ],
       );
       expect(resp.signatures.length, 2);
@@ -381,7 +381,7 @@ void main() {
     });
 
     test('copyWith replaces specified fields', () {
-      const original = GrpcTransactionResponse(
+      const original = TransactionResponse(
         digest: 'original',
         checkpoint: '100',
       );
@@ -395,13 +395,13 @@ void main() {
     });
 
     test('copyWith preserves unspecified fields', () {
-      final original = GrpcTransactionResponse(
+      final original = TransactionResponse(
         digest: 'txdigest',
         signatures: const ['sig1'],
         epoch: '5',
-        effects: const GrpcTransactionEffects(lamportVersion: '10'),
+        effects: const TransactionEffects(lamportVersion: '10'),
         events: [
-          GrpcEvent(
+          Event(
             packageId: '0x2',
             module: 'coin',
             sender: '0x1',
@@ -412,7 +412,7 @@ void main() {
       );
       final copied = original.copyWith(
         commandResults: const [
-          GrpcCommandResult(returnValues: [], mutatedReferences: []),
+          CommandResult(returnValues: [], mutatedReferences: []),
         ],
       );
       expect(copied.digest, 'txdigest');
@@ -424,9 +424,9 @@ void main() {
     });
   });
 
-  group('GrpcTransactionEffects', () {
+  group('TransactionEffects', () {
     test('creates with all null optional fields', () {
-      const effects = GrpcTransactionEffects();
+      const effects = TransactionEffects();
       expect(effects.bcs, isNull);
       expect(effects.version, isNull);
       expect(effects.transactionDigest, isNull);
@@ -439,19 +439,19 @@ void main() {
     });
 
     test('creates with full status and gas info', () {
-      final effects = GrpcTransactionEffects(
+      final effects = TransactionEffects(
         bcs: Uint8List.fromList([1, 2, 3]),
         version: 2,
         transactionDigest: 'txdigest',
         lamportVersion: '50',
-        status: const GrpcExecutionStatus(success: true),
-        gasUsed: const GrpcGasUsed(
+        status: const ExecutionStatus(success: true),
+        gasUsed: const GasUsed(
           computationCost: '1000',
           storageCost: '2000',
           storageRebate: '500',
           nonRefundableStorageFee: '100',
         ),
-        gasObject: const GrpcGasObject(
+        gasObject: const GasObject(
           objectId: '0xgas',
           inputState: 'Exists',
           outputState: 'ObjectWrite',
@@ -469,9 +469,9 @@ void main() {
     });
   });
 
-  group('GrpcExecutionError and error details', () {
+  group('ExecutionError and error details', () {
     test('creates error without detail', () {
-      const error = GrpcExecutionError(
+      const error = ExecutionError(
         message: 'Something failed',
         kind: 'MOVE_ABORT',
       );
@@ -482,13 +482,13 @@ void main() {
     });
 
     test('creates error with command and abort detail', () {
-      const error = GrpcExecutionError(
+      const error = ExecutionError(
         message: 'Move abort',
         kind: 'MOVE_ABORT',
         command: 0,
-        detail: GrpcAbortDetail(GrpcMoveAbort(
+        detail: AbortDetail(MoveAbort(
           abortCode: '1',
-          location: GrpcMoveAbortLocation(
+          location: MoveAbortLocation(
             package: '0x2',
             module: 'coin',
             function: 3,
@@ -498,47 +498,47 @@ void main() {
         )),
       );
       expect(error.command, 0);
-      final detail = error.detail as GrpcAbortDetail;
+      final detail = error.detail as AbortDetail;
       expect(detail.abort.abortCode, '1');
       expect(detail.abort.location!.package, '0x2');
       expect(detail.abort.location!.functionName, 'transfer');
     });
 
     test('pattern matching works on all error detail variants', () {
-      final details = <GrpcExecutionErrorDetail>[
-        const GrpcAbortDetail(GrpcMoveAbort(abortCode: '1')),
-        const GrpcSizeErrorDetail(size: '100', maxSize: '50'),
-        const GrpcCommandArgumentErrorDetail(argument: 0, kind: 'TYPE_MISMATCH'),
-        const GrpcTypeArgumentErrorDetail(typeArgument: 1, kind: 'CONSTRAINT_NOT_SATISFIED'),
-        const GrpcPackageUpgradeErrorDetail(kind: 'INCOMPATIBLE', packageId: '0x5'),
-        const GrpcIndexErrorDetail(index: 0, subresult: 1),
-        const GrpcObjectIdErrorDetail('0xobj'),
-        const GrpcCoinDenyListErrorDetail(address: '0xaddr', coinType: 'SUI'),
-        const GrpcCongestedObjectsDetail(['0xa', '0xb']),
+      final details = <ExecutionErrorDetail>[
+        const AbortDetail(MoveAbort(abortCode: '1')),
+        const SizeErrorDetail(size: '100', maxSize: '50'),
+        const CommandArgumentErrorDetail(argument: 0, kind: 'TYPE_MISMATCH'),
+        const TypeArgumentErrorDetail(typeArgument: 1, kind: 'CONSTRAINT_NOT_SATISFIED'),
+        const PackageUpgradeErrorDetail(kind: 'INCOMPATIBLE', packageId: '0x5'),
+        const IndexErrorDetail(index: 0, subresult: 1),
+        const ObjectIdErrorDetail('0xobj'),
+        const CoinDenyListErrorDetail(address: '0xaddr', coinType: 'SUI'),
+        const CongestedObjectsDetail(['0xa', '0xb']),
       ];
 
       expect(details.length, 9);
 
       for (final detail in details) {
         final matched = switch (detail) {
-          GrpcAbortDetail() => 'abort',
-          GrpcSizeErrorDetail() => 'size',
-          GrpcCommandArgumentErrorDetail() => 'cmdArg',
-          GrpcTypeArgumentErrorDetail() => 'typeArg',
-          GrpcPackageUpgradeErrorDetail() => 'pkgUpgrade',
-          GrpcIndexErrorDetail() => 'index',
-          GrpcObjectIdErrorDetail() => 'objectId',
-          GrpcCoinDenyListErrorDetail() => 'coinDeny',
-          GrpcCongestedObjectsDetail() => 'congested',
+          AbortDetail() => 'abort',
+          SizeErrorDetail() => 'size',
+          CommandArgumentErrorDetail() => 'cmdArg',
+          TypeArgumentErrorDetail() => 'typeArg',
+          PackageUpgradeErrorDetail() => 'pkgUpgrade',
+          IndexErrorDetail() => 'index',
+          ObjectIdErrorDetail() => 'objectId',
+          CoinDenyListErrorDetail() => 'coinDeny',
+          CongestedObjectsDetail() => 'congested',
         };
         expect(matched.isNotEmpty, true);
       }
     });
   });
 
-  group('GrpcMoveAbort', () {
+  group('MoveAbort', () {
     test('creates with abort code only', () {
-      const abort = GrpcMoveAbort(abortCode: '42');
+      const abort = MoveAbort(abortCode: '42');
       expect(abort.abortCode, '42');
       expect(abort.location, isNull);
       expect(abort.cleverError, isNull);
@@ -546,9 +546,9 @@ void main() {
     });
 
     test('creates with location and clever error', () {
-      const abort = GrpcMoveAbort(
+      const abort = MoveAbort(
         abortCode: '1',
-        location: GrpcMoveAbortLocation(
+        location: MoveAbortLocation(
           package: '0x2',
           module: 'transfer',
           function: 0,
@@ -564,9 +564,9 @@ void main() {
     });
   });
 
-  group('GrpcChangedObject', () {
+  group('ChangedObject', () {
     test('creates with required objectId only', () {
-      const obj = GrpcChangedObject(objectId: '0x1');
+      const obj = ChangedObject(objectId: '0x1');
       expect(obj.objectId, '0x1');
       expect(obj.idOperation, isNull);
       expect(obj.inputOwner, isNull);
@@ -574,25 +574,25 @@ void main() {
     });
 
     test('creates with full input/output state', () {
-      const obj = GrpcChangedObject(
+      const obj = ChangedObject(
         objectId: '0x1',
         idOperation: 'Created',
         inputState: 'DoesNotExist',
         outputState: 'ObjectWrite',
         outputVersion: '1',
         outputDigest: 'digest',
-        outputOwner: GrpcAddressOwner('0xowner'),
+        outputOwner: AddressOwner('0xowner'),
         objectType: '0x2::coin::Coin<0x2::sui::SUI>',
       );
       expect(obj.idOperation, 'Created');
       expect(obj.inputState, 'DoesNotExist');
-      expect(obj.outputOwner, isA<GrpcAddressOwner>());
+      expect(obj.outputOwner, isA<AddressOwner>());
     });
   });
 
-  group('GrpcEvent', () {
+  group('Event', () {
     test('creates with required fields', () {
-      final event = GrpcEvent(
+      final event = Event(
         packageId: '0x2',
         module: 'coin',
         sender: '0xsender',
@@ -607,7 +607,7 @@ void main() {
     });
 
     test('creates with BCS data', () {
-      final event = GrpcEvent(
+      final event = Event(
         packageId: '0x2',
         module: 'coin',
         sender: '0xsender',
@@ -618,9 +618,9 @@ void main() {
     });
   });
 
-  group('GrpcBalanceChange', () {
+  group('BalanceChange', () {
     test('creates with all required fields', () {
-      const change = GrpcBalanceChange(
+      const change = BalanceChange(
         address: '0xowner',
         coinType: '0x2::sui::SUI',
         amount: '-1000000',
@@ -631,10 +631,10 @@ void main() {
     });
   });
 
-  group('GrpcDynamicFieldEntry', () {
+  group('DynamicFieldEntry', () {
     test('creates with all fields', () {
-      final entry = GrpcDynamicFieldEntry(
-        name: GrpcDynamicFieldName(type: 'u64', bcs: Uint8List.fromList([1, 2])),
+      final entry = DynamicFieldEntry(
+        name: DynamicFieldName(type: 'u64', bcs: Uint8List.fromList([1, 2])),
         objectType: '0x2::coin::Coin<0x2::sui::SUI>',
         objectId: '0xchild',
         type: 'DynamicField',
@@ -645,16 +645,16 @@ void main() {
       expect(entry.type, 'DynamicField');
     });
 
-    test('GrpcDynamicFieldName allows null type and bcs', () {
-      const name = GrpcDynamicFieldName();
+    test('DynamicFieldName allows null type and bcs', () {
+      const name = DynamicFieldName();
       expect(name.type, isNull);
       expect(name.bcs, isNull);
     });
   });
 
-  group('GrpcSystemState', () {
+  group('SystemState', () {
     test('creates with required fields', () {
-      const state = GrpcSystemState(
+      const state = SystemState(
         epoch: '100',
         referenceGasPrice: '750',
       );
@@ -665,7 +665,7 @@ void main() {
     });
 
     test('creates with all fields', () {
-      const state = GrpcSystemState(
+      const state = SystemState(
         epoch: '100',
         referenceGasPrice: '750',
         systemState: {'validators': []},
@@ -676,15 +676,15 @@ void main() {
     });
   });
 
-  group('GrpcVerifySignatureResult', () {
+  group('VerifySignatureResult', () {
     test('creates valid result', () {
-      const result = GrpcVerifySignatureResult(isValid: true);
+      const result = VerifySignatureResult(isValid: true);
       expect(result.isValid, true);
       expect(result.reason, isNull);
     });
 
     test('creates invalid result with reason', () {
-      const result = GrpcVerifySignatureResult(
+      const result = VerifySignatureResult(
         isValid: false,
         reason: 'Invalid proof',
       );
@@ -693,14 +693,14 @@ void main() {
     });
   });
 
-  group('GrpcMoveFunction', () {
+  group('MoveFunction', () {
     test('creates with all fields', () {
-      const func = GrpcMoveFunction(
+      const func = MoveFunction(
         name: 'transfer',
         visibility: 'Public',
         isEntry: true,
         typeParameters: [
-          GrpcTypeParameter(abilities: ['Store', 'Key']),
+          TypeParameter(abilities: ['Store', 'Key']),
         ],
         parameters: [
           MoveTypePrimitive('Address'),
@@ -823,21 +823,21 @@ void main() {
     });
   });
 
-  group('GrpcCommandResult', () {
+  group('CommandResult', () {
     test('creates with empty lists', () {
-      const result = GrpcCommandResult(returnValues: [], mutatedReferences: []);
+      const result = CommandResult(returnValues: [], mutatedReferences: []);
       expect(result.returnValues, isEmpty);
       expect(result.mutatedReferences, isEmpty);
     });
 
     test('creates with values', () {
-      final result = GrpcCommandResult(
+      final result = CommandResult(
         returnValues: [
-          GrpcCommandOutput(bcs: Uint8List.fromList([1, 2, 3])),
-          GrpcCommandOutput(bcs: Uint8List.fromList([4, 5])),
+          CommandOutput(bcs: Uint8List.fromList([1, 2, 3])),
+          CommandOutput(bcs: Uint8List.fromList([4, 5])),
         ],
         mutatedReferences: [
-          GrpcCommandOutput(bcs: Uint8List.fromList([6, 7, 8])),
+          CommandOutput(bcs: Uint8List.fromList([6, 7, 8])),
         ],
       );
       expect(result.returnValues.length, 2);
@@ -847,9 +847,9 @@ void main() {
     });
   });
 
-  group('GrpcUnchangedConsensusObject', () {
+  group('UnchangedConsensusObject', () {
     test('creates with required fields', () {
-      const obj = GrpcUnchangedConsensusObject(
+      const obj = UnchangedConsensusObject(
         objectId: '0x1',
         version: '10',
       );
@@ -860,7 +860,7 @@ void main() {
     });
 
     test('creates with all fields', () {
-      const obj = GrpcUnchangedConsensusObject(
+      const obj = UnchangedConsensusObject(
         kind: 'ReadOnlyRoot',
         objectId: '0x1',
         version: '10',
@@ -872,9 +872,9 @@ void main() {
     });
   });
 
-  group('GrpcGasUsed', () {
+  group('GasUsed', () {
     test('stores all gas cost fields as strings', () {
-      const gas = GrpcGasUsed(
+      const gas = GasUsed(
         computationCost: '1000',
         storageCost: '2000',
         storageRebate: '500',
@@ -887,17 +887,17 @@ void main() {
     });
   });
 
-  group('GrpcExecutionStatus', () {
+  group('ExecutionStatus', () {
     test('creates successful status', () {
-      const status = GrpcExecutionStatus(success: true);
+      const status = ExecutionStatus(success: true);
       expect(status.success, true);
       expect(status.error, isNull);
     });
 
     test('creates failed status with error', () {
-      const status = GrpcExecutionStatus(
+      const status = ExecutionStatus(
         success: false,
-        error: GrpcExecutionError(
+        error: ExecutionError(
           message: 'Execution failed',
           kind: 'MOVE_ABORT',
         ),

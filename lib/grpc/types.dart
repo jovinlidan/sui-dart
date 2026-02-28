@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:sui_dart/types/common.dart';
-import 'package:sui_dart/types/objects.dart';
+import 'package:sui_dart/types/common.dart' as legacy_common;
+import 'package:sui_dart/types/objects.dart' as legacy_objects;
 
 class ObjectIncludeOptions {
   final bool content;
@@ -38,80 +38,80 @@ class TransactionIncludeOptions {
   });
 }
 
-class GrpcPage<T> {
+class Page<T> {
   final List<T> data;
   final bool hasNextPage;
   final String? nextCursor;
 
-  const GrpcPage({
+  const Page({
     required this.data,
     required this.hasNextPage,
     this.nextCursor,
   });
 }
 
-sealed class GrpcOwner {
-  const GrpcOwner();
+sealed class Owner {
+  const Owner();
 }
 
-class GrpcAddressOwner extends GrpcOwner {
+class AddressOwner extends Owner {
   final String address;
-  const GrpcAddressOwner(this.address);
+  const AddressOwner(this.address);
 }
 
-class GrpcObjectOwner extends GrpcOwner {
+class ObjectOwner extends Owner {
   final String address;
-  const GrpcObjectOwner(this.address);
+  const ObjectOwner(this.address);
 }
 
-class GrpcSharedOwner extends GrpcOwner {
+class SharedOwner extends Owner {
   final String initialSharedVersion;
-  const GrpcSharedOwner(this.initialSharedVersion);
+  const SharedOwner(this.initialSharedVersion);
 }
 
-class GrpcImmutableOwner extends GrpcOwner {
-  const GrpcImmutableOwner();
+class ImmutableOwner extends Owner {
+  const ImmutableOwner();
 }
 
-class GrpcConsensusAddressOwner extends GrpcOwner {
+class ConsensusAddressOwner extends Owner {
   final String address;
   final String startVersion;
-  const GrpcConsensusAddressOwner({
+  const ConsensusAddressOwner({
     required this.address,
     required this.startVersion,
   });
 }
 
-class GrpcUnknownOwner extends GrpcOwner {
-  const GrpcUnknownOwner();
+class UnknownOwner extends Owner {
+  const UnknownOwner();
 }
 
-sealed class GrpcObjectResult {
-  const GrpcObjectResult();
+sealed class ObjectResult {
+  const ObjectResult();
 }
 
-class GrpcObjectSuccess extends GrpcObjectResult {
-  final GrpcObjectData data;
-  const GrpcObjectSuccess(this.data);
+class ObjectSuccess extends ObjectResult {
+  final ObjectData data;
+  const ObjectSuccess(this.data);
 }
 
-class GrpcObjectError extends GrpcObjectResult {
+class ObjectError extends ObjectResult {
   final String error;
-  const GrpcObjectError(this.error);
+  const ObjectError(this.error);
 }
 
-class GrpcObjectData {
+class ObjectData {
   final String objectId;
   final String version;
   final String digest;
-  final GrpcOwner owner;
+  final Owner owner;
   final String type;
   final Uint8List? content;
   final String? previousTransaction;
   final Uint8List? objectBcs;
   final Map<String, dynamic>? json;
 
-  const GrpcObjectData({
+  const ObjectData({
     required this.objectId,
     required this.version,
     required this.digest,
@@ -123,15 +123,15 @@ class GrpcObjectData {
     this.json,
   });
 
-  SuiObject toSuiObject() {
-    return SuiObject(
+  legacy_objects.SuiObject toSuiObject() {
+    return legacy_objects.SuiObject(
       objectId,
       digest,
       int.parse(version),
       type,
-      json != null ? SuiMoveObject.fromJson(json!) : null,
+      json != null ? legacy_objects.SuiMoveObject.fromJson(json!) : null,
       content != null
-          ? SuiRawMoveObject(
+          ? legacy_objects.SuiRawMoveObject(
               'moveObject',
               type,
               false,
@@ -139,37 +139,40 @@ class GrpcObjectData {
               base64Encode(content!),
             )
           : null,
-      _grpcOwnerToObjectOwner(owner),
+      _toObjectOwner(owner),
       previousTransaction,
-      null, // storageRebate not available in gRPC
-      null, // display not available in gRPC
+      null, // storageRebate not available
+      null, // display not available
     );
   }
 
-  static ObjectOwner? _grpcOwnerToObjectOwner(GrpcOwner owner) {
+  static legacy_common.ObjectOwner? _toObjectOwner(Owner owner) {
     return switch (owner) {
-      GrpcAddressOwner(address: final addr) =>
-        ObjectOwner(addr, null, null, false),
-      GrpcObjectOwner(address: final addr) =>
-        ObjectOwner(null, addr, null, false),
-      GrpcSharedOwner(initialSharedVersion: final v) =>
-        ObjectOwner(null, null, Shared(int.parse(v)), false),
-      GrpcImmutableOwner() => ObjectOwner(null, null, null, true),
-      GrpcConsensusAddressOwner() => ObjectOwner(null, null, null, false),
-      GrpcUnknownOwner() => null,
+      AddressOwner(address: final addr) =>
+        legacy_common.ObjectOwner(addr, null, null, false),
+      ObjectOwner(address: final addr) =>
+        legacy_common.ObjectOwner(null, addr, null, false),
+      SharedOwner(initialSharedVersion: final v) =>
+        legacy_common.ObjectOwner(
+            null, null, legacy_common.Shared(int.parse(v)), false),
+      ImmutableOwner() =>
+        legacy_common.ObjectOwner(null, null, null, true),
+      ConsensusAddressOwner() =>
+        legacy_common.ObjectOwner(null, null, null, false),
+      UnknownOwner() => null,
     };
   }
 }
 
-class GrpcCoinData {
+class CoinData {
   final String objectId;
   final String version;
   final String digest;
-  final GrpcOwner owner;
+  final Owner owner;
   final String type;
   final String balance;
 
-  const GrpcCoinData({
+  const CoinData({
     required this.objectId,
     required this.version,
     required this.digest,
@@ -179,13 +182,13 @@ class GrpcCoinData {
   });
 }
 
-class GrpcBalance {
+class Balance {
   final String coinType;
   final String balance;
   final String coinBalance;
   final String addressBalance;
 
-  const GrpcBalance({
+  const Balance({
     required this.coinType,
     required this.balance,
     required this.coinBalance,
@@ -193,7 +196,7 @@ class GrpcBalance {
   });
 }
 
-class GrpcCoinMetadata {
+class CoinMetadata {
   final String id;
   final int decimals;
   final String name;
@@ -201,7 +204,7 @@ class GrpcCoinMetadata {
   final String description;
   final String? iconUrl;
 
-  const GrpcCoinMetadata({
+  const CoinMetadata({
     required this.id,
     required this.decimals,
     required this.name,
@@ -211,26 +214,26 @@ class GrpcCoinMetadata {
   });
 }
 
-class GrpcTransactionResponse {
+class TransactionResponse {
   final String digest;
   final List<String> signatures;
   final String? epoch;
-  final GrpcExecutionStatus status;
+  final ExecutionStatus status;
   final String? transaction;
-  final GrpcTransactionEffects? effects;
-  final List<GrpcEvent>? events;
-  final List<GrpcBalanceChange>? balanceChanges;
+  final TransactionEffects? effects;
+  final List<Event>? events;
+  final List<BalanceChange>? balanceChanges;
   final Map<String, String>? objectTypes;
   final Uint8List? bcs;
   final String? checkpoint;
   final String? timestampMs;
-  final List<GrpcCommandResult>? commandResults;
+  final List<CommandResult>? commandResults;
 
-  const GrpcTransactionResponse({
+  const TransactionResponse({
     required this.digest,
     this.signatures = const [],
     this.epoch,
-    this.status = const GrpcExecutionStatus(success: true),
+    this.status = const ExecutionStatus(success: true),
     this.transaction,
     this.effects,
     this.events,
@@ -242,22 +245,22 @@ class GrpcTransactionResponse {
     this.commandResults,
   });
 
-  GrpcTransactionResponse copyWith({
+  TransactionResponse copyWith({
     String? digest,
     List<String>? signatures,
     String? epoch,
-    GrpcExecutionStatus? status,
+    ExecutionStatus? status,
     String? transaction,
-    GrpcTransactionEffects? effects,
-    List<GrpcEvent>? events,
-    List<GrpcBalanceChange>? balanceChanges,
+    TransactionEffects? effects,
+    List<Event>? events,
+    List<BalanceChange>? balanceChanges,
     Map<String, String>? objectTypes,
     Uint8List? bcs,
     String? checkpoint,
     String? timestampMs,
-    List<GrpcCommandResult>? commandResults,
+    List<CommandResult>? commandResults,
   }) {
-    return GrpcTransactionResponse(
+    return TransactionResponse(
       digest: digest ?? this.digest,
       signatures: signatures ?? this.signatures,
       epoch: epoch ?? this.epoch,
@@ -275,21 +278,21 @@ class GrpcTransactionResponse {
   }
 }
 
-class GrpcTransactionEffects {
+class TransactionEffects {
   final Uint8List? bcs;
   final int? version;
   final String? transactionDigest;
   final String? lamportVersion;
-  final GrpcExecutionStatus? status;
-  final GrpcGasUsed? gasUsed;
-  final GrpcGasObject? gasObject;
+  final ExecutionStatus? status;
+  final GasUsed? gasUsed;
+  final GasObject? gasObject;
   final List<String>? dependencies;
-  final List<GrpcChangedObject>? changedObjects;
-  final List<GrpcUnchangedConsensusObject>? unchangedConsensusObjects;
+  final List<ChangedObject>? changedObjects;
+  final List<UnchangedConsensusObject>? unchangedConsensusObjects;
   final String? eventsDigest;
   final String? auxiliaryDataDigest;
 
-  const GrpcTransactionEffects({
+  const TransactionEffects({
     this.bcs,
     this.version,
     this.transactionDigest,
@@ -305,23 +308,23 @@ class GrpcTransactionEffects {
   });
 }
 
-class GrpcExecutionStatus {
+class ExecutionStatus {
   final bool success;
-  final GrpcExecutionError? error;
+  final ExecutionError? error;
 
-  const GrpcExecutionStatus({
+  const ExecutionStatus({
     required this.success,
     this.error,
   });
 }
 
-class GrpcGasUsed {
+class GasUsed {
   final String computationCost;
   final String storageCost;
   final String storageRebate;
   final String nonRefundableStorageFee;
 
-  const GrpcGasUsed({
+  const GasUsed({
     required this.computationCost,
     required this.storageCost,
     required this.storageRebate,
@@ -329,25 +332,25 @@ class GrpcGasUsed {
   });
 }
 
-class GrpcGasObject {
+class GasObject {
   final String objectId;
   final String? inputState;
   final String? outputState;
 
-  const GrpcGasObject({
+  const GasObject({
     required this.objectId,
     this.inputState,
     this.outputState,
   });
 }
 
-class GrpcExecutionError {
+class ExecutionError {
   final String message;
   final String kind;
   final int? command;
-  final GrpcExecutionErrorDetail? detail;
+  final ExecutionErrorDetail? detail;
 
-  const GrpcExecutionError({
+  const ExecutionError({
     required this.message,
     required this.kind,
     this.command,
@@ -355,80 +358,80 @@ class GrpcExecutionError {
   });
 }
 
-sealed class GrpcExecutionErrorDetail {
-  const GrpcExecutionErrorDetail();
+sealed class ExecutionErrorDetail {
+  const ExecutionErrorDetail();
 }
 
-class GrpcAbortDetail extends GrpcExecutionErrorDetail {
-  final GrpcMoveAbort abort;
-  const GrpcAbortDetail(this.abort);
+class AbortDetail extends ExecutionErrorDetail {
+  final MoveAbort abort;
+  const AbortDetail(this.abort);
 }
 
-class GrpcSizeErrorDetail extends GrpcExecutionErrorDetail {
+class SizeErrorDetail extends ExecutionErrorDetail {
   final String size;
   final String maxSize;
-  const GrpcSizeErrorDetail({required this.size, required this.maxSize});
+  const SizeErrorDetail({required this.size, required this.maxSize});
 }
 
-class GrpcCommandArgumentErrorDetail extends GrpcExecutionErrorDetail {
+class CommandArgumentErrorDetail extends ExecutionErrorDetail {
   final int argument;
   final String kind;
-  const GrpcCommandArgumentErrorDetail({
+  const CommandArgumentErrorDetail({
     required this.argument,
     required this.kind,
   });
 }
 
-class GrpcTypeArgumentErrorDetail extends GrpcExecutionErrorDetail {
+class TypeArgumentErrorDetail extends ExecutionErrorDetail {
   final int typeArgument;
   final String kind;
-  const GrpcTypeArgumentErrorDetail({
+  const TypeArgumentErrorDetail({
     required this.typeArgument,
     required this.kind,
   });
 }
 
-class GrpcPackageUpgradeErrorDetail extends GrpcExecutionErrorDetail {
+class PackageUpgradeErrorDetail extends ExecutionErrorDetail {
   final String kind;
   final String packageId;
-  const GrpcPackageUpgradeErrorDetail({
+  const PackageUpgradeErrorDetail({
     required this.kind,
     required this.packageId,
   });
 }
 
-class GrpcIndexErrorDetail extends GrpcExecutionErrorDetail {
+class IndexErrorDetail extends ExecutionErrorDetail {
   final int index;
   final int subresult;
-  const GrpcIndexErrorDetail({required this.index, required this.subresult});
+  const IndexErrorDetail({required this.index, required this.subresult});
 }
 
-class GrpcObjectIdErrorDetail extends GrpcExecutionErrorDetail {
+class ObjectIdErrorDetail extends ExecutionErrorDetail {
   final String objectId;
-  const GrpcObjectIdErrorDetail(this.objectId);
+  const ObjectIdErrorDetail(this.objectId);
 }
 
-class GrpcCoinDenyListErrorDetail extends GrpcExecutionErrorDetail {
+class CoinDenyListErrorDetail extends ExecutionErrorDetail {
   final String address;
   final String coinType;
-  const GrpcCoinDenyListErrorDetail({
+  const CoinDenyListErrorDetail({
     required this.address,
     required this.coinType,
   });
 }
 
-class GrpcCongestedObjectsDetail extends GrpcExecutionErrorDetail {
+class CongestedObjectsDetail extends ExecutionErrorDetail {
   final List<String> objects;
-  const GrpcCongestedObjectsDetail(this.objects);
+  const CongestedObjectsDetail(this.objects);
 }
 
-class GrpcMoveAbort {
+class MoveAbort {
   final String abortCode;
-  final GrpcMoveAbortLocation? location;
+  final MoveAbortLocation? location;
   final String? cleverError;
   final String? cleverErrorRaw;
 
-  const GrpcMoveAbort({
+  const MoveAbort({
     required this.abortCode,
     this.location,
     this.cleverError,
@@ -436,14 +439,14 @@ class GrpcMoveAbort {
   });
 }
 
-class GrpcMoveAbortLocation {
+class MoveAbortLocation {
   final String package;
   final String module;
   final int function;
   final int instruction;
   final String? functionName;
 
-  const GrpcMoveAbortLocation({
+  const MoveAbortLocation({
     required this.package,
     required this.module,
     required this.function,
@@ -452,20 +455,20 @@ class GrpcMoveAbortLocation {
   });
 }
 
-class GrpcChangedObject {
+class ChangedObject {
   final String objectId;
   final String? idOperation;
   final String? inputState;
   final String? outputState;
   final String? inputVersion;
   final String? inputDigest;
-  final GrpcOwner? inputOwner;
+  final Owner? inputOwner;
   final String? outputVersion;
   final String? outputDigest;
-  final GrpcOwner? outputOwner;
+  final Owner? outputOwner;
   final String? objectType;
 
-  const GrpcChangedObject({
+  const ChangedObject({
     required this.objectId,
     this.idOperation,
     this.inputState,
@@ -480,14 +483,14 @@ class GrpcChangedObject {
   });
 }
 
-class GrpcUnchangedConsensusObject {
+class UnchangedConsensusObject {
   final String? kind;
   final String objectId;
   final String version;
   final String? digest;
   final String? objectType;
 
-  const GrpcUnchangedConsensusObject({
+  const UnchangedConsensusObject({
     this.kind,
     required this.objectId,
     required this.version,
@@ -496,14 +499,14 @@ class GrpcUnchangedConsensusObject {
   });
 }
 
-class GrpcEvent {
+class Event {
   final String packageId;
   final String module;
   final String sender;
   final String eventType;
   final Uint8List bcs;
 
-  const GrpcEvent({
+  const Event({
     required this.packageId,
     required this.module,
     required this.sender,
@@ -512,25 +515,25 @@ class GrpcEvent {
   });
 }
 
-class GrpcBalanceChange {
+class BalanceChange {
   final String address;
   final String coinType;
   final String amount;
 
-  const GrpcBalanceChange({
+  const BalanceChange({
     required this.address,
     required this.coinType,
     required this.amount,
   });
 }
 
-class GrpcDynamicFieldEntry {
-  final GrpcDynamicFieldName name;
+class DynamicFieldEntry {
+  final DynamicFieldName name;
   final String objectType;
   final String objectId;
   final String type;
 
-  const GrpcDynamicFieldEntry({
+  const DynamicFieldEntry({
     required this.name,
     required this.objectType,
     required this.objectId,
@@ -538,20 +541,20 @@ class GrpcDynamicFieldEntry {
   });
 }
 
-class GrpcDynamicFieldName {
+class DynamicFieldName {
   final String? type;
   final Uint8List? bcs;
 
-  const GrpcDynamicFieldName({this.type, this.bcs});
+  const DynamicFieldName({this.type, this.bcs});
 }
 
-class GrpcSystemState {
+class SystemState {
   final String epoch;
   final String referenceGasPrice;
   final Map<String, dynamic>? systemState;
   final String? epochStartTimestampMs;
 
-  const GrpcSystemState({
+  const SystemState({
     required this.epoch,
     required this.referenceGasPrice,
     this.systemState,
@@ -559,25 +562,25 @@ class GrpcSystemState {
   });
 }
 
-class GrpcVerifySignatureResult {
+class VerifySignatureResult {
   final bool isValid;
   final String? reason;
 
-  const GrpcVerifySignatureResult({
+  const VerifySignatureResult({
     required this.isValid,
     this.reason,
   });
 }
 
-class GrpcMoveFunction {
+class MoveFunction {
   final String name;
   final String visibility;
   final bool isEntry;
-  final List<GrpcTypeParameter> typeParameters;
+  final List<TypeParameter> typeParameters;
   final List<NormalizedMoveType> parameters;
   final List<NormalizedMoveType> returnTypes;
 
-  const GrpcMoveFunction({
+  const MoveFunction({
     required this.name,
     required this.visibility,
     required this.isEntry,
@@ -587,9 +590,9 @@ class GrpcMoveFunction {
   });
 }
 
-class GrpcTypeParameter {
+class TypeParameter {
   final List<String> abilities;
-  const GrpcTypeParameter({required this.abilities});
+  const TypeParameter({required this.abilities});
 }
 
 sealed class NormalizedMoveType {
@@ -635,18 +638,18 @@ class MoveTypeMutableReference extends NormalizedMoveType {
   const MoveTypeMutableReference(this.body);
 }
 
-class GrpcCommandResult {
-  final List<GrpcCommandOutput> returnValues;
-  final List<GrpcCommandOutput> mutatedReferences;
+class CommandResult {
+  final List<CommandOutput> returnValues;
+  final List<CommandOutput> mutatedReferences;
 
-  const GrpcCommandResult({
+  const CommandResult({
     required this.returnValues,
     required this.mutatedReferences,
   });
 }
 
-class GrpcCommandOutput {
+class CommandOutput {
   final Uint8List bcs;
 
-  const GrpcCommandOutput({required this.bcs});
+  const CommandOutput({required this.bcs});
 }

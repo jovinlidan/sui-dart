@@ -6,24 +6,24 @@ import 'package:protobuf/protobuf.dart';
 import 'package:protobuf/well_known_types/google/protobuf/field_mask.pb.dart';
 
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/bcs.pb.dart' as grpc_bcs;
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/effects.pb.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/execution_status.pb.dart';
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/effects.pb.dart' as pb_effects;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/execution_status.pb.dart' as pb_exec;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/executed_transaction.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/ledger_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package.pb.dart';
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package.pb.dart' hide TypeParameter;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/name_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/object.pb.dart' as grpc_object;
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/owner.pb.dart';
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/owner.pb.dart' as pb_owner;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/signature.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/signature_verification_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/state_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction_execution_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction.pb.dart' as grpc_transaction;
-
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/state_service.pbgrpc.dart'
+    hide Balance, CoinMetadata;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction_execution_service.pbgrpc.dart'
+    hide CommandResult, CommandOutput;
 import 'package:sui_dart/sui.dart' as sui_dart;
 import 'package:sui_dart/builder/transaction.dart' show chunk;
-import 'package:sui_dart/types/common.dart';
+import 'package:sui_dart/types/common.dart' hide ObjectOwner;
 
 import 'client.dart';
 
@@ -35,7 +35,7 @@ class GrpcCoreClient {
 
   GrpcCoreClient(this._client);
 
-  Future<List<GrpcObjectResult>> getObjects(
+  Future<List<ObjectResult>> getObjects(
     List<String> ids, {
     ObjectIncludeOptions? include,
   }) async {
@@ -55,13 +55,13 @@ class GrpcCoreClient {
 
     return results.map((result) {
       if (result.whichResult() == GetObjectResult_Result.error) {
-        return GrpcObjectError(result.error.message);
+        return ObjectError(result.error.message);
       }
-      return GrpcObjectSuccess(_parseObject(result.object, include));
+      return ObjectSuccess(_parseObject(result.object, include));
     }).toList();
   }
 
-  Future<GrpcPage<GrpcObjectData>> listOwnedObjects(
+  Future<Page<ObjectData>> listOwnedObjects(
     String owner, {
     String? objectType,
     String? cursor,
@@ -81,14 +81,14 @@ class GrpcCoreClient {
     );
 
     final hasNext = response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
-    return GrpcPage(
+    return Page(
       data: response.objects.map((obj) => _parseObject(obj, include)).toList(),
       hasNextPage: hasNext,
       nextCursor: hasNext ? base64Encode(response.nextPageToken) : null,
     );
   }
 
-  Future<GrpcPage<GrpcCoinData>> listCoins(
+  Future<Page<CoinData>> listCoins(
     String owner, {
     String coinType = '0x2::sui::SUI',
     String? cursor,
@@ -117,13 +117,13 @@ class GrpcCoreClient {
     );
 
     final hasNext = response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
-    return GrpcPage(
+    return Page(
       data: response.objects.map((obj) {
-        return GrpcCoinData(
+        return CoinData(
           objectId: obj.objectId,
           version: obj.version.toString(),
           digest: obj.digest,
-          owner: obj.hasOwner() ? _mapOwner(obj.owner) : const GrpcUnknownOwner(),
+          owner: obj.hasOwner() ? _mapOwner(obj.owner) : const UnknownOwner(),
           type: normalizedCoinType,
           balance: obj.balance.toString(),
         );
@@ -133,7 +133,7 @@ class GrpcCoreClient {
     );
   }
 
-  Future<GrpcBalance> getBalance(String owner, {String coinType = '0x2::sui::SUI'}) async {
+  Future<Balance> getBalance(String owner, {String coinType = '0x2::sui::SUI'}) async {
     final normalizedCoinType = normalizeStructTagString(coinType);
 
     final response = await _client.stateService.getBalance(
@@ -141,7 +141,7 @@ class GrpcCoreClient {
     );
 
     final balance = response.balance;
-    return GrpcBalance(
+    return Balance(
       coinType: balance.coinType,
       balance: balance.balance.toString(),
       coinBalance: balance.balance.toString(),
@@ -149,7 +149,7 @@ class GrpcCoreClient {
     );
   }
 
-  Future<GrpcCoinMetadata?> getCoinMetadata(String coinType) async {
+  Future<CoinMetadata?> getCoinMetadata(String coinType) async {
     final normalizedCoinType = normalizeStructTagString(coinType);
 
     final response = await _client.stateService.getCoinInfo(
@@ -159,7 +159,7 @@ class GrpcCoreClient {
     if (!response.hasMetadata()) return null;
 
     final metadata = response.metadata;
-    return GrpcCoinMetadata(
+    return CoinMetadata(
       id: metadata.id,
       decimals: metadata.decimals,
       name: metadata.name,
@@ -169,8 +169,8 @@ class GrpcCoreClient {
     );
   }
 
-  Future<List<GrpcBalance>> listBalances(String owner) async {
-    final allBalances = <Balance>[];
+  Future<List<Balance>> listBalances(String owner) async {
+    final allBalances = [];
     List<int>? pageToken;
 
     while (true) {
@@ -187,7 +187,7 @@ class GrpcCoreClient {
     }
 
     return allBalances.map((balance) {
-      return GrpcBalance(
+      return Balance(
         coinType: balance.coinType,
         balance: balance.balance.toString(),
         coinBalance: balance.balance.toString(),
@@ -196,7 +196,7 @@ class GrpcCoreClient {
     }).toList();
   }
 
-  Future<GrpcTransactionResponse> getTransaction(
+  Future<TransactionResponse> getTransaction(
     String digest, {
     TransactionIncludeOptions? include,
   }) async {
@@ -209,7 +209,7 @@ class GrpcCoreClient {
     return _parseTransaction(response.transaction, include);
   }
 
-  Future<GrpcTransactionResponse> executeTransaction(
+  Future<TransactionResponse> executeTransaction(
     Uint8List transactionBytes,
     List<String> signatures, {
     TransactionIncludeOptions? include,
@@ -229,7 +229,7 @@ class GrpcCoreClient {
     return _parseTransaction(response.transaction, include);
   }
 
-  Future<GrpcTransactionResponse> simulateTransaction(
+  Future<TransactionResponse> simulateTransaction(
     sui_dart.Transaction transactionBlock, {
     TransactionIncludeOptions? include,
     bool? doGasSelection,
@@ -249,16 +249,16 @@ class GrpcCoreClient {
     if (include?.commandResults == true) {
       result = result.copyWith(
         commandResults: response.commandOutputs.map((cmdResult) {
-          return GrpcCommandResult(
+          return CommandResult(
             returnValues: cmdResult.returnValues.map((output) {
-              return GrpcCommandOutput(
+              return CommandOutput(
                 bcs: output.hasValue()
                     ? Uint8List.fromList(output.value.value)
                     : Uint8List(0),
               );
             }).toList(),
             mutatedReferences: cmdResult.mutatedByRef.map((output) {
-              return GrpcCommandOutput(
+              return CommandOutput(
                 bcs: output.hasValue()
                     ? Uint8List.fromList(output.value.value)
                     : Uint8List(0),
@@ -280,7 +280,7 @@ class GrpcCoreClient {
     return response.epoch.referenceGasPrice.toString();
   }
 
-  Future<GrpcSystemState> getCurrentSystemState() async {
+  Future<SystemState> getCurrentSystemState() async {
     final response = await _client.ledgerService.getEpoch(
       GetEpochRequest(
         readMask: FieldMask(
@@ -290,7 +290,7 @@ class GrpcCoreClient {
     );
 
     final epoch = response.epoch;
-    return GrpcSystemState(
+    return SystemState(
       epoch: epoch.epoch.toString(),
       referenceGasPrice: epoch.referenceGasPrice.toString(),
       systemState: epoch.hasSystemState() ? epoch.systemState.writeToJsonMap() : null,
@@ -298,7 +298,7 @@ class GrpcCoreClient {
     );
   }
 
-  Future<GrpcPage<GrpcDynamicFieldEntry>> listDynamicFields(
+  Future<Page<DynamicFieldEntry>> listDynamicFields(
     String parentId, {
     String? cursor,
     int? limit,
@@ -313,10 +313,10 @@ class GrpcCoreClient {
     );
 
     final hasNext = response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
-    return GrpcPage(
+    return Page(
       data: response.dynamicFields.map((field) {
-        return GrpcDynamicFieldEntry(
-          name: GrpcDynamicFieldName(
+        return DynamicFieldEntry(
+          name: DynamicFieldName(
             type: field.hasName() ? field.name.name : null,
             bcs: field.hasName() ? Uint8List.fromList(field.name.value) : null,
           ),
@@ -330,7 +330,7 @@ class GrpcCoreClient {
     );
   }
 
-  Future<GrpcVerifySignatureResult> verifyZkLoginSignature(
+  Future<VerifySignatureResult> verifyZkLoginSignature(
     Uint8List bytes,
     String signature, {
     String? address,
@@ -343,7 +343,7 @@ class GrpcCoreClient {
       ),
     );
 
-    return GrpcVerifySignatureResult(
+    return VerifySignatureResult(
       isValid: response.isValid,
       reason: response.hasReason() ? response.reason : null,
     );
@@ -363,7 +363,7 @@ class GrpcCoreClient {
     }
   }
 
-  Future<GrpcMoveFunction> getMoveFunction(
+  Future<MoveFunction> getMoveFunction(
     String packageId,
     String moduleName,
     String functionName,
@@ -373,12 +373,12 @@ class GrpcCoreClient {
     );
 
     final func = response.function;
-    return GrpcMoveFunction(
+    return MoveFunction(
       name: func.name,
       visibility: _mapVisibility(func.visibility),
       isEntry: func.isEntry,
       typeParameters: func.typeParameters.map((tp) {
-        return GrpcTypeParameter(abilities: tp.constraints.map(_mapAbility).toList());
+        return TypeParameter(abilities: tp.constraints.map(_mapAbility).toList());
       }).toList(),
       parameters: func.parameters.map(_parseNormalizedMoveType).toList(),
       returnTypes: func.returns.map(_parseNormalizedMoveType).toList(),
@@ -417,12 +417,12 @@ class GrpcCoreClient {
     return FieldMask(paths: paths);
   }
 
-  GrpcObjectData _parseObject(grpc_object.Object obj, ObjectIncludeOptions? include) {
-    return GrpcObjectData(
+  ObjectData _parseObject(grpc_object.Object obj, ObjectIncludeOptions? include) {
+    return ObjectData(
       objectId: obj.objectId,
       version: obj.version.toString(),
       digest: obj.digest,
-      owner: obj.hasOwner() ? _mapOwner(obj.owner) : const GrpcUnknownOwner(),
+      owner: obj.hasOwner() ? _mapOwner(obj.owner) : const UnknownOwner(),
       type: obj.objectType,
       previousTransaction:
           include?.previousTransaction == true ? obj.previousTransaction : null,
@@ -438,14 +438,14 @@ class GrpcCoreClient {
     );
   }
 
-  GrpcTransactionResponse _parseTransaction(
+  TransactionResponse _parseTransaction(
     ExecutedTransaction tx,
     TransactionIncludeOptions? include,
   ) {
     // Extract status from effects (always present when effects are available)
-    GrpcExecutionStatus status = const GrpcExecutionStatus(success: true);
+    ExecutionStatus status = const ExecutionStatus(success: true);
     if (tx.hasEffects() && tx.effects.hasStatus()) {
-      status = GrpcExecutionStatus(
+      status = ExecutionStatus(
         success: tx.effects.status.success,
         error: tx.effects.status.hasError()
             ? _parseExecutionError(tx.effects.status.error)
@@ -463,7 +463,7 @@ class GrpcCoreClient {
         .map((sig) => base64Encode(sig.bcs.value))
         .toList();
 
-    return GrpcTransactionResponse(
+    return TransactionResponse(
       digest: tx.digest,
       signatures: signatures,
       epoch: epoch,
@@ -476,7 +476,7 @@ class GrpcCoreClient {
           : null,
       events: (include?.events == true && tx.hasEvents())
           ? tx.events.events.map((event) {
-              return GrpcEvent(
+              return Event(
                 packageId: event.packageId,
                 module: event.module,
                 sender: event.sender,
@@ -489,7 +489,7 @@ class GrpcCoreClient {
           : null,
       balanceChanges: include?.balanceChanges == true
           ? tx.balanceChanges.map((change) {
-              return GrpcBalanceChange(
+              return BalanceChange(
                 address: change.address,
                 coinType: change.coinType,
                 amount: change.amount,
@@ -508,12 +508,12 @@ class GrpcCoreClient {
     );
   }
 
-  GrpcTransactionEffects _parseTransactionEffects(TransactionEffects effects) {
-    return GrpcTransactionEffects(
+  TransactionEffects _parseTransactionEffects(pb_effects.TransactionEffects effects) {
+    return TransactionEffects(
       transactionDigest: effects.hasTransactionDigest() ? effects.transactionDigest : null,
       lamportVersion: effects.hasLamportVersion() ? effects.lamportVersion.toString() : null,
       status: effects.hasStatus()
-          ? GrpcExecutionStatus(
+          ? ExecutionStatus(
               success: effects.status.success,
               error: effects.status.hasError()
                   ? _parseExecutionError(effects.status.error)
@@ -521,7 +521,7 @@ class GrpcCoreClient {
             )
           : null,
       gasUsed: effects.hasGasUsed()
-          ? GrpcGasUsed(
+          ? GasUsed(
               computationCost: effects.gasUsed.computationCost.toString(),
               storageCost: effects.gasUsed.storageCost.toString(),
               storageRebate: effects.gasUsed.storageRebate.toString(),
@@ -529,7 +529,7 @@ class GrpcCoreClient {
             )
           : null,
       gasObject: effects.hasGasObject()
-          ? GrpcGasObject(
+          ? GasObject(
               objectId: effects.gasObject.objectId,
               inputState: _mapInputObjectState(effects.gasObject.inputState),
               outputState: _mapOutputObjectState(effects.gasObject.outputState),
@@ -539,7 +539,7 @@ class GrpcCoreClient {
           effects.dependencies.isNotEmpty ? effects.dependencies.toList() : null,
       changedObjects: effects.changedObjects.isNotEmpty
           ? effects.changedObjects.map((obj) {
-              return GrpcChangedObject(
+              return ChangedObject(
                 objectId: obj.objectId,
                 idOperation: _mapIdOperation(obj.idOperation),
                 inputState: _mapInputObjectState(obj.inputState),
@@ -556,7 +556,7 @@ class GrpcCoreClient {
           : null,
       unchangedConsensusObjects: effects.unchangedConsensusObjects.isNotEmpty
           ? effects.unchangedConsensusObjects.map((obj) {
-              return GrpcUnchangedConsensusObject(
+              return UnchangedConsensusObject(
                 kind: _mapUnchangedConsensusObjectKind(obj.kind),
                 objectId: obj.objectId,
                 version: obj.version.toString(),
@@ -570,60 +570,60 @@ class GrpcCoreClient {
     );
   }
 
-  GrpcExecutionError _parseExecutionError(ExecutionError error) {
-    GrpcExecutionErrorDetail? detail;
+  ExecutionError _parseExecutionError(pb_exec.ExecutionError error) {
+    ExecutionErrorDetail? detail;
 
     switch (error.whichErrorDetails()) {
-      case ExecutionError_ErrorDetails.abort:
-        detail = GrpcAbortDetail(_parseMoveAbort(error.abort));
+      case pb_exec.ExecutionError_ErrorDetails.abort:
+        detail = AbortDetail(_parseMoveAbort(error.abort));
         break;
-      case ExecutionError_ErrorDetails.sizeError:
-        detail = GrpcSizeErrorDetail(
+      case pb_exec.ExecutionError_ErrorDetails.sizeError:
+        detail = SizeErrorDetail(
           size: error.sizeError.size.toString(),
           maxSize: error.sizeError.maxSize.toString(),
         );
         break;
-      case ExecutionError_ErrorDetails.commandArgumentError:
-        detail = GrpcCommandArgumentErrorDetail(
+      case pb_exec.ExecutionError_ErrorDetails.commandArgumentError:
+        detail = CommandArgumentErrorDetail(
           argument: error.commandArgumentError.argument,
           kind: _mapErrorName(error.commandArgumentError.kind),
         );
         break;
-      case ExecutionError_ErrorDetails.typeArgumentError:
-        detail = GrpcTypeArgumentErrorDetail(
+      case pb_exec.ExecutionError_ErrorDetails.typeArgumentError:
+        detail = TypeArgumentErrorDetail(
           typeArgument: error.typeArgumentError.typeArgument,
           kind: _mapErrorName(error.typeArgumentError.kind),
         );
         break;
-      case ExecutionError_ErrorDetails.packageUpgradeError:
-        detail = GrpcPackageUpgradeErrorDetail(
+      case pb_exec.ExecutionError_ErrorDetails.packageUpgradeError:
+        detail = PackageUpgradeErrorDetail(
           kind: _mapErrorName(error.packageUpgradeError.kind),
           packageId: error.packageUpgradeError.packageId,
         );
         break;
-      case ExecutionError_ErrorDetails.indexError:
-        detail = GrpcIndexErrorDetail(
+      case pb_exec.ExecutionError_ErrorDetails.indexError:
+        detail = IndexErrorDetail(
           index: error.indexError.index,
           subresult: error.indexError.subresult,
         );
         break;
-      case ExecutionError_ErrorDetails.objectId:
-        detail = GrpcObjectIdErrorDetail(error.objectId);
+      case pb_exec.ExecutionError_ErrorDetails.objectId:
+        detail = ObjectIdErrorDetail(error.objectId);
         break;
-      case ExecutionError_ErrorDetails.coinDenyListError:
-        detail = GrpcCoinDenyListErrorDetail(
+      case pb_exec.ExecutionError_ErrorDetails.coinDenyListError:
+        detail = CoinDenyListErrorDetail(
           address: error.coinDenyListError.address,
           coinType: error.coinDenyListError.coinType,
         );
         break;
-      case ExecutionError_ErrorDetails.congestedObjects:
-        detail = GrpcCongestedObjectsDetail(error.congestedObjects.objects.toList());
+      case pb_exec.ExecutionError_ErrorDetails.congestedObjects:
+        detail = CongestedObjectsDetail(error.congestedObjects.objects.toList());
         break;
-      case ExecutionError_ErrorDetails.notSet:
+      case pb_exec.ExecutionError_ErrorDetails.notSet:
         break;
     }
 
-    return GrpcExecutionError(
+    return ExecutionError(
       message: error.description,
       kind: _mapErrorName(error.kind),
       command: error.hasCommand() ? error.command.toInt() : null,
@@ -631,23 +631,23 @@ class GrpcCoreClient {
     );
   }
 
-  GrpcMoveAbort _parseMoveAbort(MoveAbort abort) {
+  MoveAbort _parseMoveAbort(pb_exec.MoveAbort abort) {
     String? cleverError;
     String? cleverErrorRaw;
 
     if (abort.hasCleverError()) {
       final ce = abort.cleverError;
-      if (ce.whichValue() == CleverError_Value.rendered) {
+      if (ce.whichValue() == pb_exec.CleverError_Value.rendered) {
         cleverError = ce.rendered;
-      } else if (ce.whichValue() == CleverError_Value.raw) {
+      } else if (ce.whichValue() == pb_exec.CleverError_Value.raw) {
         cleverErrorRaw = base64Encode(ce.raw);
       }
     }
 
-    return GrpcMoveAbort(
+    return MoveAbort(
       abortCode: abort.abortCode.toString(),
       location: abort.hasLocation()
-          ? GrpcMoveAbortLocation(
+          ? MoveAbortLocation(
               package: abort.location.package,
               module: abort.location.module,
               function: abort.location.function,
@@ -665,23 +665,23 @@ class GrpcCoreClient {
   // Enum mappers
   // ---------------------------------------------------------------------------
 
-  static GrpcOwner _mapOwner(Owner owner) {
+  static Owner _mapOwner(pb_owner.Owner owner) {
     switch (owner.kind) {
-      case Owner_OwnerKind.ADDRESS:
-        return GrpcAddressOwner(owner.address);
-      case Owner_OwnerKind.OBJECT:
-        return GrpcObjectOwner(owner.address);
-      case Owner_OwnerKind.SHARED:
-        return GrpcSharedOwner(owner.version.toString());
-      case Owner_OwnerKind.IMMUTABLE:
-        return const GrpcImmutableOwner();
-      case Owner_OwnerKind.CONSENSUS_ADDRESS:
-        return GrpcConsensusAddressOwner(
+      case pb_owner.Owner_OwnerKind.ADDRESS:
+        return AddressOwner(owner.address);
+      case pb_owner.Owner_OwnerKind.OBJECT:
+        return ObjectOwner(owner.address);
+      case pb_owner.Owner_OwnerKind.SHARED:
+        return SharedOwner(owner.version.toString());
+      case pb_owner.Owner_OwnerKind.IMMUTABLE:
+        return const ImmutableOwner();
+      case pb_owner.Owner_OwnerKind.CONSENSUS_ADDRESS:
+        return ConsensusAddressOwner(
           address: owner.address,
           startVersion: owner.version.toString(),
         );
       default:
-        return const GrpcUnknownOwner();
+        return const UnknownOwner();
     }
   }
 
@@ -690,39 +690,39 @@ class GrpcCoreClient {
     return value.name;
   }
 
-  static String? _mapIdOperation(ChangedObject_IdOperation operation) {
+  static String? _mapIdOperation(pb_effects.ChangedObject_IdOperation operation) {
     switch (operation) {
-      case ChangedObject_IdOperation.NONE:
+      case pb_effects.ChangedObject_IdOperation.NONE:
         return 'None';
-      case ChangedObject_IdOperation.CREATED:
+      case pb_effects.ChangedObject_IdOperation.CREATED:
         return 'Created';
-      case ChangedObject_IdOperation.DELETED:
+      case pb_effects.ChangedObject_IdOperation.DELETED:
         return 'Deleted';
       default:
         return null;
     }
   }
 
-  static String? _mapInputObjectState(ChangedObject_InputObjectState state) {
+  static String? _mapInputObjectState(pb_effects.ChangedObject_InputObjectState state) {
     switch (state) {
-      case ChangedObject_InputObjectState.INPUT_OBJECT_STATE_DOES_NOT_EXIST:
+      case pb_effects.ChangedObject_InputObjectState.INPUT_OBJECT_STATE_DOES_NOT_EXIST:
         return 'DoesNotExist';
-      case ChangedObject_InputObjectState.INPUT_OBJECT_STATE_EXISTS:
+      case pb_effects.ChangedObject_InputObjectState.INPUT_OBJECT_STATE_EXISTS:
         return 'Exists';
       default:
         return null;
     }
   }
 
-  static String? _mapOutputObjectState(ChangedObject_OutputObjectState state) {
+  static String? _mapOutputObjectState(pb_effects.ChangedObject_OutputObjectState state) {
     switch (state) {
-      case ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_DOES_NOT_EXIST:
+      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_DOES_NOT_EXIST:
         return 'DoesNotExist';
-      case ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_OBJECT_WRITE:
+      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_OBJECT_WRITE:
         return 'ObjectWrite';
-      case ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_PACKAGE_WRITE:
+      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_PACKAGE_WRITE:
         return 'PackageWrite';
-      case ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_ACCUMULATOR_WRITE:
+      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_ACCUMULATOR_WRITE:
         return 'AccumulatorWrite';
       default:
         return null;
@@ -730,18 +730,22 @@ class GrpcCoreClient {
   }
 
   static String? _mapUnchangedConsensusObjectKind(
-    UnchangedConsensusObject_UnchangedConsensusObjectKind kind,
+    pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind kind,
   ) {
     switch (kind) {
-      case UnchangedConsensusObject_UnchangedConsensusObjectKind.READ_ONLY_ROOT:
+      case pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind.READ_ONLY_ROOT:
         return 'ReadOnlyRoot';
-      case UnchangedConsensusObject_UnchangedConsensusObjectKind.MUTATE_CONSENSUS_STREAM_ENDED:
+      case pb_effects
+          .UnchangedConsensusObject_UnchangedConsensusObjectKind
+          .MUTATE_CONSENSUS_STREAM_ENDED:
         return 'MutateConsensusStreamEnded';
-      case UnchangedConsensusObject_UnchangedConsensusObjectKind.READ_CONSENSUS_STREAM_ENDED:
+      case pb_effects
+          .UnchangedConsensusObject_UnchangedConsensusObjectKind
+          .READ_CONSENSUS_STREAM_ENDED:
         return 'ReadConsensusStreamEnded';
-      case UnchangedConsensusObject_UnchangedConsensusObjectKind.CANCELED:
+      case pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind.CANCELED:
         return 'Canceled';
-      case UnchangedConsensusObject_UnchangedConsensusObjectKind.PER_EPOCH_CONFIG:
+      case pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind.PER_EPOCH_CONFIG:
         return 'PerEpochConfig';
       default:
         return null;

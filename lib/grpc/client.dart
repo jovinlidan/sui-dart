@@ -6,7 +6,8 @@ import 'package:sui_dart/grpc/generated/sui/rpc/v2/ledger_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/name_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/signature_verification_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/state_service.pbgrpc.dart';
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/state_service.pbgrpc.dart'
+    hide Balance, CoinMetadata;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/subscription_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction_execution_service.pbgrpc.dart';
 
@@ -58,11 +59,11 @@ class SuiGrpcClient {
     core = GrpcCoreClient(this);
   }
 
-  Future<List<GrpcObjectResult>> getObjects(List<String> ids, {ObjectIncludeOptions? include}) {
+  Future<List<ObjectResult>> getObjects(List<String> ids, {ObjectIncludeOptions? include}) {
     return core.getObjects(ids, include: include);
   }
 
-  Future<GrpcPage<GrpcObjectData>> listOwnedObjects(
+  Future<Page<ObjectData>> listOwnedObjects(
     String owner, {
     String? objectType,
     String? cursor,
@@ -78,7 +79,7 @@ class SuiGrpcClient {
     );
   }
 
-  Future<GrpcPage<GrpcCoinData>> listCoins(
+  Future<Page<CoinData>> listCoins(
     String owner, {
     String coinType = '0x2::sui::SUI',
     String? cursor,
@@ -87,26 +88,26 @@ class SuiGrpcClient {
     return core.listCoins(owner, coinType: coinType, cursor: cursor, limit: limit);
   }
 
-  Future<GrpcBalance> getBalance(String owner, {String coinType = '0x2::sui::SUI'}) {
+  Future<Balance> getBalance(String owner, {String coinType = '0x2::sui::SUI'}) {
     return core.getBalance(owner, coinType: coinType);
   }
 
-  Future<List<GrpcBalance>> listBalances(String owner) {
+  Future<List<Balance>> listBalances(String owner) {
     return core.listBalances(owner);
   }
 
-  Future<GrpcCoinMetadata?> getCoinMetadata(String coinType) {
+  Future<CoinMetadata?> getCoinMetadata(String coinType) {
     return core.getCoinMetadata(coinType);
   }
 
-  Future<GrpcTransactionResponse> getTransaction(
+  Future<TransactionResponse> getTransaction(
     String digest, {
     TransactionIncludeOptions? include,
   }) {
     return core.getTransaction(digest, include: include);
   }
 
-  Future<GrpcTransactionResponse> executeTransaction(
+  Future<TransactionResponse> executeTransaction(
     Uint8List transactionBytes,
     List<String> signatures, {
     TransactionIncludeOptions? include,
@@ -114,7 +115,7 @@ class SuiGrpcClient {
     return core.executeTransaction(transactionBytes, signatures, include: include);
   }
 
-  Future<GrpcTransactionResponse> simulateTransaction(
+  Future<TransactionResponse> simulateTransaction(
     sui_dart.Transaction transactionBlock, {
     TransactionIncludeOptions? include,
     bool? doGasSelection,
@@ -130,11 +131,11 @@ class SuiGrpcClient {
     return core.getReferenceGasPrice();
   }
 
-  Future<GrpcSystemState> getCurrentSystemState() {
+  Future<SystemState> getCurrentSystemState() {
     return core.getCurrentSystemState();
   }
 
-  Future<GrpcPage<GrpcDynamicFieldEntry>> listDynamicFields(
+  Future<Page<DynamicFieldEntry>> listDynamicFields(
     String parentId, {
     String? cursor,
     int? limit,
@@ -142,7 +143,7 @@ class SuiGrpcClient {
     return core.listDynamicFields(parentId, cursor: cursor, limit: limit);
   }
 
-  Future<GrpcVerifySignatureResult> verifyZkLoginSignature(
+  Future<VerifySignatureResult> verifyZkLoginSignature(
     Uint8List bytes,
     String signature, {
     String? address,
@@ -154,7 +155,7 @@ class SuiGrpcClient {
     return core.defaultNameServiceName(address);
   }
 
-  Future<GrpcMoveFunction> getMoveFunction(
+  Future<MoveFunction> getMoveFunction(
     String packageId,
     String moduleName,
     String functionName,
