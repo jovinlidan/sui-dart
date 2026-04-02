@@ -25,10 +25,46 @@ import 'package:sui_dart/sui.dart' as sui_dart;
 import 'package:sui_dart/builder/transaction.dart' show chunk;
 import 'package:sui_dart/types/common.dart' hide ObjectOwner;
 
+import 'package:protobuf/well_known_types/google/protobuf/struct.pb.dart' as pb_struct;
+
 import 'client.dart';
 
 // ignore: constant_identifier_names
 const _MAX_OBJECTS_PER_BATCH = 50;
+
+/// Converts a Google protobuf Value to a Dart dynamic value.
+dynamic _protoValueToDart(pb_struct.Value value) {
+  switch (value.whichKind()) {
+    case pb_struct.Value_Kind.nullValue:
+      return null;
+    case pb_struct.Value_Kind.numberValue:
+      return value.numberValue;
+    case pb_struct.Value_Kind.stringValue:
+      return value.stringValue;
+    case pb_struct.Value_Kind.boolValue:
+      return value.boolValue;
+    case pb_struct.Value_Kind.structValue:
+      return _protoStructToDart(value.structValue);
+    case pb_struct.Value_Kind.listValue:
+      return value.listValue.values.map(_protoValueToDart).toList();
+    case pb_struct.Value_Kind.notSet:
+      return null;
+  }
+}
+
+/// Converts a Google protobuf Struct to a Dart Map.
+Map<String, dynamic> _protoStructToDart(pb_struct.Struct struct) {
+  return struct.fields.map((k, v) => MapEntry(k, _protoValueToDart(v)));
+}
+
+/// Converts a Google protobuf Value to a Map<String, dynamic>.
+/// For object JSON, the top-level value is always a struct.
+Map<String, dynamic>? _protoValueToMap(pb_struct.Value value) {
+  final result = _protoValueToDart(value);
+  if (result is Map<String, dynamic>) return result;
+  if (result is Map) return Map<String, dynamic>.from(result);
+  return null;
+}
 
 class GrpcCoreClient {
   final SuiGrpcClient _client;
@@ -417,7 +453,7 @@ class GrpcCoreClient {
       objectBcs: (include?.objectBcs == true && obj.hasBcs())
           ? Uint8List.fromList(obj.bcs.value)
           : null,
-      json: (include?.json == true && obj.hasJson()) ? obj.json.writeToJsonMap() : null,
+      json: (include?.json == true && obj.hasJson()) ? _protoValueToMap(obj.json) : null,
     );
   }
 
