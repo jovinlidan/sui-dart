@@ -19,7 +19,7 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
           return Input(
             kind: Input_InputKind.IMMUTABLE_OR_OWNED,
             objectId: obj['ImmOrOwnedObject']['objectId'],
-            version: Int64.parseRadix(obj['ImmOrOwnedObject']['version'], 10),
+            version: Int64.parseRadix(obj['ImmOrOwnedObject']['version'].toString(), 10),
             digest: obj['ImmOrOwnedObject']['digest'],
           );
 
@@ -27,7 +27,7 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
           return Input(
             kind: Input_InputKind.SHARED,
             objectId: obj['SharedObject']['objectId'],
-            version: Int64.parseRadix(obj['SharedObject']['initialSharedVersion'], 10),
+            version: Int64.parseRadix(obj['SharedObject']['initialSharedVersion'].toString(), 10),
             mutable: obj['SharedObject']['mutable'],
           );
 
@@ -35,7 +35,7 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
           return Input(
             kind: Input_InputKind.RECEIVING,
             objectId: obj['Receiving']['objectId'],
-            version: Int64.parseRadix(obj['Receiving']['version'], 10),
+            version: Int64.parseRadix(obj['Receiving']['version'].toString(), 10),
             digest: obj['Receiving']['digest'],
           );
       }
@@ -46,9 +46,9 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
       return Input(
         objectId: u['objectId'],
         version: u['version'] != null
-            ? Int64.parseRadix(u['version'], 10)
+            ? Int64.parseRadix(u['version'].toString(), 10)
             : u['initialSharedVersion'] != null
-            ? Int64.parseRadix(u['initialSharedVersion'], 10)
+            ? Int64.parseRadix(u['initialSharedVersion'].toString(), 10)
             : null,
         digest: u['digest'],
         mutable: u['mutable'],
