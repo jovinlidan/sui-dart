@@ -36,6 +36,7 @@ export 'types/faucet.dart';
 export 'types/transactions.dart';
 export 'zklogin/zklogin.dart';
 export 'multisig/multsig_publickey.dart';
+export 'utils/dynamic_field.dart';
 export 'utils/suins.dart';
 
 // Grpc exports
