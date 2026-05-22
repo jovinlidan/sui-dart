@@ -7,8 +7,8 @@ environment:
   sdk: ^3.11.0
 
 dependencies:
-  bip32_plus: 1.0.0
-  bip39_plus: 1.1.1
+  bip32_plus: ^1.0.0
+  bip39_plus: ^1.1.1
   ed25519_edwards: ^0.3.1
   pointycastle: ^4.0.0
   bcs_dart: ^0.1.2

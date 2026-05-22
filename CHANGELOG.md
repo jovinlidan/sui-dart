@@ -124,3 +124,7 @@
 * Fix: Handle non-string version types in `callArgToGrpcInput`
 * Chore: Update Sui URLs to include port 443; upgrade SDK to 3.11.0
 * Chore: Upgrade `pointycastle` to 4.0.0
+
+## 0.4.1
+
+* Chore: Swap `bip32` / `bip39` for `bip32_plus` / `bip39_plus` (pointycastle ^4 compatible). Removes the need for a `pointycastle` dependency override in consumers.
