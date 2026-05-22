@@ -2,7 +2,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:bip32/bip32.dart';
+import 'package:bip32_plus/bip32_plus.dart';
 import 'package:sui_dart/cryptography/keypair.dart';
 import 'package:sui_dart/cryptography/mnemonics.dart';
 import 'package:sui_dart/cryptography/secp256.dart';
