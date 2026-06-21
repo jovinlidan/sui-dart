@@ -12,7 +12,8 @@ abstract class DynamicFieldPage with _$DynamicFieldPage {
     required bool hasNextPage,
   }) = _DynamicFieldPage;
 
-  factory DynamicFieldPage.fromJson(Map<String, dynamic> json) => _$DynamicFieldPageFromJson(json);
+  factory DynamicFieldPage.fromJson(Map<String, dynamic> json) =>
+      _$DynamicFieldPageFromJson(json);
 }
 
 @freezed
@@ -27,15 +28,15 @@ abstract class DynamicFieldInfo with _$DynamicFieldInfo {
     required String digest,
   }) = _DynamicFieldInfo;
 
-  factory DynamicFieldInfo.fromJson(Map<String, dynamic> json) => _$DynamicFieldInfoFromJson(json);
+  factory DynamicFieldInfo.fromJson(Map<String, dynamic> json) =>
+      _$DynamicFieldInfoFromJson(json);
 }
 
 @freezed
 abstract class DynamicFieldName with _$DynamicFieldName {
-  const factory DynamicFieldName({
-    required String type,
-    dynamic value,
-  }) = _DynamicFieldName;
+  const factory DynamicFieldName({required String type, dynamic value}) =
+      _DynamicFieldName;
 
-  factory DynamicFieldName.fromJson(Map<String, dynamic> json) => _$DynamicFieldNameFromJson(json);
+  factory DynamicFieldName.fromJson(Map<String, dynamic> json) =>
+      _$DynamicFieldNameFromJson(json);
 }

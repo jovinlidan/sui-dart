@@ -1,4 +1,4 @@
-
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names
 import 'package:bcs_dart/consts.dart';
 import 'package:sui_dart/types/common.dart';
 import 'package:sui_dart/types/objects.dart';
@@ -18,7 +18,7 @@ class MoveEvent {
     this.sender,
     this.type,
     this.fields,
-    this.bcs
+    this.bcs,
   );
 }
 
@@ -49,7 +49,7 @@ class CoinBalanceChangeEvent {
     this.coinType,
     this.coinObjectId,
     this.version,
-    this.amount
+    this.amount,
   );
 }
 
@@ -69,7 +69,7 @@ class TransferObjectEvent {
     this.recipient,
     this.objectType,
     this.objectId,
-    this.version
+    this.version,
   );
 }
 
@@ -87,7 +87,7 @@ class MutateObjectEvent {
     this.sender,
     this.objectType,
     this.objectId,
-    this.version
+    this.version,
   );
 }
 
@@ -103,7 +103,7 @@ class DeleteObjectEvent {
     this.transactionModule,
     this.sender,
     this.objectId,
-    this.version
+    this.version,
   );
 }
 
@@ -123,7 +123,7 @@ class NewObjectEvent {
     this.recipient,
     this.objectType,
     this.objectId,
-    this.version
+    this.version,
   );
 }
 
@@ -143,12 +143,10 @@ enum EventType {
   DeleteObject,
   NewObject,
   EpochChange,
-  Checkpoint
+  Checkpoint,
 }
 
-enum BalanceChangeType {
-  Gas, Pay, Receive
-}
+enum BalanceChangeType { Gas, Pay, Receive }
 
 // mirrors the value defined in https://github.com/MystenLabs/sui/blob/e12f8c58ef7ba17205c4caf5ad2c350cbb01656c/crates/sui-json-rpc/src/api.rs#L27
 const EVENT_QUERY_MAX_LIMIT = 100;

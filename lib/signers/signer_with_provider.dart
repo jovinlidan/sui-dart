@@ -1,4 +1,4 @@
-
+// ignore_for_file: constant_identifier_names
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -23,7 +23,13 @@ class SignaturePubkeyPair {
   Map<String, dynamic>? zkLogin;
   MultiSigStruct? multisig;
 
-  SignaturePubkeyPair(this.signatureScheme, this.signature, {this.pubKey, this.zkLogin, this.multisig});
+  SignaturePubkeyPair(
+    this.signatureScheme,
+    this.signature, {
+    this.pubKey,
+    this.zkLogin,
+    this.multisig,
+  });
 }
 
 // This is currently hardcoded with [IntentScope::TransactionData = 0, Version::V0 = 0, AppId::Sui = 0]
@@ -36,12 +42,11 @@ abstract class SignerWithProvider with JsonRpcProvider {
   SignerWithProvider({
     required String endpoint,
     RequestOptions? options,
-    TxnDataSerializer? serializer
+    TxnDataSerializer? serializer,
   }) {
     rpcClient = JsonRpcClient(endpoint, options: options);
     this.serializer = serializer ?? RpcTxnDataSerializer(endpoint);
   }
-
 
   @override
   JsonRpcClient get client => rpcClient;
@@ -56,108 +61,107 @@ abstract class SignerWithProvider with JsonRpcProvider {
   Future<SuiExecuteTransactionResponse> signAndExecuteTransaction({
     required Uint8List transaction,
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
-      final intentMessage = <int>[];
-      intentMessage.addAll(INTENT_BYTES);
-      intentMessage.addAll(transaction);
-      final digest = blake2b(intentMessage);
-      final sig = signData(digest);
-      return await executeTransaction(
-        txnBytes: transaction,
-        signatureScheme: sig.signatureScheme,
-        signature: sig.signature,
-        pubkey: sig.pubKey!,
-        requestType: requestType
-      );
+    final intentMessage = <int>[];
+    intentMessage.addAll(INTENT_BYTES);
+    intentMessage.addAll(transaction);
+    final digest = blake2b(intentMessage);
+    final sig = signData(digest);
+    return await executeTransaction(
+      txnBytes: transaction,
+      signatureScheme: sig.signatureScheme,
+      signature: sig.signature,
+      pubkey: sig.pubKey!,
+      requestType: requestType,
+    );
   }
 
   Future<SuiExecuteTransactionResponse> signAndExecuteSignableTransaction({
     required SignableTransaction transaction,
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     switch (transaction.kind) {
       case UnserializedSignableTransaction.bytes:
         return await signAndExecuteTransaction(
           transaction: Uint8List.fromList(transaction.data),
           options: options,
-          requestType: requestType
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.moveCall:
         return executeMoveCall(
           transaction.data,
           options: options,
-          requestType: requestType
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.transferSui:
         return transferSui(
-          transaction.data, 
-          options: options, 
-          requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.transferObject:
         return transferObject(
           transaction.data,
           options: options,
-          requestType: requestType
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.pay:
         return pay(
-          transaction.data, 
-          options: options, 
-          requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.paySui:
         return paySui(
-          transaction.data, 
-          options: options, 
-          requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.payAllSui:
         return payAllSui(
-          transaction.data, 
-          options: options, 
-          requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.publish:
         return publish(
-          transaction.data, 
-          options: options, 
-          requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.addStake:
         return addStake(
-            transaction.data,
-            options: options,
-            requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.withdrawStake:
         return withdrawStake(
-            transaction.data,
-            options: options,
-            requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.splitCoin:
         return splitCoin(
-            transaction.data,
-            options: options,
-            requestType: requestType
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
       case UnserializedSignableTransaction.splitCoinEqual:
         return splitCoinEqual(
-            transaction.data,
-            options: options,
-            requestType: requestType
-        );
-      default:
-        throw ArgumentError(
-          'Error, unknown transaction kind: "${transaction.kind}"'
+          transaction.data,
+          options: options,
+          requestType: requestType,
         );
     }
   }
 
-  Future<DryRunTransactionBlockResponse> dryRunTransaction<T>(T tx, {String? signerAddress}) async {
+  Future<DryRunTransactionBlockResponse> dryRunTransaction<T>(
+    T tx, {
+    String? signerAddress,
+  }) async {
     final address = signerAddress ?? getAddress();
     Uint8List dryRunTxBytes;
     if (tx is Uint8List) {
@@ -185,13 +189,16 @@ abstract class SignerWithProvider with JsonRpcProvider {
     } else if (tx is SplitCoinEqualTransaction) {
       dryRunTxBytes = await serializer.newSplitCoinEqual(address, tx);
     } else {
-      throw ArgumentError("Error, unknown transaction kind ${tx.runtimeType}. Can't dry run transaction.");
+      throw ArgumentError(
+        "Error, unknown transaction kind ${tx.runtimeType}. Can't dry run transaction.",
+      );
     }
     return dryRunTransactionBlock(base64Encode(dryRunTxBytes));
   }
 
-  Future<PaginatedObjectsResponse> getOwnedObjectsShowAllOptions(String address, {
-    Map<String,dynamic>? filter,
+  Future<PaginatedObjectsResponse> getOwnedObjectsShowAllOptions(
+    String address, {
+    Map<String, dynamic>? filter,
     int limit = 50,
     String? cursor,
   }) async {
@@ -202,92 +209,87 @@ abstract class SignerWithProvider with JsonRpcProvider {
       showOwner: true,
       showPreviousTransaction: true,
       showStorageRebate: true,
-      showType: true
+      showType: true,
     );
     return await getOwnedObjects(
-      address, 
-      filter: filter, 
+      address,
+      filter: filter,
       options: options,
       limit: limit,
-      cursor: cursor);
+      cursor: cursor,
+    );
   }
 
   Future<SuiExecuteTransactionResponse> transferObject(
     TransferObjectTransaction transaction, {
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
     final txBytes = await serializer.newTransferObject(
       signerAddress,
-      transaction
+      transaction,
     );
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
-      requestType: requestType
+      requestType: requestType,
     );
   }
 
   Future<SuiExecuteTransactionResponse> transferSui(
     TransferSuiTransaction transaction, {
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
-    final txBytes = await serializer.newTransferSui(
-      signerAddress,
-      transaction
-    );
+    final txBytes = await serializer.newTransferSui(signerAddress, transaction);
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
-      requestType: requestType
+      requestType: requestType,
     );
   }
 
   Future<SuiExecuteTransactionResponse> pay(
     PayTransaction transaction, {
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
     final txBytes = await serializer.newPay(signerAddress, transaction);
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
-      requestType: requestType
+      requestType: requestType,
     );
   }
 
   Future<SuiExecuteTransactionResponse> paySui(
     PaySuiTransaction transaction, {
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
     final txBytes = await serializer.newPaySui(signerAddress, transaction);
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
-      requestType: requestType
+      requestType: requestType,
     );
   }
 
   Future<SuiExecuteTransactionResponse> payAllSui(
     PayAllSuiTransaction transaction, {
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
-    final txBytes = await serializer.newPayAllSui(
-      signerAddress,
-      transaction
-    );
+    final txBytes = await serializer.newPayAllSui(signerAddress, transaction);
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
-      requestType: requestType
+      requestType: requestType,
     );
   }
 
@@ -311,8 +313,10 @@ abstract class SignerWithProvider with JsonRpcProvider {
     ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
-    final txBytes =
-        await serializer.newWithdrawStake(signerAddress, transaction);
+    final txBytes = await serializer.newWithdrawStake(
+      signerAddress,
+      transaction,
+    );
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
@@ -340,8 +344,10 @@ abstract class SignerWithProvider with JsonRpcProvider {
     ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
-    final txBytes =
-        await serializer.newSplitCoinEqual(signerAddress, transaction);
+    final txBytes = await serializer.newSplitCoinEqual(
+      signerAddress,
+      transaction,
+    );
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
@@ -352,34 +358,28 @@ abstract class SignerWithProvider with JsonRpcProvider {
   Future<SuiExecuteTransactionResponse> executeMoveCall(
     MoveCallTransaction transaction, {
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
-    final txBytes = await serializer.newMoveCall(
-      signerAddress,
-      transaction
-    );
+    final txBytes = await serializer.newMoveCall(signerAddress, transaction);
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
-      requestType: requestType
+      requestType: requestType,
     );
   }
 
   Future<SuiExecuteTransactionResponse> publish(
     PublishTransaction transaction, {
     SuiTransactionBlockResponseOptions? options,
-    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution
+    ExecuteTransaction requestType = ExecuteTransaction.WaitForLocalExecution,
   }) async {
     final signerAddress = getAddress();
-    final txBytes = await serializer.newPublish(
-      signerAddress,
-      transaction
-    );
+    final txBytes = await serializer.newPublish(signerAddress, transaction);
     return await signAndExecuteTransaction(
       transaction: txBytes,
       options: options,
-      requestType: requestType
+      requestType: requestType,
     );
   }
 
@@ -402,5 +402,4 @@ abstract class SignerWithProvider with JsonRpcProvider {
     final gasEstimation = gasUsed.computationCost + gasUsed.storageCost;
     return gasEstimation;
   }
-
 }

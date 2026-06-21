@@ -39,13 +39,38 @@ void main() {
       expect(isValidSuiNSName('hello-.sui'), false);
       expect(isValidSuiNSName('-hello-.sui'), false);
       expect(isValidSuiNSName('hello--world.sui'), false);
-      expect(isValidSuiNSName("${String.fromCharCodes(List<int>.filled(64, 48))}.sui"), false);
+      expect(
+        isValidSuiNSName(
+          "${String.fromCharCodes(List<int>.filled(64, 48))}.sui",
+        ),
+        false,
+      );
       expect(isValidSuiNSName('hello.sui'), true);
       expect(isValidSuiNSName('hello-world.sui'), true);
-      expect(isValidSuiNSName("${String.fromCharCodes(List<int>.filled(1, 48))}.sui"), true);
-      expect(isValidSuiNSName("${String.fromCharCodes(List<int>.filled(2, 48))}.sui"), true);
-      expect(isValidSuiNSName("${String.fromCharCodes(List<int>.filled(3, 48))}.sui"), true);
-      expect(isValidSuiNSName("${String.fromCharCodes(List<int>.filled(63, 48))}.sui"), true);
+      expect(
+        isValidSuiNSName(
+          "${String.fromCharCodes(List<int>.filled(1, 48))}.sui",
+        ),
+        true,
+      );
+      expect(
+        isValidSuiNSName(
+          "${String.fromCharCodes(List<int>.filled(2, 48))}.sui",
+        ),
+        true,
+      );
+      expect(
+        isValidSuiNSName(
+          "${String.fromCharCodes(List<int>.filled(3, 48))}.sui",
+        ),
+        true,
+      );
+      expect(
+        isValidSuiNSName(
+          "${String.fromCharCodes(List<int>.filled(63, 48))}.sui",
+        ),
+        true,
+      );
 
       expect(isValidSuiNSName('example.sui'), true);
       expect(isValidSuiNSName('test.example.sui'), true);
@@ -62,9 +87,11 @@ void main() {
       expect(isValidSuiNSName('invalid-.sui'), false);
       expect(isValidSuiNSName('hello-.sui'), false);
       expect(
-          isValidSuiNSName(
-              'toolongpartofthedomainnamethatshouldnotmatchthisexpressionbecauseitislongerthansixtytwocharacters.sui'),
-          false);
+        isValidSuiNSName(
+          'toolongpartofthedomainnamethatshouldnotmatchthisexpressionbecauseitislongerthansixtytwocharacters.sui',
+        ),
+        false,
+      );
       expect(isValidSuiNSName('1-.sui'), false);
       expect(isValidSuiNSName('hello--world.sui'), false);
       expect(isValidSuiNSName('-hello.sui'), false);
@@ -94,9 +121,11 @@ void main() {
       expect(isValidSuiNSName('invalid-@sui'), false);
       expect(isValidSuiNSName('hello-@sui'), false);
       expect(
-          isValidSuiNSName(
-              'toolongpartofthedomainnamethatshouldnotmatchthisexpressionbecauseitislongerthansixtytwocharacters@sui'),
-          false);
+        isValidSuiNSName(
+          'toolongpartofthedomainnamethatshouldnotmatchthisexpressionbecauseitislongerthansixtytwocharacters@sui',
+        ),
+        false,
+      );
       expect(isValidSuiNSName('1-@sui'), false);
       expect(isValidSuiNSName('hello--world@sui'), false);
       expect(isValidSuiNSName('-hello@sui'), false);
@@ -115,7 +144,9 @@ void main() {
 
   group('normalizeSuiNSName', () {
     Matcher throwError(String message) {
-      return throwsA((predicate((e) => e is ArgumentError && e.message == message)));
+      return throwsA(
+        (predicate((e) => e is ArgumentError && e.message == message)),
+      );
     }
 
     test('normalize SuiNS names', () {
@@ -132,34 +163,90 @@ void main() {
       expect(normalizeSuiNSName('example.sui', SuiNSType.dot), 'example.sui');
       expect(normalizeSuiNSName('EXAMPLE.sui', SuiNSType.dot), 'example.sui');
       expect(normalizeSuiNSName('@example', SuiNSType.dot), 'example.sui');
-      expect(normalizeSuiNSName('1.example.sui', SuiNSType.dot), '1.example.sui');
+      expect(
+        normalizeSuiNSName('1.example.sui', SuiNSType.dot),
+        '1.example.sui',
+      );
       expect(normalizeSuiNSName('1@example', SuiNSType.dot), '1.example.sui');
-      expect(normalizeSuiNSName('a.b.c.example.sui', SuiNSType.dot), 'a.b.c.example.sui');
-      expect(normalizeSuiNSName('A.B.c.123@Example', SuiNSType.dot), 'a.b.c.123.example.sui');
+      expect(
+        normalizeSuiNSName('a.b.c.example.sui', SuiNSType.dot),
+        'a.b.c.example.sui',
+      );
+      expect(
+        normalizeSuiNSName('A.B.c.123@Example', SuiNSType.dot),
+        'a.b.c.123.example.sui',
+      );
       expect(normalizeSuiNSName('1-a@1-b', SuiNSType.dot), '1-a.1-b.sui');
       expect(normalizeSuiNSName('1-a.1-b.sui', SuiNSType.dot), '1-a.1-b.sui');
 
-      expect(() => normalizeSuiNSName('-@test'), throwError('Invalid SuiNS name -@test'));
-      expect(() => normalizeSuiNSName('-1@test'), throwError('Invalid SuiNS name -1@test'));
-      expect(() => normalizeSuiNSName('test@-'), throwError('Invalid SuiNS name test@-'));
-      expect(() => normalizeSuiNSName('test@-1'), throwError('Invalid SuiNS name test@-1'));
-      expect(() => normalizeSuiNSName('test@-a'), throwError('Invalid SuiNS name test@-a'));
-      expect(() => normalizeSuiNSName('test.sui2'), throwError('Invalid SuiNS name test.sui2'));
-      expect(() => normalizeSuiNSName('.sui2'), throwError('Invalid SuiNS name .sui2'));
-      expect(() => normalizeSuiNSName('test@'), throwError('Invalid SuiNS name test@'));
-      expect(() => normalizeSuiNSName('@@'), throwError('Invalid SuiNS name @@'));
-      expect(() => normalizeSuiNSName('@@test'), throwError('Invalid SuiNS name @@test'));
       expect(
-          () => normalizeSuiNSName('test@test.test'),
-          throwError(
-            'Invalid SuiNS name test@test.test',
-          ));
-      expect(() => normalizeSuiNSName('@test.test'), throwError('Invalid SuiNS name @test.test'));
-      expect(() => normalizeSuiNSName('#@test'), throwError('Invalid SuiNS name #@test'));
-      expect(() => normalizeSuiNSName('test@#'), throwError('Invalid SuiNS name test@#'));
-      expect(() => normalizeSuiNSName('test.#.sui'), throwError('Invalid SuiNS name test.#.sui'));
-      expect(() => normalizeSuiNSName('#.sui'), throwError('Invalid SuiNS name #.sui'));
-      expect(() => normalizeSuiNSName('@.test.sue'), throwError('Invalid SuiNS name @.test.sue'));
+        () => normalizeSuiNSName('-@test'),
+        throwError('Invalid SuiNS name -@test'),
+      );
+      expect(
+        () => normalizeSuiNSName('-1@test'),
+        throwError('Invalid SuiNS name -1@test'),
+      );
+      expect(
+        () => normalizeSuiNSName('test@-'),
+        throwError('Invalid SuiNS name test@-'),
+      );
+      expect(
+        () => normalizeSuiNSName('test@-1'),
+        throwError('Invalid SuiNS name test@-1'),
+      );
+      expect(
+        () => normalizeSuiNSName('test@-a'),
+        throwError('Invalid SuiNS name test@-a'),
+      );
+      expect(
+        () => normalizeSuiNSName('test.sui2'),
+        throwError('Invalid SuiNS name test.sui2'),
+      );
+      expect(
+        () => normalizeSuiNSName('.sui2'),
+        throwError('Invalid SuiNS name .sui2'),
+      );
+      expect(
+        () => normalizeSuiNSName('test@'),
+        throwError('Invalid SuiNS name test@'),
+      );
+      expect(
+        () => normalizeSuiNSName('@@'),
+        throwError('Invalid SuiNS name @@'),
+      );
+      expect(
+        () => normalizeSuiNSName('@@test'),
+        throwError('Invalid SuiNS name @@test'),
+      );
+      expect(
+        () => normalizeSuiNSName('test@test.test'),
+        throwError('Invalid SuiNS name test@test.test'),
+      );
+      expect(
+        () => normalizeSuiNSName('@test.test'),
+        throwError('Invalid SuiNS name @test.test'),
+      );
+      expect(
+        () => normalizeSuiNSName('#@test'),
+        throwError('Invalid SuiNS name #@test'),
+      );
+      expect(
+        () => normalizeSuiNSName('test@#'),
+        throwError('Invalid SuiNS name test@#'),
+      );
+      expect(
+        () => normalizeSuiNSName('test.#.sui'),
+        throwError('Invalid SuiNS name test.#.sui'),
+      );
+      expect(
+        () => normalizeSuiNSName('#.sui'),
+        throwError('Invalid SuiNS name #.sui'),
+      );
+      expect(
+        () => normalizeSuiNSName('@.test.sue'),
+        throwError('Invalid SuiNS name @.test.sue'),
+      );
     });
   });
 }

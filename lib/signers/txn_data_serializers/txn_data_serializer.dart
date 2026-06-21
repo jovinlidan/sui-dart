@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:sui_dart/types/common.dart';
@@ -10,7 +9,12 @@ class TransferObjectTransaction {
   int gasBudget;
   SuiAddress recipient;
 
-  TransferObjectTransaction(this.objectId, this.gasPayment, this.gasBudget, this.recipient);
+  TransferObjectTransaction(
+    this.objectId,
+    this.gasPayment,
+    this.gasBudget,
+    this.recipient,
+  );
 }
 
 class TransferSuiTransaction {
@@ -19,10 +23,15 @@ class TransferSuiTransaction {
   SuiAddress recipient;
   int? amount;
 
-  TransferSuiTransaction(this.suiObjectId, this.gasBudget, this.recipient, this.amount);
+  TransferSuiTransaction(
+    this.suiObjectId,
+    this.gasBudget,
+    this.recipient,
+    this.amount,
+  );
 }
 
-/// Send Coin<T> to a list of addresses, where `T` can be any coin type, following a list of amounts,
+/// Send `Coin<T>` to a list of addresses, where `T` can be any coin type, following a list of amounts,
 /// The object specified in the `gas` field will be used to pay the gas fee for the transaction.
 /// The gas object can not appear in `input_coins`. If the gas object is not specified, the RPC server
 /// will auto-select one.
@@ -33,7 +42,13 @@ class PayTransaction {
   int gasBudget;
   ObjectId? gasPayment;
 
-  PayTransaction(this.inputCoins, this.recipients, this.amounts, this.gasBudget, [this.gasPayment]);
+  PayTransaction(
+    this.inputCoins,
+    this.recipients,
+    this.amounts,
+    this.gasBudget, [
+    this.gasPayment,
+  ]);
 }
 
 /// Send SUI coins to a list of addresses, following a list of amounts.
@@ -51,7 +66,12 @@ class PaySuiTransaction {
   List<int> amounts;
   int gasBudget;
 
-  PaySuiTransaction(this.inputCoins, this.recipients, this.amounts, this.gasBudget);
+  PaySuiTransaction(
+    this.inputCoins,
+    this.recipients,
+    this.amounts,
+    this.gasBudget,
+  );
 
   List<String> get amountsStr => amounts.map((e) => e.toString()).toList();
 }
@@ -86,24 +106,24 @@ class MoveCallTransaction {
     this.function,
     this.typeArguments,
     this.arguments,
-    this.gasBudget,
-    [this.gasPayment]
-  );
+    this.gasBudget, [
+    this.gasPayment,
+  ]);
 }
 
 enum UnserializedSignableTransaction {
-  moveCall,  // MoveCallTransaction
-  transferSui,  // TransferSuiTransaction
-  transferObject,  // TransferObjectTransaction
-  pay,  // PayTransaction
-  paySui,  // PaySuiTransaction
-  payAllSui,  // PayAllSuiTransaction
-  publish,  // PublishTransaction
-  addStake,  // AddStakeTransaction
-  withdrawStake,  // WithdrawStakeTransaction
-  splitCoin,  // SplitCoinTransaction
-  splitCoinEqual,  // SplitCoinEqualTransaction
-  bytes  // Uint8Array
+  moveCall, // MoveCallTransaction
+  transferSui, // TransferSuiTransaction
+  transferObject, // TransferObjectTransaction
+  pay, // PayTransaction
+  paySui, // PaySuiTransaction
+  payAllSui, // PayAllSuiTransaction
+  publish, // PublishTransaction
+  addStake, // AddStakeTransaction
+  withdrawStake, // WithdrawStakeTransaction
+  splitCoin, // SplitCoinTransaction
+  splitCoinEqual, // SplitCoinEqualTransaction
+  bytes, // Uint8Array
 }
 
 class SignableTransaction {
@@ -119,7 +139,12 @@ class PublishTransaction {
   int gasBudget;
   ObjectId? gasPayment;
 
-  PublishTransaction(this.compiledModules, this.dependencies, this.gasBudget, [this.gasPayment]);
+  PublishTransaction(
+    this.compiledModules,
+    this.dependencies,
+    this.gasBudget, [
+    this.gasPayment,
+  ]);
 }
 
 class AddStakeTransaction {
@@ -129,8 +154,13 @@ class AddStakeTransaction {
   int gasBudget;
   ObjectId? gasPayment;
 
-  AddStakeTransaction(this.coins, this.amount, this.validator, this.gasBudget,
-      [this.gasPayment]);
+  AddStakeTransaction(
+    this.coins,
+    this.amount,
+    this.validator,
+    this.gasBudget, [
+    this.gasPayment,
+  ]);
 }
 
 class WithdrawStakeTransaction {
@@ -141,15 +171,18 @@ class WithdrawStakeTransaction {
   WithdrawStakeTransaction(this.stakeSui, this.gasBudget, [this.gasPayment]);
 }
 
-
 class SplitCoinTransaction {
   ObjectId coinObjectId;
   List<BigInt> splitAmounts;
   int gasBudget;
   ObjectId? gasPayment;
 
-  SplitCoinTransaction(this.coinObjectId, this.splitAmounts, this.gasBudget,
-      [this.gasPayment]);
+  SplitCoinTransaction(
+    this.coinObjectId,
+    this.splitAmounts,
+    this.gasBudget, [
+    this.gasPayment,
+  ]);
 }
 
 class SplitCoinEqualTransaction {
@@ -158,44 +191,42 @@ class SplitCoinEqualTransaction {
   int gasBudget;
   ObjectId? gasPayment;
 
-  SplitCoinEqualTransaction(this.coinObjectId, this.splitCount, this.gasBudget,
-      [this.gasPayment]);
+  SplitCoinEqualTransaction(
+    this.coinObjectId,
+    this.splitCount,
+    this.gasBudget, [
+    this.gasPayment,
+  ]);
 }
 
 mixin TxnDataSerializer {
   Future<Uint8List> newTransferObject(
     SuiAddress signerAddress,
-    TransferObjectTransaction txn
+    TransferObjectTransaction txn,
   );
 
   Future<Uint8List> newTransferSui(
     SuiAddress signerAddress,
-    TransferSuiTransaction txn
+    TransferSuiTransaction txn,
   );
 
-  Future<Uint8List> newPay(
-    SuiAddress signerAddress,
-    PayTransaction txn
-  );
+  Future<Uint8List> newPay(SuiAddress signerAddress, PayTransaction txn);
 
-  Future<Uint8List> newPaySui(
-    SuiAddress signerAddress,
-    PaySuiTransaction txn
-  );
+  Future<Uint8List> newPaySui(SuiAddress signerAddress, PaySuiTransaction txn);
 
   Future<Uint8List> newPayAllSui(
     SuiAddress signerAddress,
-    PayAllSuiTransaction txn
+    PayAllSuiTransaction txn,
   );
 
   Future<Uint8List> newMoveCall(
     SuiAddress signerAddress,
-    MoveCallTransaction txn
+    MoveCallTransaction txn,
   );
 
   Future<Uint8List> newPublish(
     SuiAddress signerAddress,
-    PublishTransaction txn
+    PublishTransaction txn,
   );
 
   Future<Uint8List> newAddStake(

@@ -128,3 +128,11 @@
 ## 0.4.1
 
 * Chore: Swap `bip32` / `bip39` for `bip32_plus` / `bip39_plus` (pointycastle ^4 compatible). Removes the need for a `pointycastle` dependency override in consumers.
+
+## 0.5.0
+
+* Chore: Update package metadata (`homepage`, `repository`, `issue_tracker`).
+* Feat: Add an `example/` demonstrating account creation, faucet funding, and balance lookup.
+* Chore: Tighten dependency lower bounds and widen `web_socket_channel` to `^3.0.3`.
+* Refactor: Move platform-specific HTTP adapters under `lib/src/` so the package reports correct platform support (Android, iOS, Windows, macOS, Linux).
+* Style: Resolve all `dart analyze` warnings — add public-API type annotations, remove dead code, and escape doc comments.

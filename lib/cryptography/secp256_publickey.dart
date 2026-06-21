@@ -1,4 +1,4 @@
-
+// ignore_for_file: constant_identifier_names
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -17,22 +17,22 @@ class Secp256PublicKey with PublicKey {
   late BigInt _bn;
 
   Secp256PublicKey._(BigInt bn, int flag) {
-      _bn = bn;
-      _flag = flag;
+    _bn = bn;
+    _flag = flag;
   }
 
   factory Secp256PublicKey.fromBytes(Uint8List publicKey, int flag) {
     final buffer = Uint8List.fromList(publicKey);
     if (buffer.length != SECP256_PUBLIC_KEY_SIZE) {
       throw ArgumentError(
-        "Invalid public key input. Expected $SECP256_PUBLIC_KEY_SIZE bytes, got ${buffer.length}"
+        "Invalid public key input. Expected $SECP256_PUBLIC_KEY_SIZE bytes, got ${buffer.length}",
       );
     }
     return Secp256PublicKey._(decodeBigIntToUnsigned(buffer), flag);
   }
 
   /// Create a new Secp256PublicKey object.
-  /// 
+  ///
   /// secp256 [publicKeyBase64] as base-64 encoded string.
   factory Secp256PublicKey.fromString(String publicKeyBase64, int flag) {
     Uint8List buffer = base64Decode(publicKeyBase64);
@@ -81,7 +81,7 @@ class Secp256PublicKey with PublicKey {
 
   @override
   int flag() => _flag;
-  
+
   @override
   bool verify(Uint8List data, Uint8List signature) {
     final msgHash = sha256(data);
@@ -90,9 +90,17 @@ class Secp256PublicKey with PublicKey {
     }
     switch (flag()) {
       case SIGNATURE_SCHEME_TO_FLAG.Secp256k1:
-        return Secp256.fromSecp256k1().verifySignature(msgHash, SignatureData.fromBytes(signature), toRawBytes());
+        return Secp256.fromSecp256k1().verifySignature(
+          msgHash,
+          SignatureData.fromBytes(signature),
+          toRawBytes(),
+        );
       case SIGNATURE_SCHEME_TO_FLAG.Secp256r1:
-        return Secp256.fromSecp256r1().verifySignature(msgHash, SignatureData.fromBytes(signature), toRawBytes());
+        return Secp256.fromSecp256r1().verifySignature(
+          msgHash,
+          SignatureData.fromBytes(signature),
+          toRawBytes(),
+        );
       default:
         throw ArgumentError("Invalid flag ${flag()}");
     }

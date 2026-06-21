@@ -11,7 +11,9 @@ class Inputs {
     return {
       "\$kind": 'Pure',
       "Pure": {
-        "bytes": data is Uint8List ? toB64(data) : (data as SerializedBcs).toBase64(),
+        "bytes": data is Uint8List
+            ? toB64(data)
+            : (data as SerializedBcs).toBase64(),
       },
     };
   }

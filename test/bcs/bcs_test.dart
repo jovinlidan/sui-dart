@@ -49,22 +49,13 @@ void main() {
       'function': 'new',
       'typeArguments': [normalizeStructTagString('0x6::capy::Capy')],
       'arguments': [
-        {
-          '\$kind': 'GasCoin',
-          'GasCoin': true,
-        },
+        {'\$kind': 'GasCoin', 'GasCoin': true},
         {
           '\$kind': 'NestedResult',
           'NestedResult': [0, 1],
         },
-        {
-          '\$kind': 'Input',
-          'Input': 3,
-        },
-        {
-          '\$kind': 'Result',
-          'Result': 1,
-        },
+        {'\$kind': 'Input', 'Input': 3},
+        {'\$kind': 'Result', 'Result': 1},
       ],
     };
 
@@ -108,8 +99,9 @@ void main() {
               {
                 '\$kind': 'Pure',
                 'Pure': {
-                  'bytes': Bcs.vector(SuiBcs.STRING)
-                      .serialize(['name', 'description', 'img_url']).toBase64(),
+                  'bytes': Bcs.vector(
+                    SuiBcs.STRING,
+                  ).serialize(['name', 'description', 'img_url']).toBase64(),
                 },
               },
               {
@@ -138,10 +130,7 @@ void main() {
                   'function': 'new',
                   'typeArguments': ['$sui::capy::Capy'],
                   'arguments': [
-                    {
-                      '\$kind': 'Input',
-                      'Input': 0,
-                    },
+                    {'\$kind': 'Input', 'Input': 0},
                   ],
                 },
               },
@@ -153,18 +142,9 @@ void main() {
                   'function': 'add_multiple',
                   'typeArguments': ['$sui::capy::Capy'],
                   'arguments': [
-                    {
-                      '\$kind': 'Result',
-                      'Result': 0,
-                    },
-                    {
-                      '\$kind': 'Input',
-                      'Input': 1,
-                    },
-                    {
-                      '\$kind': 'Input',
-                      'Input': 2,
-                    },
+                    {'\$kind': 'Result', 'Result': 0},
+                    {'\$kind': 'Input', 'Input': 1},
+                    {'\$kind': 'Input', 'Input': 2},
                   ],
                 },
               },
@@ -176,10 +156,7 @@ void main() {
                   'function': 'update_version',
                   'typeArguments': ['$sui::capy::Capy'],
                   'arguments': [
-                    {
-                      '\$kind': 'Result',
-                      'Result': 0,
-                    },
+                    {'\$kind': 'Result', 'Result': 0},
                   ],
                 },
               },
@@ -187,15 +164,9 @@ void main() {
                 '\$kind': 'TransferObjects',
                 'TransferObjects': {
                   'objects': [
-                    {
-                      '\$kind': 'Result',
-                      'Result': 0,
-                    },
+                    {'\$kind': 'Result', 'Result': 0},
                   ],
-                  'address': {
-                    '\$kind': 'Input',
-                    'Input': 3,
-                  },
+                  'address': {'\$kind': 'Input', 'Input': 3},
                 },
               },
             ],
@@ -216,9 +187,12 @@ void main() {
       tx = setup();
     });
 
-    test('builds an empty transaction offline when provided sufficient data', () async {
-      await tx.build();
-    });
+    test(
+      'builds an empty transaction offline when provided sufficient data',
+      () async {
+        await tx.build();
+      },
+    );
 
     test('supports epoch expiration', () async {
       tx.setExpiration(1);
@@ -246,10 +220,13 @@ void main() {
       expect(tx.getData().inputs != tx.getData().inputs, true);
     });
 
-    test('can determine the type of inputs for built-in transactions', () async {
-      tx.add(Commands.splitCoins(tx.gas, [tx.pure.u8(100)]));
-      await tx.build();
-    });
+    test(
+      'can determine the type of inputs for built-in transactions',
+      () async {
+        tx.add(Commands.splitCoins(tx.gas, [tx.pure.u8(100)]));
+        await tx.build();
+      },
+    );
 
     test('supports pre-serialized inputs as Uint8Array', () async {
       final inputBytes = SuiBcs.U64.serialize(100).toBytes();
@@ -260,12 +237,18 @@ void main() {
 
     test('builds a more complex interaction', () async {
       final coin = tx.splitCoins(tx.gas, [tx.pure.u8(100)]);
-      tx.add(Commands.mergeCoins(tx.gas, [coin, tx.object(Inputs.objectRef(ref()))]));
+      tx.add(
+        Commands.mergeCoins(tx.gas, [coin, tx.object(Inputs.objectRef(ref()))]),
+      );
       tx.add(
         Commands.moveCall({
           "target": '0x2::devnet_nft::mint',
           "typeArguments": [],
-          "arguments": [tx.pure.string('foo'), tx.pure.string('bar'), tx.pure.string('baz')],
+          "arguments": [
+            tx.pure.string('foo'),
+            tx.pure.string('bar'),
+            tx.pure.string('baz'),
+          ],
         }),
       );
 
@@ -281,40 +264,42 @@ void main() {
 SuiObjectRef ref() {
   final random = Random();
   return SuiObjectRef(
-    toB58(Uint8List.fromList([
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      1,
-      2,
-    ])),
+    toB58(
+      Uint8List.fromList([
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        1,
+        2,
+      ]),
+    ),
     normalizeSuiAddress(random.nextInt(100000).toString().padRight(64, '0')),
     random.nextInt(100000),
   );

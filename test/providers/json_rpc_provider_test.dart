@@ -2,7 +2,8 @@ import 'package:test/test.dart';
 import 'package:sui_dart/sui.dart';
 
 void main() {
-  const address = '0x936accb491f0facaac668baaedcf4d0cfc6da1120b66f77fa6a43af718669973';
+  const address =
+      '0x936accb491f0facaac668baaedcf4d0cfc6da1120b66f77fa6a43af718669973';
 
   late SuiClient client;
 
@@ -38,11 +39,15 @@ void main() {
   });
 
   test('test getMoveFunctionArgTypes', () async {
-    const package = "0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1";
+    const package =
+        "0xee496a0cc04d06a345982ba6697c90c619020de9e274408c7819f787ff66e1a1";
     const module = "suifrens";
     const function = "burn";
     final resp = await client.getMoveFunctionArgTypes(
-        packageId: package, moduleName: module, functionName: function);
+      packageId: package,
+      moduleName: module,
+      functionName: function,
+    );
     expect(resp.isNotEmpty, true);
   });
 
@@ -127,7 +132,9 @@ void main() {
   });
 
   test('test getEvents', () async {
-    final resp = await client.getEvents("D46LzFjYNeN432Sz7rp8BEdAPdUU2mCeExxXJGdpBVRb");
+    final resp = await client.getEvents(
+      "D46LzFjYNeN432Sz7rp8BEdAPdUU2mCeExxXJGdpBVRb",
+    );
     expect(resp.isNotEmpty, true);
   });
 
@@ -176,7 +183,8 @@ void main() {
   });
 
   test('test getOwnedObjectList', () async {
-    const owner = '0x73024d967e8714e73cffbac418ee0cb0557308c39e3d6afac28f2bddde6651cd';
+    const owner =
+        '0x73024d967e8714e73cffbac418ee0cb0557308c39e3d6afac28f2bddde6651cd';
     final result = await client.getOwnedObjects(owner);
     expect(result.data.isNotEmpty, true);
   });
@@ -192,14 +200,16 @@ void main() {
   });
 
   test('test getStakes', () async {
-    final result = await client
-        .getStakes("0x4ee37e332292fa904bed062ce207e3c390c4f9b46773cdc46648b1e65d06adc7");
+    final result = await client.getStakes(
+      "0x4ee37e332292fa904bed062ce207e3c390c4f9b46773cdc46648b1e65d06adc7",
+    );
     expect(result.isNotEmpty, true);
   });
 
   test('test getStakesByIds', () async {
-    final result = await client
-        .getStakesByIds(["0x0175d093a5bf9d1f151548b593eed54d29d20d35fcc443be30ac2026a1c6345c"]);
+    final result = await client.getStakesByIds([
+      "0x0175d093a5bf9d1f151548b593eed54d29d20d35fcc443be30ac2026a1c6345c",
+    ]);
     expect(result.isNotEmpty, true);
   });
 
@@ -210,12 +220,17 @@ void main() {
 
   test('test resolveNameServiceAddress', () async {
     final result = await client.resolveNameServiceAddress('blockchain.sui');
-    expect(result == '0x57514a8dd8f08724d01954953721b738adecb29bca613b0b351adf76e7233bac', true);
+    expect(
+      result ==
+          '0x57514a8dd8f08724d01954953721b738adecb29bca613b0b351adf76e7233bac',
+      true,
+    );
   });
 
   test('test resolveNameServiceNames', () async {
     final result = await client.resolveNameServiceNames(
-        '0x57514a8dd8f08724d01954953721b738adecb29bca613b0b351adf76e7233bac');
+      '0x57514a8dd8f08724d01954953721b738adecb29bca613b0b351adf76e7233bac',
+    );
     expect(result!.data.first == 'blockchain.sui', true);
     expect(result.hasNextPage == false, true);
   });

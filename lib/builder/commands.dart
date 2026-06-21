@@ -1,14 +1,10 @@
-
+// ignore_for_file: constant_identifier_names
 import 'dart:typed_data';
 
 import 'package:bcs_dart/bcs.dart';
 import 'package:sui_dart/types/common.dart';
 
-enum UpgradePolicy {
-  COMPATIBLE,
-  ADDITIVE,
-  DEP_ONLY,
-}
+enum UpgradePolicy { COMPATIBLE, ADDITIVE, DEP_ONLY }
 
 class Commands {
   static Map<String, dynamic> moveCall(dynamic input) {
@@ -42,33 +38,30 @@ class Commands {
     };
   }
 
-  static Map<String, dynamic> transferObjects(List<dynamic> objects, dynamic address) {
+  static Map<String, dynamic> transferObjects(
+    List<dynamic> objects,
+    dynamic address,
+  ) {
     return {
       '\$kind': 'TransferObjects',
-      'TransferObjects': {
-        'objects': objects,
-        'address': address,
-      },
+      'TransferObjects': {'objects': objects, 'address': address},
     };
   }
 
   static Map<String, dynamic> splitCoins(dynamic coin, List<dynamic> amounts) {
     return {
       '\$kind': 'SplitCoins',
-      'SplitCoins': {
-        'coin': coin,
-        'amounts': amounts,
-      },
+      'SplitCoins': {'coin': coin, 'amounts': amounts},
     };
   }
 
-  static Map<String, dynamic> mergeCoins(dynamic destination, List<dynamic> sources) {
+  static Map<String, dynamic> mergeCoins(
+    dynamic destination,
+    List<dynamic> sources,
+  ) {
     return {
       '\$kind': 'MergeCoins',
-      'MergeCoins': {
-        'destination': destination,
-        'sources': sources,
-      },
+      'MergeCoins': {'destination': destination, 'sources': sources},
     };
   }
 
@@ -79,10 +72,15 @@ class Commands {
     return {
       '\$kind': 'Publish',
       'Publish': {
-        'modules': modules.map((module) =>
-          module is String ? module : toB64(Uint8List.fromList(module))
-        ).toList(),
-        'dependencies': dependencies.map((dep) => normalizeSuiObjectId(dep)).toList(),
+        'modules': modules
+            .map(
+              (module) =>
+                  module is String ? module : toB64(Uint8List.fromList(module)),
+            )
+            .toList(),
+        'dependencies': dependencies
+            .map((dep) => normalizeSuiObjectId(dep))
+            .toList(),
       },
     };
   }
@@ -96,10 +94,15 @@ class Commands {
     return {
       '\$kind': 'Upgrade',
       'Upgrade': {
-        'modules': modules.map((module) =>
-          module is String ? module : toB64(Uint8List.fromList(module))
-        ).toList(),
-        'dependencies': dependencies.map((dep) => normalizeSuiObjectId(dep)).toList(),
+        'modules': modules
+            .map(
+              (module) =>
+                  module is String ? module : toB64(Uint8List.fromList(module)),
+            )
+            .toList(),
+        'dependencies': dependencies
+            .map((dep) => normalizeSuiObjectId(dep))
+            .toList(),
         'package': package,
         'ticket': ticket,
       },
@@ -112,10 +115,7 @@ class Commands {
   }) {
     return {
       '\$kind': 'MakeMoveVec',
-      'MakeMoveVec': {
-        'type': type,
-        'elements': elements,
-      },
+      'MakeMoveVec': {'type': type, 'elements': elements},
     };
   }
 
@@ -128,10 +128,7 @@ class Commands {
       '\$kind': '\$Intent',
       '\$Intent': {
         'name': name,
-        'inputs': inputs?.map((key, value) => MapEntry(
-          key,
-          value
-        )) ?? {},
+        'inputs': inputs?.map((key, value) => MapEntry(key, value)) ?? {},
         'data': data ?? {},
       },
     };

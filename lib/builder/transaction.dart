@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -21,7 +22,8 @@ import 'package:sui_dart/types/normalized.dart';
 import 'package:sui_dart/types/objects.dart';
 import 'package:sui_dart/types/sui_bcs.dart';
 import 'package:sui_dart/types/transactions.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction.pb.dart' as grpc_transaction;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction.pb.dart'
+    as grpc_transaction;
 
 class TransactionResult {
   final int index;
@@ -31,16 +33,16 @@ class TransactionResult {
   Map<String, dynamic> get result => {"\$kind": 'Result', "Result": index};
   final Map<String, dynamic> _nestedResult = <String, dynamic>{};
 
-  Map<String, dynamic> nestedResult(subIndex) {
+  Map<String, dynamic> nestedResult(dynamic subIndex) {
     final result = {
       "\$kind": 'NestedResult',
-      "NestedResult": [index, subIndex]
+      "NestedResult": [index, subIndex],
     };
     _nestedResult.addAll(result);
     return result;
   }
 
-  operator [](indexKey) {
+  dynamic operator [](dynamic indexKey) {
     if (result.containsKey(indexKey)) {
       return result[indexKey];
     }
@@ -102,7 +104,10 @@ List<List<T>> chunk<T>(List<T> arr, int size) {
   int length = (arr.length / size).ceil();
 
   return List<List<T>>.generate(length, (int i) {
-    return arr.sublist(i * size, (i * size + size > arr.length) ? arr.length : i * size + size);
+    return arr.sublist(
+      i * size,
+      (i * size + size > arr.length) ? arr.length : i * size + size,
+    );
   });
 }
 
@@ -116,29 +121,36 @@ class BuildOptions {
   /// Define limits that are used when building the transaction. In general, we recommend using the protocol configuration instead of defining limits.
   Limits? limits;
 
-  BuildOptions({this.client, this.onlyTransactionKind = false, this.protocolConfig, this.limits});
+  BuildOptions({
+    this.client,
+    this.onlyTransactionKind = false,
+    this.protocolConfig,
+    this.limits,
+  });
 }
 
 class SerializeTransactionOptions extends BuildOptions {
   List<String>? supportedIntents;
 
-  SerializeTransactionOptions(
-      {this.supportedIntents,
-      super.client,
-      super.onlyTransactionKind,
-      super.protocolConfig,
-      super.limits});
+  SerializeTransactionOptions({
+    this.supportedIntents,
+    super.client,
+    super.onlyTransactionKind,
+    super.protocolConfig,
+    super.limits,
+  });
 }
 
 class SignOptions extends BuildOptions {
   Keypair signer;
 
-  SignOptions(
-      {required this.signer,
-      super.client,
-      super.onlyTransactionKind,
-      super.protocolConfig,
-      super.limits});
+  SignOptions({
+    required this.signer,
+    super.client,
+    super.onlyTransactionKind,
+    super.protocolConfig,
+    super.limits,
+  });
 }
 
 class Transaction {
@@ -199,8 +211,9 @@ class Transaction {
   }
 
   void setGasPayment(List<SuiObjectRef> payments) {
-    _blockData.gasData.payment =
-        payments.map((p) => SuiObjectRef(p.digest, p.objectId, p.version)).toList();
+    _blockData.gasData.payment = payments
+        .map((p) => SuiObjectRef(p.digest, p.objectId, p.version))
+        .toList();
   }
 
   @Deprecated('Use getData() instead')
@@ -216,8 +229,6 @@ class Transaction {
     return transactionDataToGrpcTransaction(_blockData.snapshot());
   }
 
-
-
   Pure? _pure;
 
   Pure get pure {
@@ -225,9 +236,7 @@ class Transaction {
       if (value is SerializedBcs) {
         return _blockData.addInput('pure', {
           '\$kind': 'Pure',
-          'Pure': {
-            'bytes': value.toBase64(),
-          },
+          'Pure': {'bytes': value.toBase64()},
         });
       }
 
@@ -254,25 +263,6 @@ class Transaction {
     return {"\$kind": 'GasCoin', "GasCoin": true};
   }
 
-  /// Dynamically create a new input, which is separate from the `input`. This is important
-  /// for generated clients to be able to define unique inputs that are non-overlapping with the
-  /// defined inputs.
-  ///
-  /// For `Uint8Array` type automatically convert the input into a `Pure` CallArg, since this
-  /// is the format required for custom serialization.
-  Map<String, dynamic> _input(String type, dynamic value) {
-    final index = _blockData.inputs.length;
-    final input = {
-      "\$kind": 'Input',
-      // bigints can't be serialized to JSON, so just string-convert them here:
-      "value": value is BigInt ? value.toString() : value,
-      "index": index,
-      "type": type,
-    };
-    _blockData.inputs.add(input);
-    return input;
-  }
-
   Map<String, dynamic> object(dynamic value) {
     if (value is Function) {
       return object(value(this));
@@ -280,28 +270,37 @@ class Transaction {
 
     if (value is Map && value['\$kind'] != null) {
       final kind = value['\$kind'];
-      if (kind == 'GasCoin' || kind == 'Input' || kind == 'Result' || kind == 'NestedResult') {
+      if (kind == 'GasCoin' ||
+          kind == 'Input' ||
+          kind == 'Result' ||
+          kind == 'NestedResult') {
         return value as Map<String, dynamic>;
       }
     }
 
     final id = getIdFromCallArg(value);
 
-    final inserted = _blockData.inputs
-        .firstWhere((i) => id == getIdFromCallArg(i), orElse: () => <String, dynamic>{});
+    final inserted = _blockData.inputs.firstWhere(
+      (i) => id == getIdFromCallArg(i),
+      orElse: () => <String, dynamic>{},
+    );
 
     // Upgrade shared object inputs to mutable if needed:
     if (inserted.isNotEmpty &&
         inserted['Object']?['SharedObject'] != null &&
         value is Map<String, dynamic> &&
         value['Object']?['SharedObject'] != null) {
-      inserted['Object']['SharedObject']['mutable'] = inserted['Object']['SharedObject']
-              ['mutable'] ||
+      inserted['Object']['SharedObject']['mutable'] =
+          inserted['Object']['SharedObject']['mutable'] ||
           value['Object']['SharedObject']['mutable'];
     }
 
     if (inserted.isNotEmpty) {
-      return {'\$kind': 'Input', 'Input': _blockData.inputs.indexOf(inserted), 'type': 'object'};
+      return {
+        '\$kind': 'Input',
+        'Input': _blockData.inputs.indexOf(inserted),
+        'type': 'object',
+      };
     } else {
       return _blockData.addInput(
         'object',
@@ -347,7 +346,10 @@ class Transaction {
     return pure.string(str);
   }
 
-  Map<String, dynamic> pureVector(List<dynamic> value, [String type = LegacyBCS.U64]) {
+  Map<String, dynamic> pureVector(
+    List<dynamic> value, [
+    String type = LegacyBCS.U64,
+  ]) {
     return pure.vector(type, value);
   }
 
@@ -358,14 +360,20 @@ class Transaction {
 
   // Method shorthands:
 
-  TransactionResult splitCoins(Map<String, dynamic> coin, List<dynamic> amounts) {
-    final result =
-        amounts.map((x) => x is! Map ? pure.u64(BigInt.parse(x.toString())) : x).toList();
+  TransactionResult splitCoins(
+    Map<String, dynamic> coin,
+    List<dynamic> amounts,
+  ) {
+    final result = amounts
+        .map((x) => x is! Map ? pure.u64(BigInt.parse(x.toString())) : x)
+        .toList();
     return add(Commands.splitCoins(coin, result));
   }
 
   TransactionResult mergeCoins(
-      Map<String, dynamic> destination, List<Map<String, dynamic>> sources) {
+    Map<String, dynamic> destination,
+    List<Map<String, dynamic>> sources,
+  ) {
     return add(Commands.mergeCoins(destination, sources));
   }
 
@@ -379,13 +387,28 @@ class Transaction {
     required String packageId,
     required dynamic ticket,
   }) {
-    return add(Commands.upgrade(
-        modules: modules, dependencies: dependencies, package: packageId, ticket: ticket));
+    return add(
+      Commands.upgrade(
+        modules: modules,
+        dependencies: dependencies,
+        package: packageId,
+        ticket: ticket,
+      ),
+    );
   }
 
-  TransactionResult moveCall(String target, {List? typeArguments, List? arguments}) {
-    return add(Commands.moveCall(
-        {"target": target, "typeArguments": typeArguments, "arguments": arguments}));
+  TransactionResult moveCall(
+    String target, {
+    List? typeArguments,
+    List? arguments,
+  }) {
+    return add(
+      Commands.moveCall({
+        "target": target,
+        "typeArguments": typeArguments,
+        "arguments": arguments,
+      }),
+    );
   }
 
   TransactionResult transferObjects(List<dynamic> objects, dynamic address) {
@@ -434,7 +457,9 @@ class Transaction {
 
     final value = attribute["u64"] ?? (attribute["u32"] ?? attribute["f64"]);
     if (value == null) {
-      throw ArgumentError('Unexpected protocol config value found for: "${LIMITS[key]}"');
+      throw ArgumentError(
+        'Unexpected protocol config value found for: "${LIMITS[key]}"',
+      );
     }
 
     // NOTE: Technically this is not a safe conversion, but we know all of the values in protocol config are safe
@@ -451,9 +476,7 @@ class Transaction {
   Future<Uint8List> build([BuildOptions? options]) async {
     options ??= BuildOptions();
     await _prepare(options);
-    return _blockData.build(
-      onlyTransactionKind: options.onlyTransactionKind,
-    );
+    return _blockData.build(onlyTransactionKind: options.onlyTransactionKind);
   }
 
   /// Derive transaction digest
@@ -463,7 +486,9 @@ class Transaction {
   }
 
   void _validate(BuildOptions options) {
-    final maxPureArgumentSize = int.parse(_getConfig('maxPureArgumentSize', options));
+    final maxPureArgumentSize = int.parse(
+      _getConfig('maxPureArgumentSize', options),
+    );
     // Validate all inputs are the correct size:
     for (var i = 0; i < _blockData.inputs.length; i++) {
       final input = _blockData.inputs[i];
@@ -477,10 +502,7 @@ class Transaction {
     }
   }
 
-  void normalizeRawArgument(
-    dynamic arg,
-    BcsType schema,
-  ) {
+  void normalizeRawArgument(dynamic arg, BcsType schema) {
     if (arg is! Map) {
       return;
     }
@@ -493,8 +515,9 @@ class Transaction {
       return;
     }
 
-    _blockData.inputs[arg["Input"]] =
-        Inputs.pure(schema.serialize(input["UnresolvedPure"]["value"]));
+    _blockData.inputs[arg["Input"]] = Inputs.pure(
+      schema.serialize(input["UnresolvedPure"]["value"]),
+    );
   }
 
   Future<void> resolveObjectReferences(BuildOptions options) async {
@@ -506,16 +529,23 @@ class Transaction {
               input["UnresolvedObject"]["initialSharedVersion"] == null));
     });
 
-    final dedupedIds = Set.from(objectsToResolve
-        .map((input) => normalizeSuiObjectId(input["UnresolvedObject"]["objectId"]))).toList();
+    final dedupedIds = Set.from(
+      objectsToResolve.map(
+        (input) => normalizeSuiObjectId(input["UnresolvedObject"]["objectId"]),
+      ),
+    ).toList();
 
-    final objectChunks = dedupedIds.isNotEmpty ? chunk(dedupedIds, MAX_OBJECTS_PER_FETCH) : [];
+    final objectChunks = dedupedIds.isNotEmpty
+        ? chunk(dedupedIds, MAX_OBJECTS_PER_FETCH)
+        : [];
 
     final resolved = <SuiObjectResponse>[];
     final objectsResult = (await Future.wait(
       objectChunks.map(
-        (chunk) => expectClient(options)
-            .multiGetObjects(chunk.cast<String>(), options: SuiObjectDataOptions(showOwner: true)),
+        (chunk) => expectClient(options).multiGetObjects(
+          chunk.cast<String>(),
+          options: SuiObjectDataOptions(showOwner: true),
+        ),
       ),
     ));
     for (var item in objectsResult) {
@@ -524,7 +554,10 @@ class Transaction {
 
     final responsesById = Map.fromIterables(
       dedupedIds,
-      dedupedIds.asMap().map((index, id) => MapEntry(index, resolved[index])).values,
+      dedupedIds
+          .asMap()
+          .map((index, id) => MapEntry(index, resolved[index]))
+          .values,
     );
 
     final invalidObjects = responsesById.entries
@@ -533,7 +566,9 @@ class Transaction {
         .toList();
 
     if (invalidObjects.isNotEmpty) {
-      throw ArgumentError("The following input objects are invalid: ${invalidObjects.join(', ')}");
+      throw ArgumentError(
+        "The following input objects are invalid: ${invalidObjects.join(', ')}",
+      );
     }
 
     final objects = resolved.map((object) {
@@ -547,13 +582,16 @@ class Transaction {
         "objectId": object.data?.objectId,
         "digest": object.data?.digest,
         "version": object.data?.version,
-        "initialSharedVersion": initialSharedVersion
+        "initialSharedVersion": initialSharedVersion,
       };
     }).toList();
 
     final objectsById = Map.fromIterables(
       dedupedIds,
-      dedupedIds.asMap().map((index, id) => MapEntry(index, objects[index])).values,
+      dedupedIds
+          .asMap()
+          .map((index, id) => MapEntry(index, objects[index]))
+          .values,
     );
 
     for (int index = 0; index < _blockData.inputs.length; index++) {
@@ -566,28 +604,35 @@ class Transaction {
       final id = normalizeSuiAddress(input["UnresolvedObject"]["objectId"]);
       final object = objectsById[id];
 
-      if ((input["UnresolvedObject"]?["initialSharedVersion"] ?? object?["initialSharedVersion"]) !=
+      if ((input["UnresolvedObject"]?["initialSharedVersion"] ??
+              object?["initialSharedVersion"]) !=
           null) {
         updated = Inputs.sharedObjectRef({
           "objectId": id,
           "initialSharedVersion":
-              input["UnresolvedObject"]["initialSharedVersion"] ?? object?["initialSharedVersion"],
+              input["UnresolvedObject"]["initialSharedVersion"] ??
+              object?["initialSharedVersion"],
           "mutable": isUsedAsMutable(_blockData, index),
         });
       } else if (isUsedAsReceiving(_blockData, index)) {
-        updated = Inputs.receivingRef(SuiObjectRef(
-          input["UnresolvedObject"]["digest"] ?? object?["digest"],
-          id,
-          input["UnresolvedObject"]["version"] ?? object?["version"],
-        ));
-      }
-
-      _blockData.inputs[_blockData.inputs.indexOf(input)] = updated ??
-          Inputs.objectRef(SuiObjectRef(
+        updated = Inputs.receivingRef(
+          SuiObjectRef(
             input["UnresolvedObject"]["digest"] ?? object?["digest"],
             id,
             input["UnresolvedObject"]["version"] ?? object?["version"],
-          ));
+          ),
+        );
+      }
+
+      _blockData.inputs[_blockData.inputs.indexOf(input)] =
+          updated ??
+          Inputs.objectRef(
+            SuiObjectRef(
+              input["UnresolvedObject"]["digest"] ?? object?["digest"],
+              id,
+              input["UnresolvedObject"]["version"] ?? object?["version"],
+            ),
+          );
     }
   }
 
@@ -608,15 +653,20 @@ class Transaction {
           continue;
         }
 
-        final inputs = (command["MoveCall"]["arguments"] as Iterable).map((arg) {
+        final inputs = (command["MoveCall"]["arguments"] as Iterable).map((
+          arg,
+        ) {
           if (arg is Map && arg["Input"] != null) {
             return _blockData.inputs[arg["Input"]];
           }
           return null;
         }).toList();
         final needsResolution = inputs.firstWhere(
-            (input) => input?["UnresolvedPure"] != null || input?["UnresolvedObject"] != null,
-            orElse: () => null);
+          (input) =>
+              input?["UnresolvedPure"] != null ||
+              input?["UnresolvedObject"] != null,
+          orElse: () => null,
+        );
 
         if (needsResolution != null) {
           final functionName =
@@ -633,7 +683,10 @@ class Transaction {
           normalizeRawArgument(amount, SuiBcs.U64);
         });
       } else if (command["TransferObjects"] != null) {
-        normalizeRawArgument(command["TransferObjects"]["address"], SuiBcs.Address);
+        normalizeRawArgument(
+          command["TransferObjects"]["address"],
+          SuiBcs.Address,
+        );
       }
     }
 
@@ -649,22 +702,25 @@ class Transaction {
             functionId,
           );
 
-          moveFunctionParameters[functionName] =
-              def.parameters.map((param) => normalizedTypeToMoveTypeSignature(param)).toList();
+          moveFunctionParameters[functionName] = def.parameters
+              .map((param) => normalizedTypeToMoveTypeSignature(param))
+              .toList();
         }),
       );
     }
 
     if (moveCallsToResolve.isNotEmpty) {
       for (var moveCall in moveCallsToResolve) {
-        final parameters = moveFunctionParameters[
-            "${moveCall["package"]}::${moveCall["module"]}::${moveCall["function"]}"];
+        final parameters =
+            moveFunctionParameters["${moveCall["package"]}::${moveCall["module"]}::${moveCall["function"]}"];
         if (parameters != null && parameters.isNotEmpty) {
           // Entry functions can have a mutable reference to an instance of the TxContext
           // struct defined in the TxContext module as the last parameter. The caller of
           // the function does not need to pass it in as an argument.
           final hasTxContext = isTxContext(parameters.last!);
-          final params = hasTxContext ? parameters.sublist(0, parameters.length - 1) : parameters;
+          final params = hasTxContext
+              ? parameters.sublist(0, parameters.length - 1)
+              : parameters;
 
           moveCall["_argumentTypes"] = params;
         }
@@ -677,7 +733,8 @@ class Transaction {
       }
 
       final moveCall = command["MoveCall"];
-      final fnName = "${moveCall["package"]}::${moveCall["module"]}::${moveCall["function"]}";
+      final fnName =
+          "${moveCall["package"]}::${moveCall["module"]}::${moveCall["function"]}";
       final params = moveCall["_argumentTypes"];
 
       if (params == null) {
@@ -696,30 +753,34 @@ class Transaction {
         final input = inputs[arg["Input"]];
 
         // Skip if the input is already resolved
-        if (input["UnresolvedPure"] == null && input["UnresolvedObject"] == null) {
+        if (input["UnresolvedPure"] == null &&
+            input["UnresolvedObject"] == null) {
           continue;
         }
 
         final inputValue =
-            input["UnresolvedPure"]?["value"] ?? input["UnresolvedObject"]?["objectId"];
+            input["UnresolvedPure"]?["value"] ??
+            input["UnresolvedObject"]?["objectId"];
 
         final schema = getPureBcsSchema(param["body"]);
         if (schema != null) {
           arg["type"] = 'pure';
-          inputs[inputs.indexOf(input)] = Inputs.pure(schema.serialize(inputValue));
+          inputs[inputs.indexOf(input)] = Inputs.pure(
+            schema.serialize(inputValue),
+          );
           continue;
         }
 
         if (inputValue is! String) {
-          throw ArgumentError("Expect the argument to be an object id string, got $inputValue");
+          throw ArgumentError(
+            "Expect the argument to be an object id string, got $inputValue",
+          );
         }
 
         arg["type"] = 'object';
         final unresolvedObject = input["UnresolvedPure"] != null
             ? {
-                "UnresolvedObject": {
-                  "objectId": inputValue,
-                },
+                "UnresolvedObject": {"objectId": inputValue},
               }
             : input;
 
@@ -733,7 +794,9 @@ class Transaction {
     if (_blockData.gasData.payment != null) {
       final maxGasObjects = int.parse(_getConfig('maxGasObjects', options));
       if (_blockData.gasData.payment!.length > maxGasObjects) {
-        throw ArgumentError("Payment objects exceed maximum amount: $maxGasObjects");
+        throw ArgumentError(
+          "Payment objects exceed maximum amount: $maxGasObjects",
+        );
       }
     }
 
@@ -744,27 +807,36 @@ class Transaction {
 
     final gasOwner = _blockData.gasData.owner ?? _blockData.sender;
 
-    final coins = await expectClient(options).getCoins(gasOwner!, coinType: SUI_TYPE_ARG);
+    final coins = await expectClient(
+      options,
+    ).getCoins(gasOwner!, coinType: SUI_TYPE_ARG);
 
     final paymentCoins = coins.data
         // Filter out coins that are also used as input:
         .where((coin) {
-      final matchingInput = _blockData.inputs.indexWhere((input) {
-        if (input["Object"]?["ImmOrOwnedObject"] != null) {
-          return coin.coinObjectId == input["Object"]["ImmOrOwnedObject"]["objectId"];
-        }
+          final matchingInput = _blockData.inputs.indexWhere((input) {
+            if (input["Object"]?["ImmOrOwnedObject"] != null) {
+              return coin.coinObjectId ==
+                  input["Object"]["ImmOrOwnedObject"]["objectId"];
+            }
 
-        return false;
-      });
+            return false;
+          });
 
-      return matchingInput == -1;
-    }).toList();
+          return matchingInput == -1;
+        })
+        .toList();
 
-    int end = min(paymentCoins.length, int.parse(_getConfig('maxGasObjects', options)) - 1);
+    int end = min(
+      paymentCoins.length,
+      int.parse(_getConfig('maxGasObjects', options)) - 1,
+    );
 
     final usePaymentCoins = paymentCoins
         .sublist(0, end)
-        .map((coin) => SuiObjectRef(coin.digest, coin.coinObjectId, coin.version))
+        .map(
+          (coin) => SuiObjectRef(coin.digest, coin.coinObjectId, coin.version),
+        )
         .toList();
 
     if (paymentCoins.isEmpty) {
@@ -783,7 +855,7 @@ class Transaction {
     setGasPrice(gasPrice);
   }
 
-  bool isBuilderCallArg(arg) {
+  bool isBuilderCallArg(dynamic arg) {
     if (arg is! Map) return false;
     return arg.containsKey("Pure") || arg.containsKey("Object");
   }
@@ -801,17 +873,22 @@ class Transaction {
     for (var input in inputs) {
       if (input['type'] == 'object' && input['value'] is String) {
         // The input is a string that we need to resolve to an object reference:
-        objectsToResolve.add({"id": normalizeSuiAddress(input['value']), "input": input});
+        objectsToResolve.add({
+          "id": normalizeSuiAddress(input['value']),
+          "input": input,
+        });
         continue;
       }
     }
 
     for (var transaction in transactions) {
       if (transaction["kind"] == "MoveCall") {
-        bool needsResolution = (transaction["arguments"] as List).any((arg) =>
-            arg is Map &&
-            arg['kind'] == 'Input' &&
-            !(isBuilderCallArg(inputs[arg['index']]["value"])));
+        bool needsResolution = (transaction["arguments"] as List).any(
+          (arg) =>
+              arg is Map &&
+              arg['kind'] == 'Input' &&
+              !(isBuilderCallArg(inputs[arg['index']]["value"])),
+        );
         if (needsResolution) {
           moveModulesToResolve.add(transaction);
         }
@@ -841,73 +918,81 @@ class Transaction {
     }
 
     if (moveModulesToResolve.isNotEmpty) {
-      final resolveResults = await Future.wait(moveModulesToResolve.map((moveCall) async {
-        final target = moveCall["target"].split('::');
-        final packageId = target[0];
-        final moduleName = target[1];
-        final functionName = target[2];
+      final resolveResults = await Future.wait(
+        moveModulesToResolve.map((moveCall) async {
+          final target = moveCall["target"].split('::');
+          final packageId = target[0];
+          final moduleName = target[1];
+          final functionName = target[2];
 
-        final normalized = await expectClient(options).getNormalizedMoveFunction(
-          normalizeSuiObjectId(packageId),
-          moduleName,
-          functionName,
-        );
+          final normalized = await expectClient(options)
+              .getNormalizedMoveFunction(
+                normalizeSuiObjectId(packageId),
+                moduleName,
+                functionName,
+              );
 
-        // Entry functions can have a mutable reference to an instance of the TxContext
-        // struct defined in the TxContext module as the last parameter. The caller of
-        // the function does not need to pass it in as an argument.
-        final hasTxContext =
-            normalized.parameters.isNotEmpty && isTxContext(normalized.parameters.last);
+          // Entry functions can have a mutable reference to an instance of the TxContext
+          // struct defined in the TxContext module as the last parameter. The caller of
+          // the function does not need to pass it in as an argument.
+          final hasTxContext =
+              normalized.parameters.isNotEmpty &&
+              isTxContext(normalized.parameters.last);
 
-        final params = hasTxContext
-            ? normalized.parameters.sublist(0, normalized.parameters.length - 1)
-            : normalized.parameters;
+          final params = hasTxContext
+              ? normalized.parameters.sublist(
+                  0,
+                  normalized.parameters.length - 1,
+                )
+              : normalized.parameters;
 
-        final callArgs = moveCall["arguments"].toList();
-        if (params.length != callArgs.length) {
-          throw ArgumentError('Incorrect number of arguments.');
-        }
-
-        final localObjectsToResolve = [];
-
-        for (int i = 0; i < params.length; i++) {
-          final param = params[i];
-          final arg = callArgs[i];
-          if (arg["kind"] != 'Input') continue;
-          final input = inputs[arg["index"]];
-          // Skip if the input is already resolved
-          if (isBuilderCallArg(input["value"])) continue;
-
-          final inputValue = input["value"];
-
-          final serType = getPureSerializationType(param, inputValue);
-
-          if (serType != null) {
-            input["value"] = Inputs.pure(inputValue, serType);
-            continue;
+          final callArgs = moveCall["arguments"].toList();
+          if (params.length != callArgs.length) {
+            throw ArgumentError('Incorrect number of arguments.');
           }
 
-          final structVal = extractStructTag(param);
-          if (structVal != null || (param is Map && param["TypeParameter"] != null)) {
-            if (inputValue is! String) {
+          final localObjectsToResolve = [];
+
+          for (int i = 0; i < params.length; i++) {
+            final param = params[i];
+            final arg = callArgs[i];
+            if (arg["kind"] != 'Input') continue;
+            final input = inputs[arg["index"]];
+            // Skip if the input is already resolved
+            if (isBuilderCallArg(input["value"])) continue;
+
+            final inputValue = input["value"];
+
+            final serType = getPureSerializationType(param, inputValue);
+
+            if (serType != null) {
+              input["value"] = Inputs.pure(inputValue, serType);
+              continue;
+            }
+
+            final structVal = extractStructTag(param);
+            if (structVal != null ||
+                (param is Map && param["TypeParameter"] != null)) {
+              if (inputValue is! String) {
+                throw ArgumentError(
+                  "Expect the argument to be an object id string, got ${jsonEncode(inputValue)}",
+                );
+              }
+              localObjectsToResolve.add({
+                "id": inputValue,
+                "input": input,
+                "normalizedType": param,
+              });
+            } else {
               throw ArgumentError(
-                "Expect the argument to be an object id string, got ${jsonEncode(inputValue)}",
+                "Unknown call arg type ${jsonEncode(param)} for value ${jsonEncode(inputValue)}",
               );
             }
-            localObjectsToResolve.add({
-              "id": inputValue,
-              "input": input,
-              "normalizedType": param,
-            });
-          } else {
-            throw ArgumentError(
-              "Unknown call arg type ${jsonEncode(param)} for value ${jsonEncode(inputValue)}",
-            );
           }
-        }
 
-        return localObjectsToResolve;
-      }));
+          return localObjectsToResolve;
+        }),
+      );
 
       for (var result in resolveResults) {
         objectsToResolve.addAll(result);
@@ -915,7 +1000,9 @@ class Transaction {
     }
 
     if (objectsToResolve.isNotEmpty) {
-      final dedupedIds = Set<String>.from(objectsToResolve.map((o) => o["id"])).toList();
+      final dedupedIds = Set<String>.from(
+        objectsToResolve.map((o) => o["id"]),
+      ).toList();
       final objectChunks = chunk(dedupedIds, MAX_OBJECTS_PER_FETCH);
       final objects = (await Future.wait(
         objectChunks.map(
@@ -924,9 +1011,7 @@ class Transaction {
             options: SuiObjectDataOptions(showOwner: true),
           ),
         ),
-      ))
-          .expand((element) => element)
-          .toList();
+      )).expand((element) => element).toList();
 
       final objectsById = <String, SuiObjectResponse>{};
       for (int index = 0; index < dedupedIds.length; index++) {
@@ -939,7 +1024,8 @@ class Transaction {
           .toList();
       if (invalidObjects.isNotEmpty) {
         throw ArgumentError(
-            "The following input objects are invalid: ${invalidObjects.join(', ')}");
+          "The following input objects are invalid: ${invalidObjects.join(', ')}",
+        );
       }
 
       for (var item in objectsToResolve) {
@@ -955,12 +1041,15 @@ class Transaction {
           // There could be multiple transactions that reference the same shared object.
           // If one of them is a mutable reference, then we should mark the input
           // as mutable.
-          final isByValue = normalizedType != null &&
+          final isByValue =
+              normalizedType != null &&
               extractMutableReference(normalizedType) == null &&
               extractReference(normalizedType) == null;
-          final mutable = isMutableSharedObjectInput(input["value"]) ||
+          final mutable =
+              isMutableSharedObjectInput(input["value"]) ||
               isByValue ||
-              (normalizedType != null && extractMutableReference(normalizedType) != null);
+              (normalizedType != null &&
+                  extractMutableReference(normalizedType) != null);
 
           input["value"] = Inputs.sharedObjectRef({
             "objectId": id,
@@ -985,14 +1074,19 @@ class Transaction {
 
     final client = options.client;
 
-    if (options.protocolConfig == null && options.limits == null && client != null) {
+    if (options.protocolConfig == null &&
+        options.limits == null &&
+        client != null) {
       options.protocolConfig = await client.getProtocolConfig();
     }
 
     await normalizeInputs(options);
     await resolveObjectReferences(options);
 
-    await Future.wait([_prepareGasPrice(options), _prepareTransactions(options)]);
+    await Future.wait([
+      _prepareGasPrice(options),
+      _prepareTransactions(options),
+    ]);
 
     if (options.onlyTransactionKind != true) {
       await _prepareGasPayment(options);
@@ -1000,28 +1094,37 @@ class Transaction {
       if (_blockData.gasData.budget == null) {
         final dryRunResult = await expectClient(options).dryRunTransaction(
           _blockData.build(
-              gasConfig:
-                  GasConfig(budget: BigInt.tryParse(_getConfig('maxTxGas', options)), payment: [])),
+            gasConfig: GasConfig(
+              budget: BigInt.tryParse(_getConfig('maxTxGas', options)),
+              payment: [],
+            ),
+          ),
           signerAddress: _blockData.sender,
         );
 
         if (dryRunResult.effects.status.status != ExecutionStatusType.success) {
           throw ArgumentError(
-              "Dry run failed, could not automatically determine a budget: ${dryRunResult.effects.status.error}");
+            "Dry run failed, could not automatically determine a budget: ${dryRunResult.effects.status.error}",
+          );
         }
 
-        final safeOverhead = GAS_SAFE_OVERHEAD * (_blockData.gasData.price ?? BigInt.one);
+        final safeOverhead =
+            GAS_SAFE_OVERHEAD * (_blockData.gasData.price ?? BigInt.one);
 
         final baseComputationCostWithOverhead =
-            BigInt.from(dryRunResult.effects.gasUsed.computationCost) + safeOverhead;
+            BigInt.from(dryRunResult.effects.gasUsed.computationCost) +
+            safeOverhead;
 
-        final gasBudget = baseComputationCostWithOverhead +
+        final gasBudget =
+            baseComputationCostWithOverhead +
             BigInt.from(dryRunResult.effects.gasUsed.storageCost) -
             BigInt.from(dryRunResult.effects.gasUsed.storageRebate);
 
         // Set the budget to max(computation, computation + storage - rebate)
         setGasBudget(
-          gasBudget > baseComputationCostWithOverhead ? gasBudget : baseComputationCostWithOverhead,
+          gasBudget > baseComputationCostWithOverhead
+              ? gasBudget
+              : baseComputationCostWithOverhead,
         );
       }
     }
@@ -1036,10 +1139,13 @@ class Transaction {
     transactionData.getInputUses(index, (arg, tx) {
       if (tx["MoveCall"]?["_argumentTypes"] != null) {
         final arguments = tx["MoveCall"]["arguments"].toList();
-        final argIndex =
-            arguments.indexWhere((element) => DeepCollectionEquality().equals(element, arg));
+        final argIndex = arguments.indexWhere(
+          (element) => DeepCollectionEquality().equals(element, arg),
+        );
         if (argIndex != -1) {
-          usedAsMutable = tx["MoveCall"]["_argumentTypes"][argIndex]["ref"] != '&' || usedAsMutable;
+          usedAsMutable =
+              tx["MoveCall"]["_argumentTypes"][argIndex]["ref"] != '&' ||
+              usedAsMutable;
         }
       } else if (tx["MakeMoveVec"] != null ||
           tx["MergeCoins"] == null ||
@@ -1051,17 +1157,22 @@ class Transaction {
     return usedAsMutable;
   }
 
-  bool isUsedAsReceiving(TransactionBlockDataBuilder transactionData, int index) {
+  bool isUsedAsReceiving(
+    TransactionBlockDataBuilder transactionData,
+    int index,
+  ) {
     var usedAsReceiving = false;
 
     transactionData.getInputUses(index, (arg, tx) {
       if (tx["MoveCall"]?["_argumentTypes"] != null) {
         final arguments = tx["MoveCall"]["arguments"].toList();
-        final argIndex =
-            arguments.indexWhere((element) => DeepCollectionEquality().equals(element, arg));
+        final argIndex = arguments.indexWhere(
+          (element) => DeepCollectionEquality().equals(element, arg),
+        );
         if (argIndex != -1) {
           usedAsReceiving =
-              isReceivingType(tx["MoveCall"]["_argumentTypes"][argIndex]) || usedAsReceiving;
+              isReceivingType(tx["MoveCall"]["_argumentTypes"][argIndex]) ||
+              usedAsReceiving;
         }
       }
     });

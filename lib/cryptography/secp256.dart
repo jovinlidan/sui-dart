@@ -25,7 +25,9 @@ class Secp256 {
 
   factory Secp256.fromSecp256r1() => Secp256(curve256r1Params);
 
-  AsymmetricKeyPair<PublicKey, PrivateKey> generateKeypair([SecureRandom? random]) {
+  AsymmetricKeyPair<PublicKey, PrivateKey> generateKeypair([
+    SecureRandom? random,
+  ]) {
     random ??= getRandom();
     CipherParameters cipherParams = ECKeyGeneratorParameters(_ecDomainParams);
     cipherParams = ParametersWithRandom(cipherParams, random);
@@ -54,7 +56,10 @@ class Secp256 {
     return isCompressed ? buffer : Uint8List.sublistView(buffer, 1);
   }
 
-  Uint8List getPublicKeyFromPrivateKeyBytes(Uint8List privateKey, [bool isCompressed = true]) {
+  Uint8List getPublicKeyFromPrivateKeyBytes(
+    Uint8List privateKey, [
+    bool isCompressed = true,
+  ]) {
     BigInt privKey = decodeBigIntToUnsigned(privateKey);
     return getPublicKey(privKey, isCompressed);
   }
@@ -62,8 +67,13 @@ class Secp256 {
   /// Given an arbitrary message hash and an Ethereum message signature encoded in bytes, returns
   /// the public key that was used to sign it.
   /// https://github.com/web3j/web3j/blob/c0b7b9c2769a466215d416696021aa75127c2ff1/crypto/src/main/java/org/web3j/crypto/Sign.java#L241
-  Uint8List ecRecover(int recId, Uint8List messageHash, SignatureData signature,
-      [bool isCompressed = false, bool isEthereum = false]) {
+  Uint8List ecRecover(
+    int recId,
+    Uint8List messageHash,
+    SignatureData signature, [
+    bool isCompressed = false,
+    bool isEthereum = false,
+  ]) {
     var header = recId & 0xFF;
     // The header byte: 0x1B = first key with even y, 0x1C = first key with odd y,
     //                  0x1D = second key with even y, 0x1E = second key with odd y
@@ -75,7 +85,12 @@ class Secp256 {
     final sig = ECSignature(signature.r, signature.s);
 
     recId = header - magicNum;
-    Uint8List? pubKey = recoverFromSignature(recId, sig, messageHash, isCompressed);
+    Uint8List? pubKey = recoverFromSignature(
+      recId,
+      sig,
+      messageHash,
+      isCompressed,
+    );
     if (pubKey == null) {
       throw Exception('Could not recover public key from signature');
     }
@@ -88,13 +103,25 @@ class Secp256 {
     Uint8List publicKey,
   ) {
     int recId = recoveryId(signature, messageHash, publicKey);
-    final recoveredPublicKey = ecRecover(recId, messageHash, signature, publicKey.length == 33);
+    final recoveredPublicKey = ecRecover(
+      recId,
+      messageHash,
+      signature,
+      publicKey.length == 33,
+    );
     return Hex.encode(publicKey) == Hex.encode(recoveredPublicKey);
   }
 
-  SignatureData sign(Uint8List messageHash, Uint8List privateKey, [bool isEthereum = false]) {
+  SignatureData sign(
+    Uint8List messageHash,
+    Uint8List privateKey, [
+    bool isEthereum = false,
+  ]) {
     final signer = ECDSASigner(null, HMac(SHA256Digest(), 64));
-    final key = ECPrivateKey(decodeBigIntToUnsigned(privateKey), _ecDomainParams);
+    final key = ECPrivateKey(
+      decodeBigIntToUnsigned(privateKey),
+      _ecDomainParams,
+    );
     signer.init(true, PrivateKeyParameter(key));
     var signature = signer.generateSignature(messageHash) as ECSignature;
     if (!signature.isNormalized(_ecDomainParams)) {
@@ -114,8 +141,15 @@ class Secp256 {
 
     int recId = -1;
     for (int i = 0; i < 4; i++) {
-      Uint8List? k = recoverFromSignature(i, signature, messageHash, isCompressed);
-      if (k != null && decodeBigIntToUnsigned(k.sublist(isCompressed ? 0 : 1)) == publicKey) {
+      Uint8List? k = recoverFromSignature(
+        i,
+        signature,
+        messageHash,
+        isCompressed,
+      );
+      if (k != null &&
+          decodeBigIntToUnsigned(k.sublist(isCompressed ? 0 : 1)) ==
+              publicKey) {
         recId = i;
         break;
       }
@@ -130,8 +164,12 @@ class Secp256 {
     return recId;
   }
 
-  Uint8List? recoverFromSignature(int recId, ECSignature sig, Uint8List msg,
-      [bool encoded = false]) {
+  Uint8List? recoverFromSignature(
+    int recId,
+    ECSignature sig,
+    Uint8List msg, [
+    bool encoded = false,
+  ]) {
     final n = _ecDomainParams.n;
     final i = BigInt.from(recId ~/ 2);
     final x = sig.r + (i * n);
@@ -159,7 +197,10 @@ class Secp256 {
   }
 
   ECPoint _decompressKey(BigInt xBN, bool yBit) {
-    final compEnc = _x9IntegerToBytes(xBN, 1 + ((_ecDomainParams.curve.fieldSize + 7) ~/ 8));
+    final compEnc = _x9IntegerToBytes(
+      xBN,
+      1 + ((_ecDomainParams.curve.fieldSize + 7) ~/ 8),
+    );
     compEnc[0] = yBit ? 0x03 : 0x02;
     return _ecDomainParams.curve.decodePoint(compEnc)!;
   }
@@ -182,7 +223,7 @@ class Secp256 {
 }
 
 class SignatureData extends ECSignature {
-  SignatureData(BigInt r, BigInt s) : super(r, s);
+  SignatureData(super.r, super.s);
 
   factory SignatureData.fromBytes(Uint8List data) {
     if (data.length != 64) {

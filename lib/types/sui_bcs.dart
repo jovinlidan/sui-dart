@@ -11,9 +11,13 @@ class SharedObjectRef {
   /// Whether reference is mutable
   bool mutable;
 
-  SharedObjectRef(this.objectId, final dynamic initialSharedVersion, this.mutable)
-      : this.initialSharedVersion =
-            initialSharedVersion is String ? int.parse(initialSharedVersion) : initialSharedVersion;
+  SharedObjectRef(
+    this.objectId,
+    final dynamic initialSharedVersion,
+    this.mutable,
+  ) : initialSharedVersion = initialSharedVersion is String
+          ? int.parse(initialSharedVersion)
+          : initialSharedVersion;
 }
 
 typedef ObjectArg = dynamic;
@@ -36,7 +40,12 @@ class StructTag {
   StructTag(this.address, this.module, this.name, this.typeParams);
 
   Map<String, dynamic> toJson() {
-    return {"address": address, "module": module, "name": name, "typeParams": typeParams};
+    return {
+      "address": address,
+      "module": module,
+      "name": name,
+      "typeParams": typeParams,
+    };
   }
 }
 

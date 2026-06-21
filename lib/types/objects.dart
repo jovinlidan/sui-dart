@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names
 import 'package:sui_dart/types/common.dart';
 
 class SuiObjectRef {
@@ -11,18 +12,18 @@ class SuiObjectRef {
   int version;
 
   SuiObjectRef(this.digest, this.objectId, final dynamic version)
-      : this.version = version is String ? int.parse(version) : version;
+    : version = version is String ? int.parse(version) : version;
 
   factory SuiObjectRef.fromJson(dynamic data) {
-    return SuiObjectRef(data['digest'], data['objectId'], int.parse(data['version'].toString()));
+    return SuiObjectRef(
+      data['digest'],
+      data['objectId'],
+      int.parse(data['version'].toString()),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'digest': digest,
-      'objectId': objectId,
-      'version': version,
-    };
+    return {'digest': digest, 'objectId': objectId, 'version': version};
   }
 }
 
@@ -39,7 +40,13 @@ class SuiObjectError {
   String? error;
   String code;
 
-  SuiObjectError(this.code, this.digest, this.objectId, this.version, this.error);
+  SuiObjectError(
+    this.code,
+    this.digest,
+    this.objectId,
+    this.version,
+    this.error,
+  );
 
   factory SuiObjectError.fromJson(dynamic data) {
     return SuiObjectError(
@@ -57,7 +64,7 @@ class SuiObjectError {
       'digest': digest,
       'object_id': objectId,
       'version': version,
-      'error': error
+      'error': error,
     };
   }
 }
@@ -132,7 +139,11 @@ class CoinDenominationInfoResponse {
   /// number of zeros in the denomination, e.g., 9 here for SUI.
   int decimalNumber;
 
-  CoinDenominationInfoResponse(this.coinType, this.basicUnit, this.decimalNumber);
+  CoinDenominationInfoResponse(
+    this.coinType,
+    this.basicUnit,
+    this.decimalNumber,
+  );
 }
 
 class SuiMovePackage {
@@ -187,16 +198,25 @@ class SuiObjectData {
   String? bcsBytes;
 
   SuiObjectData(
-      this.dataType, this.type, this.hasPublicTransfer, this.fields, this.version, this.bcsBytes);
+    this.dataType,
+    this.type,
+    this.hasPublicTransfer,
+    this.fields,
+    this.version,
+    this.bcsBytes,
+  );
 
   factory SuiObjectData.fromJson(dynamic data) {
     return SuiObjectData(
-        data['dataType'],
-        data['type'],
-        data['hasPublicTransfer'],
-        data['fields'] != null ? SuiObjectDataFields.fromJson(data['fields']) : null,
-        data['version'],
-        data['bcs_bytes']);
+      data['dataType'],
+      data['type'],
+      data['hasPublicTransfer'],
+      data['fields'] != null
+          ? SuiObjectDataFields.fromJson(data['fields'])
+          : null,
+      data['version'],
+      data['bcs_bytes'],
+    );
   }
 }
 
@@ -214,16 +234,10 @@ class DisplayFieldsResponse {
   Map<String, dynamic>? data;
   dynamic error;
 
-  DisplayFieldsResponse(
-    this.data,
-    this.error,
-  );
+  DisplayFieldsResponse(this.data, this.error);
 
   factory DisplayFieldsResponse.fromJson(dynamic data) {
-    return DisplayFieldsResponse(
-      data['data'],
-      data['error'],
-    );
+    return DisplayFieldsResponse(data['data'], data['error']);
   }
 }
 
@@ -314,7 +328,7 @@ class SuiObject extends SuiObjectRef {
       'owner': owner,
       'previousTransaction': previousTransaction,
       'storageRebate': storageRebate,
-      'display': display
+      'display': display,
     };
   }
 }
@@ -377,8 +391,9 @@ SuiObjectRef? getObjectReference(SuiObjectResponse resp) {
   }
 }
 
-int? getObjectVersion(dynamic data // SuiObjectResponse | SuiObjectRef
-    ) {
+int? getObjectVersion(
+  dynamic data, // SuiObjectResponse | SuiObjectRef
+) {
   if (data is SuiObjectRef) {
     return data.version;
   }
@@ -500,11 +515,7 @@ class PaginatedObjectsResponse {
   String nextCursor;
   bool hasNextPage;
 
-  PaginatedObjectsResponse(
-    this.data,
-    this.nextCursor,
-    this.hasNextPage,
-  );
+  PaginatedObjectsResponse(this.data, this.nextCursor, this.hasNextPage);
 
   factory PaginatedObjectsResponse.fromJson(dynamic data) {
     List<SuiObjectResponse> list = [];

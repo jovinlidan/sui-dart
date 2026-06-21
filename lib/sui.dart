@@ -1,4 +1,4 @@
-library sui;
+library;
 
 export 'bcs/sui_bcs.dart';
 export 'bcs/sui_effects.dart';
@@ -59,4 +59,3 @@ export 'utils/suins.dart';
 // export 'grpc/proto/sui/rpc/v2/transaction_execution_service.pbgrpc.dart';
 // export 'grpc/proto/sui/rpc/v2/object_reference.pb.dart';
 // export 'grpc/proto/sui/rpc/v2/transaction.pb.dart';
-

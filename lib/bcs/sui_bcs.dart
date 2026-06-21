@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names
 import 'dart:typed_data';
 
 import 'package:bcs_dart/bcs.dart';
@@ -19,21 +20,21 @@ class SuiBcs {
   static final STRING = Bcs.string();
   static const VECTOR = Bcs.vector;
 
-  static BcsType<int, dynamic> unsafe_u64([BcsTypeOptions<int, dynamic>? options]) {
-    return Bcs.u64(BcsTypeOptions(
-      name: 'unsafe_u64',
-      validate: options?.validate,
-    )).transform(
+  static BcsType<int, dynamic> unsafe_u64([
+    BcsTypeOptions<int, dynamic>? options,
+  ]) {
+    return Bcs.u64(
+      BcsTypeOptions(name: 'unsafe_u64', validate: options?.validate),
+    ).transform(
       input: (dynamic val) => val is int ? val : int.parse(val.toString()),
       output: (BigInt val) => val.toInt(),
     );
   }
 
-  static BcsType<Map<String, dynamic>, dynamic> OptionEnum<T>(BcsType<T, dynamic> type) {
-    return Bcs.enumeration('Option', {
-      'None': null,
-      'Some': type,
-    });
+  static BcsType<Map<String, dynamic>, dynamic> OptionEnum<T>(
+    BcsType<T, dynamic> type,
+  ) {
+    return Bcs.enumeration('Option', {'None': null, 'Some': type});
   }
 
   static final Address = Bcs.bytes(SUI_ADDRESS_LENGTH).transform(
@@ -43,7 +44,8 @@ class SuiBcs {
         throw Exception('Invalid Sui address $address');
       }
     },
-    input: (dynamic val) => val is String ? fromHEX(normalizeSuiAddress(val)) : val,
+    input: (dynamic val) =>
+        val is String ? fromHEX(normalizeSuiAddress(val)) : val,
     output: (Uint8List val) => normalizeSuiAddress(toHEX(val)),
   );
 
@@ -79,9 +81,7 @@ class SuiBcs {
   static final Owner = Bcs.enumeration('Owner', {
     'AddressOwner': Address,
     'ObjectOwner': Address,
-    'Shared': Bcs.struct('Shared', {
-      'initialSharedVersion': Bcs.u64(),
-    }),
+    'Shared': Bcs.struct('Shared', {'initialSharedVersion': Bcs.u64()}),
     'Immutable': null,
     'ConsensusAddressOwner': Bcs.struct('ConsensusAddressOwner', {
       'owner': Address,
@@ -99,23 +99,26 @@ class SuiBcs {
     'Object': ObjectArg,
   });
 
-  static final BcsType<dynamic, dynamic> InnerTypeTag = Bcs.enumeration('TypeTag', {
-    'bool': null,
-    'u8': null,
-    'u64': null,
-    'u128': null,
-    'address': null,
-    'signer': null,
-    'vector': Bcs.lazy(() => InnerTypeTag),
-    'struct': Bcs.lazy(() => StructTag),
-    'u16': null,
-    'u32': null,
-    'u256': null,
-  }) as BcsType<dynamic, dynamic>;
+  static final BcsType<dynamic, dynamic> InnerTypeTag =
+      Bcs.enumeration('TypeTag', {
+            'bool': null,
+            'u8': null,
+            'u64': null,
+            'u128': null,
+            'address': null,
+            'signer': null,
+            'vector': Bcs.lazy(() => InnerTypeTag),
+            'struct': Bcs.lazy(() => StructTag),
+            'u16': null,
+            'u32': null,
+            'u256': null,
+          })
+          as BcsType<dynamic, dynamic>;
 
   static final TypeTag = InnerTypeTag.transform(
-    input: (dynamic typeTag) =>
-        typeTag is String ? TypeTagSerializer.parseFromStr(typeTag, true) : typeTag,
+    input: (dynamic typeTag) => typeTag is String
+        ? TypeTagSerializer.parseFromStr(typeTag, true)
+        : typeTag,
     output: (dynamic typeTag) => TypeTagSerializer.tagToString(typeTag),
   );
 
@@ -189,10 +192,10 @@ class SuiBcs {
     'ConsensusCommitPrologue': null,
   });
 
-  static final TransactionExpiration = Bcs.enumeration('TransactionExpiration', {
-    'None': null,
-    'Epoch': unsafe_u64(),
-  });
+  static final TransactionExpiration = Bcs.enumeration(
+    'TransactionExpiration',
+    {'None': null, 'Epoch': unsafe_u64()},
+  );
 
   static final StructTag = Bcs.struct('StructTag', {
     'address': Address,
@@ -226,13 +229,9 @@ class SuiBcs {
     'PersonalMessage': null,
   });
 
-  static final IntentVersion = Bcs.enumeration('IntentVersion', {
-    'V0': null,
-  });
+  static final IntentVersion = Bcs.enumeration('IntentVersion', {'V0': null});
 
-  static final AppId = Bcs.enumeration('AppId', {
-    'Sui': null,
-  });
+  static final AppId = Bcs.enumeration('AppId', {'Sui': null});
 
   static final Intent = Bcs.struct('Intent', {
     'scope': IntentScope,
@@ -240,7 +239,9 @@ class SuiBcs {
     'appId': AppId,
   });
 
-  static BcsType<Map<String, dynamic>, dynamic> IntentMessage<T>(BcsType<T, dynamic> T) {
+  static BcsType<Map<String, dynamic>, dynamic> IntentMessage<T>(
+    BcsType<T, dynamic> T,
+  ) {
     return Bcs.struct('IntentMessage<${T.name}>', {
       'intent': Intent,
       'value': T,
@@ -289,8 +290,10 @@ class SuiBcs {
     'txSignatures': Bcs.vector(base64String),
   });
 
-  static final SenderSignedData =
-      Bcs.vector(SenderSignedTransaction, BcsTypeOptions(name: 'SenderSignedData'));
+  static final SenderSignedData = Bcs.vector(
+    SenderSignedTransaction,
+    BcsTypeOptions(name: 'SenderSignedData'),
+  );
 
   static final PasskeyAuthenticator = Bcs.struct('PasskeyAuthenticator', {
     'authenticatorData': Bcs.vector(Bcs.u8()),

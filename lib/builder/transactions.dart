@@ -7,8 +7,11 @@ import 'package:sui_dart/types/common.dart';
 
 /// Simple helpers used to construct transactions:
 class Transactions {
-  static Map<String, dynamic> moveCall(
-      {required String target, List? typeArguments, List? arguments}) {
+  static Map<String, dynamic> moveCall({
+    required String target,
+    List? typeArguments,
+    List? arguments,
+  }) {
     return {
       "kind": 'MoveCall',
       "target": target,
@@ -25,20 +28,29 @@ class Transactions {
     return {"kind": 'SplitCoins', "coin": coin, "amounts": amounts};
   }
 
-  static Map<String, dynamic> mergeCoins(
-    dynamic destination,
-    List sources,
-  ) {
-    return {"kind": 'MergeCoins', "destination": destination, "sources": sources};
+  static Map<String, dynamic> mergeCoins(dynamic destination, List sources) {
+    return {
+      "kind": 'MergeCoins',
+      "destination": destination,
+      "sources": sources,
+    };
   }
 
-  static Map<String, dynamic> publish(List<dynamic> modules, List<String> dependencies) {
+  static Map<String, dynamic> publish(
+    List<dynamic> modules,
+    List<String> dependencies,
+  ) {
     return {
       "kind": 'Publish',
       "modules": modules
-          .map((module) => module is String ? module : toB64(Uint8List.fromList(module)))
+          .map(
+            (module) =>
+                module is String ? module : toB64(Uint8List.fromList(module)),
+          )
           .toList(),
-      "dependencies": dependencies.map((dep) => normalizeSuiObjectId(dep)).toList(),
+      "dependencies": dependencies
+          .map((dep) => normalizeSuiObjectId(dep))
+          .toList(),
     };
   }
 
@@ -51,7 +63,10 @@ class Transactions {
     return {
       "kind": 'Upgrade',
       "modules": modules
-          .map((module) => module is String ? module : toB64(Uint8List.fromList(module)))
+          .map(
+            (module) =>
+                module is String ? module : toB64(Uint8List.fromList(module)),
+          )
           .toList(),
       "dependencies": dependencies.map((dep) => normalizeSuiObjectId(dep)),
       "packageId": packageId,
@@ -65,7 +80,9 @@ class Transactions {
   }) {
     return {
       "kind": 'MakeMoveVec',
-      "type": type != null ? {"Some": TypeTagSerializer.parseFromStr(type)} : {"None": null},
+      "type": type != null
+          ? {"Some": TypeTagSerializer.parseFromStr(type)}
+          : {"None": null},
       "objects": objects,
     };
   }

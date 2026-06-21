@@ -20,29 +20,33 @@ class WebsocketClient {
   WebSocketChannel setupClient() {
     if (_webSocketChannel != null) return _webSocketChannel!;
     final channel = WebSocketChannel.connect(Uri.parse(endpoint));
-    channel.stream.listen((event) {
-      final data = jsonDecode(event);
-      if (data["error"] != null) {
-        streams[data["id"]]?.addError(data["error"]);
-      } else if (data["id"] != null && data["result"] != null) {
-        final reqId = data["result"];
-        final subId = data["id"];
-        subscriptionIdToRequestId[reqId] = subId;
-        requestIdToSubscriptionId[subId] = reqId;
-      } else {
-        final subId = data["params"]["subscription"];
-        final sm = streams[subscriptionIdToRequestId[subId]];
-        if (sm != null) {
-          sm.sink.add(event);
+    channel.stream.listen(
+      (event) {
+        final data = jsonDecode(event);
+        if (data["error"] != null) {
+          streams[data["id"]]?.addError(data["error"]);
+        } else if (data["id"] != null && data["result"] != null) {
+          final reqId = data["result"];
+          final subId = data["id"];
+          subscriptionIdToRequestId[reqId] = subId;
+          requestIdToSubscriptionId[subId] = reqId;
+        } else {
+          final subId = data["params"]["subscription"];
+          final sm = streams[subscriptionIdToRequestId[subId]];
+          if (sm != null) {
+            sm.sink.add(event);
+          }
         }
-      }
-    }, onError: (e) {
-      print(e);
-    }, onDone: () {
-      // for (var key in streams.keys) {
-      // streams[key]?.sink.close();
-      // }
-    });
+      },
+      onError: (e) {
+        print(e);
+      },
+      onDone: () {
+        // for (var key in streams.keys) {
+        // streams[key]?.sink.close();
+        // }
+      },
+    );
 
     _webSocketChannel = channel;
     return _webSocketChannel!;
@@ -50,14 +54,16 @@ class WebsocketClient {
 
   Stream<dynamic> send(dynamic data) {
     final client = setupClient();
-    final controller = StreamController(onCancel: () {
-      final cancel = {
-        "jsonrpc": "2.0",
-        "method": "suix_unsubscribeEvent",
-        "params": [requestIdToSubscriptionId[data["id"]]]
-      };
-      client.sink.add(cancel);
-    });
+    final controller = StreamController(
+      onCancel: () {
+        final cancel = {
+          "jsonrpc": "2.0",
+          "method": "suix_unsubscribeEvent",
+          "params": [requestIdToSubscriptionId[data["id"]]],
+        };
+        client.sink.add(cancel);
+      },
+    );
     streams[data['id']] = controller;
     final sendData = jsonEncode(data);
     client.sink.add(sendData);
@@ -78,7 +84,7 @@ class WebsocketClient {
       "jsonrpc": "2.0",
       "id": _id,
       "method": "suix_subscribeEvent",
-      "params": [filter]
+      "params": [filter],
     };
     return send(data);
   }
@@ -89,7 +95,7 @@ class WebsocketClient {
       "jsonrpc": "2.0",
       "id": _id,
       "method": "suix_subscribeEvent",
-      "params": [filter.toJson()]
+      "params": [filter.toJson()],
     };
     return send(data);
   }
@@ -100,7 +106,7 @@ class WebsocketClient {
       "jsonrpc": "2.0",
       "id": _id,
       "method": "suix_subscribeTransaction",
-      "params": [filter]
+      "params": [filter],
     };
     return send(data);
   }

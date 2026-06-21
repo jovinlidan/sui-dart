@@ -1,8 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:sui_dart/types/common.dart' as legacy_common;
-import 'package:sui_dart/types/objects.dart' as legacy_objects;
-
 class ObjectIncludeOptions {
   final bool content;
   final bool previousTransaction;
@@ -42,11 +39,7 @@ class Page<T> {
   final bool hasNextPage;
   final String? nextCursor;
 
-  const Page({
-    required this.data,
-    required this.hasNextPage,
-    this.nextCursor,
-  });
+  const Page({required this.data, required this.hasNextPage, this.nextCursor});
 }
 
 sealed class Owner {
@@ -121,8 +114,6 @@ class ObjectData {
     this.objectBcs,
     this.json,
   });
-
-  
 }
 
 class CoinData {
@@ -273,10 +264,7 @@ class ExecutionStatus {
   final bool success;
   final ExecutionError? error;
 
-  const ExecutionStatus({
-    required this.success,
-    this.error,
-  });
+  const ExecutionStatus({required this.success, this.error});
 }
 
 class GasUsed {
@@ -298,11 +286,7 @@ class GasObject {
   final String? inputState;
   final String? outputState;
 
-  const GasObject({
-    required this.objectId,
-    this.inputState,
-    this.outputState,
-  });
+  const GasObject({required this.objectId, this.inputState, this.outputState});
 }
 
 class ExecutionError {
@@ -527,10 +511,7 @@ class VerifySignatureResult {
   final bool isValid;
   final String? reason;
 
-  const VerifySignatureResult({
-    required this.isValid,
-    this.reason,
-  });
+  const VerifySignatureResult({required this.isValid, this.reason});
 }
 
 class MoveFunction {

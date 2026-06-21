@@ -12,7 +12,8 @@ void main() {
       // set up default zklogin public identifier consistent with default zklogin proof.
       final pkZklogin = toZkLoginPublicIdentifier(
         BigInt.parse(
-            '20794788559620669596206457022966176986688727876128223628113916380927502737911'),
+          '20794788559620669596206457022966176986688727876128223628113916380927502737911',
+        ),
         'https://id.twitch.tv/oauth2',
       );
       // set up ephemeral keypair, consistent with default zklogin proof.
@@ -146,16 +147,24 @@ void main() {
           ],
         },
       };
-      final ephemeralSig = ephemeralKeypair.signTransactionBlock(bytes).signature;
+      final ephemeralSig = ephemeralKeypair
+          .signTransactionBlock(bytes)
+          .signature;
 
       // create zklogin signature based on default zk proof.
-      final zkLoginSig = getZkLoginSignature(ZkLoginSignature(
+      final zkLoginSig = getZkLoginSignature(
+        ZkLoginSignature(
           inputs: ZkLoginSignatureInputs.fromJson(zkLoginInputs),
           maxEpoch: 10,
-          userSignature: fromB64(ephemeralSig)));
+          userSignature: fromB64(ephemeralSig),
+        ),
+      );
 
       // combine to multisig and execute the transaction.
-      final signature = multiSigPublicKey.combinePartialSignatures([singleSig, zkLoginSig]);
+      final signature = multiSigPublicKey.combinePartialSignatures([
+        singleSig,
+        zkLoginSig,
+      ]);
       final result = await client.executeTransactionBlock(
         toB64(bytes),
         [signature],

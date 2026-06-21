@@ -1,5 +1,4 @@
-
-
+// ignore_for_file: constant_identifier_names
 import 'dart:typed_data';
 
 import 'package:sui_dart/cryptography/keypair.dart';
@@ -16,16 +15,12 @@ class PubkeyWeightPair {
 }
 
 class MultiSig {
-
   static const int MAX_SIGNER_IN_MULTISIG = 10;
 
   /// Derives a multisig address from a list of pk and weights and threshold.
   // It is the 32-byte Blake2b hash of the serializd bytes of `flag_MultiSig || threshold || flag_1 || pk_1 || weight_1
   /// || ... || flag_n || pk_n || weight_n`
-  static String toMultiSigAddress(
-    List<PubkeyWeightPair> pks,
-    int threshold
-  ) {
+  static String toMultiSigAddress(List<PubkeyWeightPair> pks, int threshold) {
     if (pks.length > MAX_SIGNER_IN_MULTISIG) {
       throw ArgumentError(
         "Max number of signers in a multisig is $MAX_SIGNER_IN_MULTISIG",
@@ -44,9 +39,7 @@ class MultiSig {
       tmp.setAll(i + 1 + pk.pubKey.toRawBytes().length, [pk.weight]);
       i += pk.pubKey.toRawBytes().length + 2;
     }
-    return normalizeSuiAddress(
-      Hex.encode(blake2b(tmp.sublist(0, i))),
-    );
+    return normalizeSuiAddress(Hex.encode(blake2b(tmp.sublist(0, i))));
   }
 
   /// Convert u16 to Uint8List of length 2 in little endian.
@@ -59,5 +52,4 @@ class MultiSig {
     arr[1] = threshold >> 8;
     return arr;
   }
-
 }

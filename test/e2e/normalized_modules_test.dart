@@ -20,14 +20,19 @@ void main() {
 
   test('test getNormalizedMoveModulesByPackage', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final moveModules = await client.getNormalizedMoveModulesByPackage(defaultPackage);
+    final moveModules = await client.getNormalizedMoveModulesByPackage(
+      defaultPackage,
+    );
     expect(moveModules.keys.contains(defaultModule), true);
     expect(moveModules.keys.isNotEmpty, true);
   });
 
   test('test getNormalizedMoveModule', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final moveModule = await client.getNormalizedMoveModule(defaultPackage, defaultModule);
+    final moveModule = await client.getNormalizedMoveModule(
+      defaultPackage,
+      defaultModule,
+    );
     expect(moveModule.exposedFunctions.containsKey(defaultFunction), true);
   });
 

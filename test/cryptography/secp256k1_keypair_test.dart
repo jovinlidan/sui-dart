@@ -7,7 +7,7 @@ import 'package:sui_dart/cryptography/secp256k1_keypair.dart';
 import 'package:sui_dart/utils/sha.dart';
 
 void main() {
-  const VALID_SECP256K1_SECRET_KEY = [
+  const validSecp256k1SecretKey = [
     59,
     148,
     11,
@@ -43,7 +43,7 @@ void main() {
   ];
 
   // Corresponding to the secret key above.
-  const VALID_SECP256K1_PUBLIC_KEY = [
+  const validSecp256k1PublicKey = [
     2,
     29,
     21,
@@ -80,9 +80,9 @@ void main() {
   ];
 
   // Invalid private key with incorrect length
-  final INVALID_SECP256K1_SECRET_KEY = Uint8List.fromList(List<int>.filled(31, 1));
+  final invalidSecp256k1SecretKey = Uint8List.fromList(List<int>.filled(31, 1));
 
-  const TEST_MNEMONIC =
+  const testMnemonic =
       'result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss';
 
   group('secp256k1-keypair', () {
@@ -92,17 +92,20 @@ void main() {
     });
 
     test('create keypair from secret key', () {
-      final secretKey = Uint8List.fromList(VALID_SECP256K1_SECRET_KEY);
-      final pubKey = Uint8List.fromList(VALID_SECP256K1_PUBLIC_KEY);
+      final secretKey = Uint8List.fromList(validSecp256k1SecretKey);
+      final pubKey = Uint8List.fromList(validSecp256k1PublicKey);
       final pubKeyBase64 = base64Encode(pubKey);
       final keypair = Secp256k1Keypair.fromSecretKey(secretKey);
       expect(
-          base64Encode(keypair.publicKeyBytes()) == base64Encode(Uint8List.fromList(pubKey)), true);
+        base64Encode(keypair.publicKeyBytes()) ==
+            base64Encode(Uint8List.fromList(pubKey)),
+        true,
+      );
       expect(keypair.getPublicKey().toBase64() == pubKeyBase64, true);
     });
 
     test('creating keypair from invalid secret key throws error', () {
-      var secretKey = Uint8List.fromList(INVALID_SECP256K1_SECRET_KEY);
+      var secretKey = Uint8List.fromList(invalidSecp256k1SecretKey);
       final secretKeyBase64 = base64Encode(secretKey);
       secretKey = base64Decode(secretKeyBase64);
       expect(() {
@@ -111,9 +114,14 @@ void main() {
     });
 
     test('generate keypair from random seed', () {
-      final keypair = Secp256k1Keypair.fromSeed(Uint8List.fromList(List<int>.filled(32, 8)));
-      expect(keypair.getPublicKey().toBase64() == 'A/mR+UTR4ZVKf8i5v2Lg148BX0wHdi1QXiDmxFJgo2Yb',
-          true);
+      final keypair = Secp256k1Keypair.fromSeed(
+        Uint8List.fromList(List<int>.filled(32, 8)),
+      );
+      expect(
+        keypair.getPublicKey().toBase64() ==
+            'A/mR+UTR4ZVKf8i5v2Lg148BX0wHdi1QXiDmxFJgo2Yb',
+        true,
+      );
     });
 
     test('signature of data is valid', () async {
@@ -123,40 +131,59 @@ void main() {
       final msgHash = sha256(signData);
       final sig = keypair.signData(signData);
       final signature = SignatureData.fromBytes(sig);
-      int recId =
-          Secp256k1Keypair.secp256k1.recoveryId(signature, msgHash, keypair.publicKeyBytes(false));
-      final publicKey = Secp256k1Keypair.secp256k1.ecRecover(recId, msgHash, signature);
+      int recId = Secp256k1Keypair.secp256k1.recoveryId(
+        signature,
+        msgHash,
+        keypair.publicKeyBytes(false),
+      );
+      final publicKey = Secp256k1Keypair.secp256k1.ecRecover(
+        recId,
+        msgHash,
+        signature,
+      );
 
-      expect(base64Encode(publicKey) == base64Encode(keypair.publicKeyBytes(false)), true);
+      expect(
+        base64Encode(publicKey) == base64Encode(keypair.publicKeyBytes(false)),
+        true,
+      );
     });
 
     test('invalid mnemonics to derive secp256k1 keypair', () {
       expect(() {
-        Secp256k1Keypair.deriveKeypair(DEFAULT_SECP256K1_DERIVATION_PATH, 'aaa');
+        Secp256k1Keypair.deriveKeypair(
+          DEFAULT_SECP256K1_DERIVATION_PATH,
+          'aaa',
+        );
       }, throwsArgumentError);
     });
 
     test('derive secp256k1 keypair from path and mnemonics', () {
-      final keypair =
-          Secp256k1Keypair.deriveKeypair(DEFAULT_SECP256K1_DERIVATION_PATH, TEST_MNEMONIC);
+      final keypair = Secp256k1Keypair.deriveKeypair(
+        DEFAULT_SECP256K1_DERIVATION_PATH,
+        testMnemonic,
+      );
 
-      expect(keypair.getPublicKey().toBase64() == 'A+NxdDVYKrM9LjFdIem8ThlQCh/EyM3HOhU2WJF3SxMf',
-          true);
       expect(
-          keypair.getPublicKey().toSuiAddress() ==
-              '0x7ec1b6df34a4018c377109851af1cf70db6687dd4a880a51f9119af86d855643',
-          true);
+        keypair.getPublicKey().toBase64() ==
+            'A+NxdDVYKrM9LjFdIem8ThlQCh/EyM3HOhU2WJF3SxMf',
+        true,
+      );
+      expect(
+        keypair.getPublicKey().toSuiAddress() ==
+            '0x7ec1b6df34a4018c377109851af1cf70db6687dd4a880a51f9119af86d855643',
+        true,
+      );
     });
 
     test('incorrect purpose node for secp256k1 derivation path', () {
       expect(() {
-        Secp256k1Keypair.deriveKeypair("m/44'/784'/0'/0'/0'", TEST_MNEMONIC);
+        Secp256k1Keypair.deriveKeypair("m/44'/784'/0'/0'/0'", testMnemonic);
       }, throwsArgumentError);
     });
 
     test('incorrect hardened path for secp256k1 key derivation', () {
       expect(() {
-        Secp256k1Keypair.deriveKeypair("m/54'/784'/0'/0'/0'", TEST_MNEMONIC);
+        Secp256k1Keypair.deriveKeypair("m/54'/784'/0'/0'/0'", testMnemonic);
       }, throwsArgumentError);
     });
 
@@ -166,8 +193,14 @@ void main() {
 
       final signatureWithBytes = (keypair.signPersonalMessage(message));
 
-      expect(keypair.verifyPersonalMessage(message, signatureWithBytes.signature), true);
-      expect(keypair.verifyPersonalMessage(message, signatureWithBytes.signature), true);
+      expect(
+        keypair.verifyPersonalMessage(message, signatureWithBytes.signature),
+        true,
+      );
+      expect(
+        keypair.verifyPersonalMessage(message, signatureWithBytes.signature),
+        true,
+      );
     });
   });
 }

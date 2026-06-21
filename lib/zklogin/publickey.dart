@@ -59,12 +59,15 @@ class ZkLoginPublicIdentifier with PublicKey {
 }
 
 ZkLoginPublicIdentifier toZkLoginPublicIdentifier(
-    BigInt addressSeed, String iss) {
+  BigInt addressSeed,
+  String iss,
+) {
   // Consists of iss_bytes_len || iss_bytes || padded_32_byte_address_seed.
   Uint8List addressSeedBytesBigEndian = toPaddedBigEndianBytes(addressSeed, 32);
   List<int> issBytes = utf8.encode(iss);
-  Uint8List tmp =
-      Uint8List(1 + issBytes.length + addressSeedBytesBigEndian.length);
+  Uint8List tmp = Uint8List(
+    1 + issBytes.length + addressSeedBytesBigEndian.length,
+  );
   tmp[0] = issBytes.length;
   tmp.setAll(1, issBytes);
   tmp.setAll(1 + issBytes.length, addressSeedBytesBigEndian);

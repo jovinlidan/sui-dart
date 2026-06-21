@@ -24,7 +24,11 @@ class SuiGrpcClientOptions {
   final int port;
   final ClientChannel? customChannel;
 
-  SuiGrpcClientOptions({required this.baseUrl, this.customChannel, required this.port});
+  SuiGrpcClientOptions({
+    required this.baseUrl,
+    this.customChannel,
+    required this.port,
+  });
 }
 
 class SuiGrpcClient {
@@ -59,7 +63,10 @@ class SuiGrpcClient {
     core = GrpcCoreClient(this);
   }
 
-  Future<List<ObjectResult>> getObjects(List<String> ids, {ObjectIncludeOptions? include}) {
+  Future<List<ObjectResult>> getObjects(
+    List<String> ids, {
+    ObjectIncludeOptions? include,
+  }) {
     return core.getObjects(ids, include: include);
   }
 
@@ -85,10 +92,18 @@ class SuiGrpcClient {
     String? cursor,
     int? limit,
   }) {
-    return core.listCoins(owner, coinType: coinType, cursor: cursor, limit: limit);
+    return core.listCoins(
+      owner,
+      coinType: coinType,
+      cursor: cursor,
+      limit: limit,
+    );
   }
 
-  Future<Balance> getBalance(String owner, {String coinType = '0x2::sui::SUI'}) {
+  Future<Balance> getBalance(
+    String owner, {
+    String coinType = '0x2::sui::SUI',
+  }) {
     return core.getBalance(owner, coinType: coinType);
   }
 
@@ -112,7 +127,11 @@ class SuiGrpcClient {
     List<String> signatures, {
     TransactionIncludeOptions? include,
   }) {
-    return core.executeTransaction(transactionBytes, signatures, include: include);
+    return core.executeTransaction(
+      transactionBytes,
+      signatures,
+      include: include,
+    );
   }
 
   Future<TransactionResponse> simulateTransaction(

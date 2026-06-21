@@ -6,14 +6,18 @@ import 'package:protobuf/protobuf.dart';
 import 'package:protobuf/well_known_types/google/protobuf/field_mask.pb.dart';
 
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/bcs.pb.dart' as grpc_bcs;
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/effects.pb.dart' as pb_effects;
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/execution_status.pb.dart' as pb_exec;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/effects.pb.dart'
+    as pb_effects;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/execution_status.pb.dart'
+    as pb_exec;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/executed_transaction.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/ledger_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package.pb.dart' hide TypeParameter;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package.pb.dart'
+    hide TypeParameter;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/move_package_service.pbgrpc.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/name_service.pbgrpc.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/object.pb.dart' as grpc_object;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/object.pb.dart'
+    as grpc_object;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/owner.pb.dart' as pb_owner;
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/signature.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/signature_verification_service.pbgrpc.dart';
@@ -25,7 +29,8 @@ import 'package:sui_dart/sui.dart' as sui_dart;
 import 'package:sui_dart/builder/transaction.dart' show chunk;
 import 'package:sui_dart/types/common.dart' hide ObjectOwner;
 
-import 'package:protobuf/well_known_types/google/protobuf/struct.pb.dart' as pb_struct;
+import 'package:protobuf/well_known_types/google/protobuf/struct.pb.dart'
+    as pb_struct;
 
 import 'client.dart';
 
@@ -57,7 +62,7 @@ Map<String, dynamic> _protoStructToDart(pb_struct.Struct struct) {
   return struct.fields.map((k, v) => MapEntry(k, _protoValueToDart(v)));
 }
 
-/// Converts a Google protobuf Value to a Map<String, dynamic>.
+/// Converts a Google protobuf Value to a `Map<String, dynamic>`.
 /// For object JSON, the top-level value is always a struct.
 Map<String, dynamic>? _protoValueToMap(pb_struct.Value value) {
   final result = _protoValueToDart(value);
@@ -71,7 +76,10 @@ class GrpcCoreClient {
 
   GrpcCoreClient(this._client);
 
-  Future<List<ObjectResult>> getObjects(List<String> ids, {ObjectIncludeOptions? include}) async {
+  Future<List<ObjectResult>> getObjects(
+    List<String> ids, {
+    ObjectIncludeOptions? include,
+  }) async {
     final readMask = _objectReadMask(include);
     final chunks = chunk(ids, _MAX_OBJECTS_PER_BATCH);
 
@@ -113,7 +121,8 @@ class GrpcCoreClient {
       ),
     );
 
-    final hasNext = response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
+    final hasNext =
+        response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
     return Page(
       data: response.objects.map((obj) => _parseObject(obj, include)).toList(),
       hasNextPage: hasNext,
@@ -137,12 +146,20 @@ class GrpcCoreClient {
         pageSize: limit,
         pageToken: cursor != null ? base64Decode(cursor) : null,
         readMask: FieldMask(
-          paths: ['object_id', 'version', 'digest', 'object_type', 'owner', 'balance'],
+          paths: [
+            'object_id',
+            'version',
+            'digest',
+            'object_type',
+            'owner',
+            'balance',
+          ],
         ),
       ),
     );
 
-    final hasNext = response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
+    final hasNext =
+        response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
     return Page(
       data: response.objects.map((obj) {
         return CoinData(
@@ -159,7 +176,10 @@ class GrpcCoreClient {
     );
   }
 
-  Future<Balance> getBalance(String owner, {String coinType = '0x2::sui::SUI'}) async {
+  Future<Balance> getBalance(
+    String owner, {
+    String coinType = '0x2::sui::SUI',
+  }) async {
     final normalizedCoinType = normalizeStructTagString(coinType);
 
     final response = await _client.stateService.getBalance(
@@ -242,15 +262,16 @@ class GrpcCoreClient {
   }) async {
     final readMask = _transactionReadMask(include);
 
-    final response = await _client.transactionExecutionService.executeTransaction(
-      ExecuteTransactionRequest(
-        transaction: .new(bcs: .new(value: transactionBytes)),
-        signatures: signatures.map((sig) {
-          return UserSignature(bcs: grpc_bcs.Bcs(value: base64Decode(sig)));
-        }),
-        readMask: readMask,
-      ),
-    );
+    final response = await _client.transactionExecutionService
+        .executeTransaction(
+          ExecuteTransactionRequest(
+            transaction: .new(bcs: .new(value: transactionBytes)),
+            signatures: signatures.map((sig) {
+              return UserSignature(bcs: grpc_bcs.Bcs(value: base64Decode(sig)));
+            }),
+            readMask: readMask,
+          ),
+        );
 
     return _parseTransaction(response.transaction, include);
   }
@@ -262,13 +283,14 @@ class GrpcCoreClient {
   }) async {
     final readMask = _transactionReadMask(include);
 
-    final response = await _client.transactionExecutionService.simulateTransaction(
-      SimulateTransactionRequest(
-        transaction: transactionBlock.toGrpcTransaction(),
-        readMask: readMask,
-        doGasSelection: doGasSelection ?? true,
-      ),
-    );
+    final response = await _client.transactionExecutionService
+        .simulateTransaction(
+          SimulateTransactionRequest(
+            transaction: transactionBlock.toGrpcTransaction(),
+            readMask: readMask,
+            doGasSelection: doGasSelection ?? true,
+          ),
+        );
 
     var result = _parseTransaction(response.transaction, include);
 
@@ -278,12 +300,16 @@ class GrpcCoreClient {
           return CommandResult(
             returnValues: cmdResult.returnValues.map((output) {
               return CommandOutput(
-                bcs: output.hasValue() ? Uint8List.fromList(output.value.value) : Uint8List(0),
+                bcs: output.hasValue()
+                    ? Uint8List.fromList(output.value.value)
+                    : Uint8List(0),
               );
             }).toList(),
             mutatedReferences: cmdResult.mutatedByRef.map((output) {
               return CommandOutput(
-                bcs: output.hasValue() ? Uint8List.fromList(output.value.value) : Uint8List(0),
+                bcs: output.hasValue()
+                    ? Uint8List.fromList(output.value.value)
+                    : Uint8List(0),
               );
             }).toList(),
           );
@@ -306,7 +332,13 @@ class GrpcCoreClient {
     final response = await _client.ledgerService.getEpoch(
       GetEpochRequest(
         readMask: FieldMask(
-          paths: ['epoch', 'reference_gas_price', 'system_state', 'start', 'end'],
+          paths: [
+            'epoch',
+            'reference_gas_price',
+            'system_state',
+            'start',
+            'end',
+          ],
         ),
       ),
     );
@@ -315,8 +347,12 @@ class GrpcCoreClient {
     return SystemState(
       epoch: epoch.epoch.toString(),
       referenceGasPrice: epoch.referenceGasPrice.toString(),
-      systemState: epoch.hasSystemState() ? epoch.systemState.writeToJsonMap() : null,
-      epochStartTimestampMs: epoch.hasStart() ? epoch.start.seconds.toString() : null,
+      systemState: epoch.hasSystemState()
+          ? epoch.systemState.writeToJsonMap()
+          : null,
+      epochStartTimestampMs: epoch.hasStart()
+          ? epoch.start.seconds.toString()
+          : null,
     );
   }
 
@@ -330,11 +366,14 @@ class GrpcCoreClient {
         parent: parentId,
         pageSize: limit,
         pageToken: cursor != null ? base64Decode(cursor) : null,
-        readMask: FieldMask(paths: ['kind', 'field_id', 'name', 'value_type', 'child_id']),
+        readMask: FieldMask(
+          paths: ['kind', 'field_id', 'name', 'value_type', 'child_id'],
+        ),
       ),
     );
 
-    final hasNext = response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
+    final hasNext =
+        response.hasNextPageToken() && response.nextPageToken.isNotEmpty;
     return Page(
       data: response.dynamicFields.map((field) {
         return DynamicFieldEntry(
@@ -360,7 +399,9 @@ class GrpcCoreClient {
     final response = await _client.signatureVerificationService.verifySignature(
       VerifySignatureRequest(
         message: grpc_bcs.Bcs(name: 'TransactionData', value: bytes),
-        signature: UserSignature(bcs: grpc_bcs.Bcs(value: base64Decode(signature))),
+        signature: UserSignature(
+          bcs: grpc_bcs.Bcs(value: base64Decode(signature)),
+        ),
         address: address,
       ),
     );
@@ -391,7 +432,11 @@ class GrpcCoreClient {
     String functionName,
   ) async {
     final response = await _client.movePackageService.getFunction(
-      GetFunctionRequest(packageId: packageId, moduleName: moduleName, name: functionName),
+      GetFunctionRequest(
+        packageId: packageId,
+        moduleName: moduleName,
+        name: functionName,
+      ),
     );
 
     final func = response.function;
@@ -400,7 +445,9 @@ class GrpcCoreClient {
       visibility: _mapVisibility(func.visibility),
       isEntry: func.isEntry,
       typeParameters: func.typeParameters.map((tp) {
-        return TypeParameter(abilities: tp.constraints.map(_mapAbility).toList());
+        return TypeParameter(
+          abilities: tp.constraints.map(_mapAbility).toList(),
+        );
       }).toList(),
       parameters: func.parameters.map(_parseNormalizedMoveType).toList(),
       returnTypes: func.returns.map(_parseNormalizedMoveType).toList(),
@@ -408,7 +455,9 @@ class GrpcCoreClient {
   }
 
   Future<String> getChainIdentifier() async {
-    final response = await _client.ledgerService.getServiceInfo(GetServiceInfoRequest());
+    final response = await _client.ledgerService.getServiceInfo(
+      GetServiceInfoRequest(),
+    );
     return response.chainId;
   }
 
@@ -417,7 +466,13 @@ class GrpcCoreClient {
   // ---------------------------------------------------------------------------
 
   FieldMask _objectReadMask(ObjectIncludeOptions? include) {
-    final paths = <String>['object_id', 'version', 'digest', 'object_type', 'owner'];
+    final paths = <String>[
+      'object_id',
+      'version',
+      'digest',
+      'object_type',
+      'owner',
+    ];
 
     if (include?.previousTransaction == true) paths.add('previous_transaction');
     if (include?.content == true) paths.add('contents');
@@ -439,21 +494,28 @@ class GrpcCoreClient {
     return FieldMask(paths: paths);
   }
 
-  ObjectData _parseObject(grpc_object.Object obj, ObjectIncludeOptions? include) {
+  ObjectData _parseObject(
+    grpc_object.Object obj,
+    ObjectIncludeOptions? include,
+  ) {
     return ObjectData(
       objectId: obj.objectId,
       version: obj.version.toString(),
       digest: obj.digest,
       owner: obj.hasOwner() ? _mapOwner(obj.owner) : const UnknownOwner(),
       type: obj.objectType,
-      previousTransaction: include?.previousTransaction == true ? obj.previousTransaction : null,
+      previousTransaction: include?.previousTransaction == true
+          ? obj.previousTransaction
+          : null,
       content: (include?.content == true && obj.hasContents())
           ? Uint8List.fromList(obj.contents.value)
           : null,
       objectBcs: (include?.objectBcs == true && obj.hasBcs())
           ? Uint8List.fromList(obj.bcs.value)
           : null,
-      json: (include?.json == true && obj.hasJson()) ? _protoValueToMap(obj.json) : null,
+      json: (include?.json == true && obj.hasJson())
+          ? _protoValueToMap(obj.json)
+          : null,
     );
   }
 
@@ -466,15 +528,21 @@ class GrpcCoreClient {
     if (tx.hasEffects() && tx.effects.hasStatus()) {
       status = ExecutionStatus(
         success: tx.effects.status.success,
-        error: tx.effects.status.hasError() ? _parseExecutionError(tx.effects.status.error) : null,
+        error: tx.effects.status.hasError()
+            ? _parseExecutionError(tx.effects.status.error)
+            : null,
       );
     }
 
     // Extract epoch from effects
-    final epoch = (tx.hasEffects() && tx.effects.hasEpoch()) ? tx.effects.epoch.toString() : null;
+    final epoch = (tx.hasEffects() && tx.effects.hasEpoch())
+        ? tx.effects.epoch.toString()
+        : null;
 
     // Extract signatures
-    final signatures = tx.signatures.map((sig) => base64Encode(sig.bcs.value)).toList();
+    final signatures = tx.signatures
+        .map((sig) => base64Encode(sig.bcs.value))
+        .toList();
 
     return TransactionResponse(
       digest: tx.digest,
@@ -494,7 +562,9 @@ class GrpcCoreClient {
                 module: event.module,
                 sender: event.sender,
                 eventType: event.eventType,
-                bcs: event.hasContents() ? Uint8List.fromList(event.contents.value) : Uint8List(0),
+                bcs: event.hasContents()
+                    ? Uint8List.fromList(event.contents.value)
+                    : Uint8List(0),
               );
             }).toList()
           : null,
@@ -507,22 +577,35 @@ class GrpcCoreClient {
               );
             }).toList()
           : null,
-      bcs: (include?.bcs == true && tx.hasTransaction() && tx.transaction.hasBcs())
+      bcs:
+          (include?.bcs == true &&
+              tx.hasTransaction() &&
+              tx.transaction.hasBcs())
           ? Uint8List.fromList(tx.transaction.bcs.value)
           : null,
       checkpoint: tx.hasCheckpoint() ? tx.checkpoint.toString() : null,
-      timestampMs: tx.hasTimestamp() ? (tx.timestamp.seconds * Int64(1000)).toString() : null,
+      timestampMs: tx.hasTimestamp()
+          ? (tx.timestamp.seconds * Int64(1000)).toString()
+          : null,
     );
   }
 
-  TransactionEffects _parseTransactionEffects(pb_effects.TransactionEffects effects) {
+  TransactionEffects _parseTransactionEffects(
+    pb_effects.TransactionEffects effects,
+  ) {
     return TransactionEffects(
-      transactionDigest: effects.hasTransactionDigest() ? effects.transactionDigest : null,
-      lamportVersion: effects.hasLamportVersion() ? effects.lamportVersion.toString() : null,
+      transactionDigest: effects.hasTransactionDigest()
+          ? effects.transactionDigest
+          : null,
+      lamportVersion: effects.hasLamportVersion()
+          ? effects.lamportVersion.toString()
+          : null,
       status: effects.hasStatus()
           ? ExecutionStatus(
               success: effects.status.success,
-              error: effects.status.hasError() ? _parseExecutionError(effects.status.error) : null,
+              error: effects.status.hasError()
+                  ? _parseExecutionError(effects.status.error)
+                  : null,
             )
           : null,
       gasUsed: effects.hasGasUsed()
@@ -530,7 +613,8 @@ class GrpcCoreClient {
               computationCost: effects.gasUsed.computationCost.toString(),
               storageCost: effects.gasUsed.storageCost.toString(),
               storageRebate: effects.gasUsed.storageRebate.toString(),
-              nonRefundableStorageFee: effects.gasUsed.nonRefundableStorageFee.toString(),
+              nonRefundableStorageFee: effects.gasUsed.nonRefundableStorageFee
+                  .toString(),
             )
           : null,
       gasObject: effects.hasGasObject()
@@ -540,7 +624,9 @@ class GrpcCoreClient {
               outputState: _mapOutputObjectState(effects.gasObject.outputState),
             )
           : null,
-      dependencies: effects.dependencies.isNotEmpty ? effects.dependencies.toList() : null,
+      dependencies: effects.dependencies.isNotEmpty
+          ? effects.dependencies.toList()
+          : null,
       changedObjects: effects.changedObjects.isNotEmpty
           ? effects.changedObjects.map((obj) {
               return ChangedObject(
@@ -548,12 +634,20 @@ class GrpcCoreClient {
                 idOperation: _mapIdOperation(obj.idOperation),
                 inputState: _mapInputObjectState(obj.inputState),
                 outputState: _mapOutputObjectState(obj.outputState),
-                inputVersion: obj.hasInputVersion() ? obj.inputVersion.toString() : null,
+                inputVersion: obj.hasInputVersion()
+                    ? obj.inputVersion.toString()
+                    : null,
                 inputDigest: obj.hasInputDigest() ? obj.inputDigest : null,
-                inputOwner: obj.hasInputOwner() ? _mapOwner(obj.inputOwner) : null,
-                outputVersion: obj.hasOutputVersion() ? obj.outputVersion.toString() : null,
+                inputOwner: obj.hasInputOwner()
+                    ? _mapOwner(obj.inputOwner)
+                    : null,
+                outputVersion: obj.hasOutputVersion()
+                    ? obj.outputVersion.toString()
+                    : null,
                 outputDigest: obj.hasOutputDigest() ? obj.outputDigest : null,
-                outputOwner: obj.hasOutputOwner() ? _mapOwner(obj.outputOwner) : null,
+                outputOwner: obj.hasOutputOwner()
+                    ? _mapOwner(obj.outputOwner)
+                    : null,
                 objectType: obj.objectType.isNotEmpty ? obj.objectType : null,
               );
             }).toList()
@@ -621,7 +715,9 @@ class GrpcCoreClient {
         );
         break;
       case pb_exec.ExecutionError_ErrorDetails.congestedObjects:
-        detail = CongestedObjectsDetail(error.congestedObjects.objects.toList());
+        detail = CongestedObjectsDetail(
+          error.congestedObjects.objects.toList(),
+        );
         break;
       case pb_exec.ExecutionError_ErrorDetails.notSet:
         break;
@@ -656,7 +752,9 @@ class GrpcCoreClient {
               module: abort.location.module,
               function: abort.location.function,
               instruction: abort.location.instruction,
-              functionName: abort.location.hasFunctionName() ? abort.location.functionName : null,
+              functionName: abort.location.hasFunctionName()
+                  ? abort.location.functionName
+                  : null,
             )
           : null,
       cleverError: cleverError,
@@ -693,7 +791,9 @@ class GrpcCoreClient {
     return value.name;
   }
 
-  static String? _mapIdOperation(pb_effects.ChangedObject_IdOperation operation) {
+  static String? _mapIdOperation(
+    pb_effects.ChangedObject_IdOperation operation,
+  ) {
     switch (operation) {
       case pb_effects.ChangedObject_IdOperation.NONE:
         return 'None';
@@ -706,9 +806,13 @@ class GrpcCoreClient {
     }
   }
 
-  static String? _mapInputObjectState(pb_effects.ChangedObject_InputObjectState state) {
+  static String? _mapInputObjectState(
+    pb_effects.ChangedObject_InputObjectState state,
+  ) {
     switch (state) {
-      case pb_effects.ChangedObject_InputObjectState.INPUT_OBJECT_STATE_DOES_NOT_EXIST:
+      case pb_effects
+          .ChangedObject_InputObjectState
+          .INPUT_OBJECT_STATE_DOES_NOT_EXIST:
         return 'DoesNotExist';
       case pb_effects.ChangedObject_InputObjectState.INPUT_OBJECT_STATE_EXISTS:
         return 'Exists';
@@ -717,15 +821,25 @@ class GrpcCoreClient {
     }
   }
 
-  static String? _mapOutputObjectState(pb_effects.ChangedObject_OutputObjectState state) {
+  static String? _mapOutputObjectState(
+    pb_effects.ChangedObject_OutputObjectState state,
+  ) {
     switch (state) {
-      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_DOES_NOT_EXIST:
+      case pb_effects
+          .ChangedObject_OutputObjectState
+          .OUTPUT_OBJECT_STATE_DOES_NOT_EXIST:
         return 'DoesNotExist';
-      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_OBJECT_WRITE:
+      case pb_effects
+          .ChangedObject_OutputObjectState
+          .OUTPUT_OBJECT_STATE_OBJECT_WRITE:
         return 'ObjectWrite';
-      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_PACKAGE_WRITE:
+      case pb_effects
+          .ChangedObject_OutputObjectState
+          .OUTPUT_OBJECT_STATE_PACKAGE_WRITE:
         return 'PackageWrite';
-      case pb_effects.ChangedObject_OutputObjectState.OUTPUT_OBJECT_STATE_ACCUMULATOR_WRITE:
+      case pb_effects
+          .ChangedObject_OutputObjectState
+          .OUTPUT_OBJECT_STATE_ACCUMULATOR_WRITE:
         return 'AccumulatorWrite';
       default:
         return null;
@@ -736,7 +850,9 @@ class GrpcCoreClient {
     pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind kind,
   ) {
     switch (kind) {
-      case pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind.READ_ONLY_ROOT:
+      case pb_effects
+          .UnchangedConsensusObject_UnchangedConsensusObjectKind
+          .READ_ONLY_ROOT:
         return 'ReadOnlyRoot';
       case pb_effects
           .UnchangedConsensusObject_UnchangedConsensusObjectKind
@@ -746,9 +862,13 @@ class GrpcCoreClient {
           .UnchangedConsensusObject_UnchangedConsensusObjectKind
           .READ_CONSENSUS_STREAM_ENDED:
         return 'ReadConsensusStreamEnded';
-      case pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind.CANCELED:
+      case pb_effects
+          .UnchangedConsensusObject_UnchangedConsensusObjectKind
+          .CANCELED:
         return 'Canceled';
-      case pb_effects.UnchangedConsensusObject_UnchangedConsensusObjectKind.PER_EPOCH_CONFIG:
+      case pb_effects
+          .UnchangedConsensusObject_UnchangedConsensusObjectKind
+          .PER_EPOCH_CONFIG:
         return 'PerEpochConfig';
       default:
         return null;
@@ -805,7 +925,9 @@ class GrpcCoreClient {
     return body;
   }
 
-  static NormalizedMoveType _parseNormalizedMoveTypeBody(OpenSignatureBody body) {
+  static NormalizedMoveType _parseNormalizedMoveTypeBody(
+    OpenSignatureBody body,
+  ) {
     switch (body.type) {
       case OpenSignatureBody_Type.ADDRESS:
         return const MoveTypePrimitive('Address');
@@ -826,7 +948,9 @@ class GrpcCoreClient {
       case OpenSignatureBody_Type.VECTOR:
         return MoveTypeVector(
           body.typeParameterInstantiation.isNotEmpty
-              ? _parseNormalizedMoveTypeBody(body.typeParameterInstantiation.first)
+              ? _parseNormalizedMoveTypeBody(
+                  body.typeParameterInstantiation.first,
+                )
               : null,
         );
       case OpenSignatureBody_Type.DATATYPE:
@@ -835,7 +959,9 @@ class GrpcCoreClient {
           address: parts.first,
           module: parts.length > 1 ? parts[1] : '',
           name: parts.length > 2 ? parts[2] : '',
-          typeArguments: body.typeParameterInstantiation.map(_parseNormalizedMoveTypeBody).toList(),
+          typeArguments: body.typeParameterInstantiation
+              .map(_parseNormalizedMoveTypeBody)
+              .toList(),
         );
       case OpenSignatureBody_Type.TYPE_PARAMETER:
         return MoveTypeParameter(body.typeParameter);

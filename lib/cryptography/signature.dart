@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names, camel_case_types
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:sui_dart/bcs/sui_bcs.dart';
@@ -10,13 +11,7 @@ import 'package:sui_dart/zklogin/address.dart';
 import 'package:sui_dart/zklogin/jwt_utils.dart';
 import 'package:sui_dart/zklogin/signature.dart';
 
-enum SignatureScheme {
-  Ed25519,
-  Secp256k1,
-  Secp256r1,
-  MultiSig,
-  ZkLogin,
-}
+enum SignatureScheme { Ed25519, Secp256k1, Secp256r1, MultiSig, ZkLogin }
 
 abstract class SIGNATURE_SCHEME_TO_FLAG {
   static const int Ed25519 = 0x00;
@@ -37,8 +32,6 @@ abstract class SIGNATURE_SCHEME_TO_FLAG {
         return MultiSig;
       case SignatureScheme.ZkLogin:
         return ZkLogin;
-      default:
-        throw ArgumentError("Undefined Signature Scheme $scheme");
     }
   }
 
@@ -68,15 +61,15 @@ String toSerializedSignature(
   final serializedSignature = Uint8List(
     1 + signature.length + pubKey.toRawBytes().length,
   );
-  serializedSignature.setAll(0, [SIGNATURE_SCHEME_TO_FLAG.schemeToFlag(signatureScheme)]);
+  serializedSignature.setAll(0, [
+    SIGNATURE_SCHEME_TO_FLAG.schemeToFlag(signatureScheme),
+  ]);
   serializedSignature.setAll(1, signature);
   serializedSignature.setAll(1 + signature.length, pubKey.toRawBytes());
   return base64Encode(serializedSignature);
 }
 
-SignaturePubkeyPair parseSerializedSignature(
-  String serializedSignature,
-) {
+SignaturePubkeyPair parseSerializedSignature(String serializedSignature) {
   final bytes = base64Decode(serializedSignature);
   final signatureScheme = SIGNATURE_SCHEME_TO_FLAG.flagToScheme(bytes[0]);
 
@@ -89,7 +82,10 @@ SignaturePubkeyPair parseSerializedSignature(
   if (signatureScheme == SignatureScheme.ZkLogin) {
     final signatureBytes = bytes.sublist(1);
     final signature = parseZkLoginSignature(signatureBytes);
-    final iss = extractClaimValue<String>(signature.inputs.issBase64Details, 'iss');
+    final iss = extractClaimValue<String>(
+      signature.inputs.issBase64Details,
+      'iss',
+    );
     final addressSeed = BigInt.parse(signature.inputs.addressSeed);
     final address = computeZkLoginAddressFromSeed(addressSeed, iss);
     final zkLgoin = {
@@ -108,9 +104,15 @@ SignaturePubkeyPair parseSerializedSignature(
       case SignatureScheme.Ed25519:
         return Ed25519PublicKey.fromBytes(bytes);
       case SignatureScheme.Secp256k1:
-        return Secp256PublicKey.fromBytes(bytes, SIGNATURE_SCHEME_TO_FLAG.Secp256k1);
+        return Secp256PublicKey.fromBytes(
+          bytes,
+          SIGNATURE_SCHEME_TO_FLAG.Secp256k1,
+        );
       case SignatureScheme.Secp256r1:
-        return Secp256PublicKey.fromBytes(bytes, SIGNATURE_SCHEME_TO_FLAG.Secp256r1);
+        return Secp256PublicKey.fromBytes(
+          bytes,
+          SIGNATURE_SCHEME_TO_FLAG.Secp256r1,
+        );
       default:
         throw ArgumentError("Undefined Scheme: $scheme");
     }

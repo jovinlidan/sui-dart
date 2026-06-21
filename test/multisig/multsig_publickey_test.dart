@@ -18,7 +18,7 @@ void main() {
     late PublicKey pk3;
 
     setUpAll(() {
-      const VALID_SECP256K1_SECRET_KEY = [
+      const validSecp256k1SecretKey = [
         59,
         148,
         11,
@@ -53,7 +53,7 @@ void main() {
         28,
       ];
 
-      const VALID_SECP256R1_SECRET_KEY = [
+      const validSecp256r1SecretKey = [
         66,
         37,
         141,
@@ -88,16 +88,16 @@ void main() {
         22,
       ];
 
-      final secret_key_k1 = Uint8List.fromList(VALID_SECP256K1_SECRET_KEY);
-      final secret_key_r1 = Uint8List.fromList(VALID_SECP256R1_SECRET_KEY);
+      final secretKeyK1 = Uint8List.fromList(validSecp256k1SecretKey);
+      final secretKeyR1 = Uint8List.fromList(validSecp256r1SecretKey);
 
-      k1 = Ed25519Keypair.fromSecretKey(secret_key_k1);
+      k1 = Ed25519Keypair.fromSecretKey(secretKeyK1);
       pk1 = k1.getPublicKey();
 
-      k2 = Secp256k1Keypair.fromSecretKey(secret_key_k1);
+      k2 = Secp256k1Keypair.fromSecretKey(secretKeyK1);
       pk2 = k2.getPublicKey();
 
-      k3 = Secp256r1Keypair.fromSecretKey(secret_key_r1);
+      k3 = Secp256r1Keypair.fromSecretKey(secretKeyR1);
       pk3 = k3.getPublicKey();
     });
 
@@ -152,22 +152,26 @@ void main() {
       final pk11 = k11.getPublicKey();
 
       expect(
-          () => {
-                MultiSigPublicKey.fromPublicKeys(threshold: 10, publicKeys: [
-                  PublicKeyWeight(1, pk1),
-                  PublicKeyWeight(2, pk2),
-                  PublicKeyWeight(3, pk3),
-                  PublicKeyWeight(1, pk4),
-                  PublicKeyWeight(2, pk5),
-                  PublicKeyWeight(3, pk6),
-                  PublicKeyWeight(1, pk7),
-                  PublicKeyWeight(2, pk8),
-                  PublicKeyWeight(3, pk9),
-                  PublicKeyWeight(1, pk10),
-                  PublicKeyWeight(2, pk11),
-                ])
-              },
-          throwsArgumentError);
+        () => {
+          MultiSigPublicKey.fromPublicKeys(
+            threshold: 10,
+            publicKeys: [
+              PublicKeyWeight(1, pk1),
+              PublicKeyWeight(2, pk2),
+              PublicKeyWeight(3, pk3),
+              PublicKeyWeight(1, pk4),
+              PublicKeyWeight(2, pk5),
+              PublicKeyWeight(3, pk6),
+              PublicKeyWeight(1, pk7),
+              PublicKeyWeight(2, pk8),
+              PublicKeyWeight(3, pk9),
+              PublicKeyWeight(1, pk10),
+              PublicKeyWeight(2, pk11),
+            ],
+          ),
+        },
+        throwsArgumentError,
+      );
     });
 
     test('`constructor()` should create multisig correctly', () {
@@ -184,7 +188,10 @@ void main() {
       final sig1 = k1.signPersonalMessage(data);
       final sig2 = k2.signPersonalMessage(data);
 
-      final multisig = multiSigPublicKey.combinePartialSignatures([sig1.signature, sig2.signature]);
+      final multisig = multiSigPublicKey.combinePartialSignatures([
+        sig1.signature,
+        sig2.signature,
+      ]);
       final parsed = parseSerializedSignature(multisig);
 
       final publicKey = MultiSigPublicKey(parsed.multisig!.multisigPK);
@@ -220,10 +227,7 @@ void main() {
 
       final multiSigPublicKey3 = MultiSigPublicKey.fromPublicKeys(
         threshold: 3,
-        publicKeys: [
-          PublicKeyWeight(1, pk1),
-          PublicKeyWeight(2, pk2),
-        ],
+        publicKeys: [PublicKeyWeight(1, pk1), PublicKeyWeight(2, pk2)],
       );
 
       final multiSigPublicKey4 = MultiSigPublicKey.fromPublicKeys(
@@ -255,7 +259,10 @@ void main() {
       final sig1 = k1.signPersonalMessage(data);
       final sig2 = k2.signPersonalMessage(data);
 
-      final multisig = multiSigPublicKey.combinePartialSignatures([sig1.signature, sig2.signature]);
+      final multisig = multiSigPublicKey.combinePartialSignatures([
+        sig1.signature,
+        sig2.signature,
+      ]);
       final rawBytes = base64Decode(multisig).sublist(134);
 
       expect(multiSigPublicKey.toRawBytes(), rawBytes);
@@ -373,40 +380,42 @@ void main() {
       );
     });
 
-    test('`toSuiAddress()` should return correct sui address associated with multisig publickey',
-        () {
-      final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
-        threshold: 3,
-        publicKeys: [
-          PublicKeyWeight(1, pk1),
-          PublicKeyWeight(2, pk2),
-          PublicKeyWeight(3, pk3),
-        ],
-      );
+    test(
+      '`toSuiAddress()` should return correct sui address associated with multisig publickey',
+      () {
+        final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
+          threshold: 3,
+          publicKeys: [
+            PublicKeyWeight(1, pk1),
+            PublicKeyWeight(2, pk2),
+            PublicKeyWeight(3, pk3),
+          ],
+        );
 
-      const maxLength = 1 + (64 + 1) * MAX_SIGNER_IN_MULTISIG + 2;
-      final tmp = Uint8List(maxLength);
-      tmp.setAll(0, [0x03]);
-      tmp.setAll(1, SuiBcs.U16.serialize(3).toBytes());
-      int i = 3;
-      for (var item in multiSigPublicKey.publicKeys) {
-        final publicKey = item.publicKey;
-        final weight = item.weight;
-        final bytes = publicKey.toSuiBytes();
-        tmp.setAll(i, bytes);
-        i += bytes.length;
-        tmp.setAll(i++, [weight]);
-      }
-      final multisigSuiAddress = normalizeSuiAddress(
-        Hex.encode(blake2b(tmp.sublist(0, i))),
-      );
+        const maxLength = 1 + (64 + 1) * MAX_SIGNER_IN_MULTISIG + 2;
+        final tmp = Uint8List(maxLength);
+        tmp.setAll(0, [0x03]);
+        tmp.setAll(1, SuiBcs.U16.serialize(3).toBytes());
+        int i = 3;
+        for (var item in multiSigPublicKey.publicKeys) {
+          final publicKey = item.publicKey;
+          final weight = item.weight;
+          final bytes = publicKey.toSuiBytes();
+          tmp.setAll(i, bytes);
+          i += bytes.length;
+          tmp.setAll(i++, [weight]);
+        }
+        final multisigSuiAddress = normalizeSuiAddress(
+          Hex.encode(blake2b(tmp.sublist(0, i))),
+        );
 
-      expect(multiSigPublicKey.toSuiAddress(), multisigSuiAddress);
-      expect(
-        multiSigPublicKey.toSuiAddress(),
-        '0x8ee027fe556a3f6c0a23df64f090d2429fec0bb21f55594783476e81de2dec27',
-      );
-    });
+        expect(multiSigPublicKey.toSuiAddress(), multisigSuiAddress);
+        expect(
+          multiSigPublicKey.toSuiAddress(),
+          '0x8ee027fe556a3f6c0a23df64f090d2429fec0bb21f55594783476e81de2dec27',
+        );
+      },
+    );
 
     test('`flag()` should return correct signature scheme', () {
       final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
@@ -422,46 +431,72 @@ void main() {
       expect(multiSigPublicKey.flag(), SIGNATURE_SCHEME_TO_FLAG.MultiSig);
     });
 
-    test('`parsePartialSignatures()` should parse serialized signatures correctly', () {
-      final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
-        threshold: 3,
-        publicKeys: [
-          PublicKeyWeight(1, pk1),
-          PublicKeyWeight(2, pk2),
-          PublicKeyWeight(3, pk3),
-        ],
-      );
+    test(
+      '`parsePartialSignatures()` should parse serialized signatures correctly',
+      () {
+        final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
+          threshold: 3,
+          publicKeys: [
+            PublicKeyWeight(1, pk1),
+            PublicKeyWeight(2, pk2),
+            PublicKeyWeight(3, pk3),
+          ],
+        );
 
-      final data = Uint8List.fromList([0, 0, 0, 5, 72, 101, 108, 108, 111]);
+        final data = Uint8List.fromList([0, 0, 0, 5, 72, 101, 108, 108, 111]);
 
-      final sig1 = k1.signPersonalMessage(data);
-      final sig2 = k2.signPersonalMessage(data);
+        final sig1 = k1.signPersonalMessage(data);
+        final sig2 = k2.signPersonalMessage(data);
 
-      final multisig = multiSigPublicKey.combinePartialSignatures([sig1.signature, sig2.signature]);
+        final multisig = multiSigPublicKey.combinePartialSignatures([
+          sig1.signature,
+          sig2.signature,
+        ]);
 
-      final bytes = base64Decode(multisig);
-      final multiSigStruct = MultiSigStruct.fromJson(SuiBcs.MultiSig.parse(bytes.sublist(1)));
+        final bytes = base64Decode(multisig);
+        final multiSigStruct = MultiSigStruct.fromJson(
+          SuiBcs.MultiSig.parse(bytes.sublist(1)),
+        );
 
-      final parsedPartialSignatures = parsePartialSignatures(multiSigStruct);
+        final parsedPartialSignatures = parsePartialSignatures(multiSigStruct);
 
-      expect(parsedPartialSignatures.length, 2);
+        expect(parsedPartialSignatures.length, 2);
 
-      final parsedPK1 = parsedPartialSignatures[0];
-      expect(parsedPK1.publicKey.toRawBytes(), pk1.toRawBytes());
-      expect(parsedPK1.weight, 1);
-      expect(parsedPK1.signatureScheme, SIGNATURE_SCHEME_TO_FLAG.flagToScheme(pk1.flag()));
-      expect(parsedPK1.signature,
-          parseSerializedSignature(k1.signPersonalMessage(data).signature).signature);
+        final parsedPK1 = parsedPartialSignatures[0];
+        expect(parsedPK1.publicKey.toRawBytes(), pk1.toRawBytes());
+        expect(parsedPK1.weight, 1);
+        expect(
+          parsedPK1.signatureScheme,
+          SIGNATURE_SCHEME_TO_FLAG.flagToScheme(pk1.flag()),
+        );
+        expect(
+          parsedPK1.signature,
+          parseSerializedSignature(
+            k1.signPersonalMessage(data).signature,
+          ).signature,
+        );
 
-      final parsedPK2 = parsedPartialSignatures[1];
-      expect(parsedPK2.publicKey.toRawBytes(), pk2.toRawBytes());
-      expect(parsedPK2.weight, 2);
-      expect(parsedPK2.signatureScheme, SIGNATURE_SCHEME_TO_FLAG.flagToScheme(pk2.flag()));
-      expect(parsedPK2.signature,
-          parseSerializedSignature(k2.signPersonalMessage(data).signature).signature);
-      expect(parsedPK2.signature,
-          parseSerializedSignature(k2.signPersonalMessage(data).signature).signature);
-    });
+        final parsedPK2 = parsedPartialSignatures[1];
+        expect(parsedPK2.publicKey.toRawBytes(), pk2.toRawBytes());
+        expect(parsedPK2.weight, 2);
+        expect(
+          parsedPK2.signatureScheme,
+          SIGNATURE_SCHEME_TO_FLAG.flagToScheme(pk2.flag()),
+        );
+        expect(
+          parsedPK2.signature,
+          parseSerializedSignature(
+            k2.signPersonalMessage(data).signature,
+          ).signature,
+        );
+        expect(
+          parsedPK2.signature,
+          parseSerializedSignature(
+            k2.signPersonalMessage(data).signature,
+          ).signature,
+        );
+      },
+    );
 
     test('`verify()` should verify the signature correctly', () {
       final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
@@ -478,10 +513,15 @@ void main() {
       final sig1 = k1.signPersonalMessage(data);
       final sig2 = k2.signPersonalMessage(data);
 
-      final multisig = multiSigPublicKey.combinePartialSignatures([sig1.signature, sig2.signature]);
+      final multisig = multiSigPublicKey.combinePartialSignatures([
+        sig1.signature,
+        sig2.signature,
+      ]);
 
       final intentMessage = messageWithIntent(
-          IntentScope.personalMessage, Bcs.vector(Bcs.u8()).serialize(data).toBytes());
+        IntentScope.personalMessage,
+        Bcs.vector(Bcs.u8()).serialize(data).toBytes(),
+      );
       final digest = blake2b(intentMessage);
 
       expect(multiSigPublicKey.verify(digest, base64Decode(multisig)), true);
@@ -502,63 +542,79 @@ void main() {
       final sig1 = k1.signPersonalMessage(data);
       final sig2 = k2.signPersonalMessage(data);
 
-      multiSigPublicKey.combinePartialSignatures([sig1.signature, sig2.signature]);
+      multiSigPublicKey.combinePartialSignatures([
+        sig1.signature,
+        sig2.signature,
+      ]);
 
       final intentMessage = messageWithIntent(
-          IntentScope.personalMessage, Bcs.vector(Bcs.u8()).serialize(data).toBytes());
+        IntentScope.personalMessage,
+        Bcs.vector(Bcs.u8()).serialize(data).toBytes(),
+      );
       final digest = blake2b(intentMessage);
 
-      expect(() => multiSigPublicKey.verify(digest, base64Decode(sig1.signature)),
-          throwsArgumentError);
+      expect(
+        () => multiSigPublicKey.verify(digest, base64Decode(sig1.signature)),
+        throwsArgumentError,
+      );
     });
 
     test(
-        '`combinePartialSignatures()` should combine with different signatures into a single multisig correctly',
-        () {
-      final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
-        threshold: 3,
-        publicKeys: [
-          PublicKeyWeight(1, pk1),
-          PublicKeyWeight(2, pk2),
-          PublicKeyWeight(3, pk3),
-        ],
-      );
+      '`combinePartialSignatures()` should combine with different signatures into a single multisig correctly',
+      () {
+        final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
+          threshold: 3,
+          publicKeys: [
+            PublicKeyWeight(1, pk1),
+            PublicKeyWeight(2, pk2),
+            PublicKeyWeight(3, pk3),
+          ],
+        );
 
-      final data = Uint8List.fromList([0, 0, 0, 5, 72, 101, 108, 108, 111]);
+        final data = Uint8List.fromList([0, 0, 0, 5, 72, 101, 108, 108, 111]);
 
-      final sig1 = k1.signPersonalMessage(data);
-      final sig2 = k2.signPersonalMessage(data);
+        final sig1 = k1.signPersonalMessage(data);
+        final sig2 = k2.signPersonalMessage(data);
 
-      final multisig = multiSigPublicKey.combinePartialSignatures([sig1.signature, sig2.signature]);
+        final multisig = multiSigPublicKey.combinePartialSignatures([
+          sig1.signature,
+          sig2.signature,
+        ]);
 
-      expect(
-        multisig,
-        'AwIANe9gJJmT5m1UvpV8Hj7nOyif76rS5Zgg1bi7VApts+KwtSc2Bg8WJ6LBfGnZKugrOqtQsk5d2Q+IMRLD4hYmBQFYlrlXc01/ZSdgwSD3eGEdm6kxwtOwAvTWdb2wNZP2Hnkgrh+indYN4s2Qd99iYCz+xsY6aT5lpOBsDZb2x9LyAwADAFriILSy9l6XfBLt5hV5/1FwtsIsAGFow3tefGGvAYCDAQECHRUjB8a3Kw7QQYsOcM2A5/UpW42G9XItP1IT+9I5TzYCAgInMis6iRoKKA1rwfssuyPSj1SQb9ZAf190H23vV2JgmgMDAA==',
-      );
+        expect(
+          multisig,
+          'AwIANe9gJJmT5m1UvpV8Hj7nOyif76rS5Zgg1bi7VApts+KwtSc2Bg8WJ6LBfGnZKugrOqtQsk5d2Q+IMRLD4hYmBQFYlrlXc01/ZSdgwSD3eGEdm6kxwtOwAvTWdb2wNZP2Hnkgrh+indYN4s2Qd99iYCz+xsY6aT5lpOBsDZb2x9LyAwADAFriILSy9l6XfBLt5hV5/1FwtsIsAGFow3tefGGvAYCDAQECHRUjB8a3Kw7QQYsOcM2A5/UpW42G9XItP1IT+9I5TzYCAgInMis6iRoKKA1rwfssuyPSj1SQb9ZAf190H23vV2JgmgMDAA==',
+        );
 
-      final decoded = SuiBcs.MultiSig.parse(base64Decode(multisig).sublist(1));
-      expect(decoded["bitmap"], 3);
-      expect(
-          decoded["multisig_pk"], SuiBcs.MultiSigPublicKey.parse(multiSigPublicKey.toRawBytes()));
-      expect(decoded["sigs"], [
-        {
-          "Ed25519": parseSerializedSignature((k1.signPersonalMessage(data)).signature).signature,
-          "\$kind": "Ed25519"
-        },
-        {
-          "Secp256k1": parseSerializedSignature((k2.signPersonalMessage(data)).signature).signature,
-          "\$kind": "Secp256k1"
-        }
-      ]);
-    });
+        final decoded = SuiBcs.MultiSig.parse(
+          base64Decode(multisig).sublist(1),
+        );
+        expect(decoded["bitmap"], 3);
+        expect(
+          decoded["multisig_pk"],
+          SuiBcs.MultiSigPublicKey.parse(multiSigPublicKey.toRawBytes()),
+        );
+        expect(decoded["sigs"], [
+          {
+            "Ed25519": parseSerializedSignature(
+              (k1.signPersonalMessage(data)).signature,
+            ).signature,
+            "\$kind": "Ed25519",
+          },
+          {
+            "Secp256k1": parseSerializedSignature(
+              (k2.signPersonalMessage(data)).signature,
+            ).signature,
+            "\$kind": "Secp256k1",
+          },
+        ]);
+      },
+    );
 
     test('`combinePartialSignatures()` should handle invalid parameters', () {
       final multiSigPublicKey = MultiSigPublicKey.fromPublicKeys(
         threshold: 3,
-        publicKeys: [
-          PublicKeyWeight(1, pk1),
-          PublicKeyWeight(2, pk2),
-        ],
+        publicKeys: [PublicKeyWeight(1, pk1), PublicKeyWeight(2, pk2)],
       );
 
       final data = Uint8List.fromList([0, 0, 0, 5, 72, 101, 108, 108, 111]);
@@ -567,16 +623,34 @@ void main() {
       final sig2 = k2.signPersonalMessage(data);
       final sig3 = k3.signPersonalMessage(data);
 
-      expect(() => multiSigPublicKey.combinePartialSignatures([sig1.signature, sig3.signature]),
-          throwsArgumentError);
+      expect(
+        () => multiSigPublicKey.combinePartialSignatures([
+          sig1.signature,
+          sig3.signature,
+        ]),
+        throwsArgumentError,
+      );
 
-      expect(() => multiSigPublicKey.combinePartialSignatures([sig1.signature, sig1.signature]),
-          throwsArgumentError);
+      expect(
+        () => multiSigPublicKey.combinePartialSignatures([
+          sig1.signature,
+          sig1.signature,
+        ]),
+        throwsArgumentError,
+      );
 
-      final multisig = multiSigPublicKey.combinePartialSignatures([sig1.signature, sig2.signature]);
+      final multisig = multiSigPublicKey.combinePartialSignatures([
+        sig1.signature,
+        sig2.signature,
+      ]);
 
-      expect(() => multiSigPublicKey.combinePartialSignatures([multisig, sig1.signature]),
-          throwsArgumentError);
+      expect(
+        () => multiSigPublicKey.combinePartialSignatures([
+          multisig,
+          sig1.signature,
+        ]),
+        throwsArgumentError,
+      );
     });
   });
 }

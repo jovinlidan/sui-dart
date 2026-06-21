@@ -63,10 +63,7 @@ void main() {
 
   group('Page', () {
     test('creates with required fields', () {
-      final page = Page<String>(
-        data: ['a', 'b', 'c'],
-        hasNextPage: false,
-      );
+      final page = Page<String>(data: ['a', 'b', 'c'], hasNextPage: false);
       expect(page.data, ['a', 'b', 'c']);
       expect(page.hasNextPage, false);
       expect(page.nextCursor, isNull);
@@ -132,10 +129,7 @@ void main() {
     });
 
     test('ConsensusAddressOwner holds address and start version', () {
-      const owner = ConsensusAddressOwner(
-        address: '0x123',
-        startVersion: '10',
-      );
+      const owner = ConsensusAddressOwner(address: '0x123', startVersion: '10');
       expect(owner.address, '0x123');
       expect(owner.startVersion, '10');
       expect(owner, isA<Owner>());
@@ -160,7 +154,8 @@ void main() {
         return switch (owner) {
           AddressOwner(:final address) => 'address:$address',
           ObjectOwner(:final address) => 'object:$address',
-          SharedOwner(:final initialSharedVersion) => 'shared:$initialSharedVersion',
+          SharedOwner(:final initialSharedVersion) =>
+            'shared:$initialSharedVersion',
           ImmutableOwner() => 'immutable',
           ConsensusAddressOwner(:final address) => 'consensus:$address',
           UnknownOwner() => 'unknown',
@@ -180,13 +175,15 @@ void main() {
 
   group('ObjectResult sealed class', () {
     test('ObjectSuccess wraps object data', () {
-      final result = ObjectSuccess(ObjectData(
-        objectId: '0x1',
-        version: '5',
-        digest: 'abc',
-        owner: const AddressOwner('0xowner'),
-        type: 'SomeType',
-      ));
+      final result = ObjectSuccess(
+        ObjectData(
+          objectId: '0x1',
+          version: '5',
+          digest: 'abc',
+          owner: const AddressOwner('0xowner'),
+          type: 'SomeType',
+        ),
+      );
       expect(result, isA<ObjectResult>());
       expect(result.data.objectId, '0x1');
       expect(result.data.version, '5');
@@ -200,13 +197,15 @@ void main() {
 
     test('pattern matching works on result variants', () {
       final results = <ObjectResult>[
-        ObjectSuccess(ObjectData(
-          objectId: '0x1',
-          version: '1',
-          digest: 'abc',
-          owner: const ImmutableOwner(),
-          type: 'Coin',
-        )),
+        ObjectSuccess(
+          ObjectData(
+            objectId: '0x1',
+            version: '1',
+            digest: 'abc',
+            owner: const ImmutableOwner(),
+            type: 'Coin',
+          ),
+        ),
         const ObjectError('not found'),
       ];
 
@@ -251,7 +250,9 @@ void main() {
         previousTransaction: 'txdigest123',
         content: Uint8List.fromList([1, 2, 3]),
         objectBcs: Uint8List.fromList([4, 5, 6]),
-        json: const {'fields': {'value': 42}},
+        json: const {
+          'fields': {'value': 42},
+        },
       );
       expect(obj.previousTransaction, 'txdigest123');
       expect(obj.content, isNotNull);
@@ -486,16 +487,18 @@ void main() {
         message: 'Move abort',
         kind: 'MOVE_ABORT',
         command: 0,
-        detail: AbortDetail(MoveAbort(
-          abortCode: '1',
-          location: MoveAbortLocation(
-            package: '0x2',
-            module: 'coin',
-            function: 3,
-            instruction: 10,
-            functionName: 'transfer',
+        detail: AbortDetail(
+          MoveAbort(
+            abortCode: '1',
+            location: MoveAbortLocation(
+              package: '0x2',
+              module: 'coin',
+              function: 3,
+              instruction: 10,
+              functionName: 'transfer',
+            ),
           ),
-        )),
+        ),
       );
       expect(error.command, 0);
       final detail = error.detail as AbortDetail;
@@ -509,7 +512,10 @@ void main() {
         const AbortDetail(MoveAbort(abortCode: '1')),
         const SizeErrorDetail(size: '100', maxSize: '50'),
         const CommandArgumentErrorDetail(argument: 0, kind: 'TYPE_MISMATCH'),
-        const TypeArgumentErrorDetail(typeArgument: 1, kind: 'CONSTRAINT_NOT_SATISFIED'),
+        const TypeArgumentErrorDetail(
+          typeArgument: 1,
+          kind: 'CONSTRAINT_NOT_SATISFIED',
+        ),
         const PackageUpgradeErrorDetail(kind: 'INCOMPATIBLE', packageId: '0x5'),
         const IndexErrorDetail(index: 0, subresult: 1),
         const ObjectIdErrorDetail('0xobj'),
@@ -654,10 +660,7 @@ void main() {
 
   group('SystemState', () {
     test('creates with required fields', () {
-      const state = SystemState(
-        epoch: '100',
-        referenceGasPrice: '750',
-      );
+      const state = SystemState(epoch: '100', referenceGasPrice: '750');
       expect(state.epoch, '100');
       expect(state.referenceGasPrice, '750');
       expect(state.systemState, isNull);
@@ -849,10 +852,7 @@ void main() {
 
   group('UnchangedConsensusObject', () {
     test('creates with required fields', () {
-      const obj = UnchangedConsensusObject(
-        objectId: '0x1',
-        version: '10',
-      );
+      const obj = UnchangedConsensusObject(objectId: '0x1', version: '10');
       expect(obj.objectId, '0x1');
       expect(obj.version, '10');
       expect(obj.kind, isNull);
@@ -897,10 +897,7 @@ void main() {
     test('creates failed status with error', () {
       const status = ExecutionStatus(
         success: false,
-        error: ExecutionError(
-          message: 'Execution failed',
-          kind: 'MOVE_ABORT',
-        ),
+        error: ExecutionError(message: 'Execution failed', kind: 'MOVE_ABORT'),
       );
       expect(status.success, false);
       expect(status.error!.message, 'Execution failed');

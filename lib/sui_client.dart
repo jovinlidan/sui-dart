@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:sui_dart/builder/transaction.dart';
 import 'package:sui_dart/models/dev_inspect_results.dart';
-import 'package:sui_dart/rpc/client.dart';
 import 'package:sui_dart/signers/signer_with_provider.dart';
 import 'package:sui_dart/sui_account.dart';
 import 'package:sui_dart/types/common.dart';
@@ -11,8 +10,8 @@ import 'package:sui_dart/types/transactions.dart';
 class SuiClient extends SignerWithProvider {
   late SuiAccount? _account;
 
-  SuiClient(String endpoint, {SuiAccount? account, RequestOptions? options})
-    : super(endpoint: endpoint, options: options) {
+  SuiClient(String endpoint, {SuiAccount? account, super.options})
+    : super(endpoint: endpoint) {
     _account = account;
   }
 
@@ -66,17 +65,26 @@ class SuiClient extends SignerWithProvider {
     BigInt? gasPrice,
     String? epoch,
   }) async {
-    
     late Uint8List txBytes;
     if (transaction is Transaction) {
       transaction.setSenderIfNotSet(sender);
-      txBytes = await transaction.build(BuildOptions(client: this, onlyTransactionKind: true));
+      txBytes = await transaction.build(
+        BuildOptions(client: this, onlyTransactionKind: true),
+      );
     } else if (transaction is Uint8List) {
       txBytes = transaction;
     } else {
-      throw ArgumentError("transaction must be Transaction or Uint8List", "transaction");
+      throw ArgumentError(
+        "transaction must be Transaction or Uint8List",
+        "transaction",
+      );
     }
-    final result = await devInspectTransaction(sender, txBytes, gasPrice: gasPrice, epoch: epoch);
+    final result = await devInspectTransaction(
+      sender,
+      txBytes,
+      gasPrice: gasPrice,
+      epoch: epoch,
+    );
     return result;
   }
 }

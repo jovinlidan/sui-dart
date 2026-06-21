@@ -1,11 +1,13 @@
-
-
+// ignore_for_file: constant_identifier_names
 enum ObjectReadStatus {
-  VersionFound, ObjectNotExists, ObjectDeleted, VersionNotFound, VersionTooHigh
+  VersionFound,
+  ObjectNotExists,
+  ObjectDeleted,
+  VersionNotFound,
+  VersionTooHigh,
 }
 
 class ObjectRead {
-
   ObjectReadStatus status;
   dynamic details;
 
@@ -17,10 +19,6 @@ class ObjectRead {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      "status": status.name,
-      "details": details
-    };
+    return {"status": status.name, "details": details};
   }
-
 }

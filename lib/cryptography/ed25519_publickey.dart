@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -22,7 +23,8 @@ class Ed25519PublicKey with PublicKey {
     final buffer = Uint8List.fromList(publicKey);
     if (buffer.length != PUBLIC_KEY_SIZE) {
       throw ArgumentError(
-          "Invalid public key input. Expected $PUBLIC_KEY_SIZE bytes, got ${buffer.length}");
+        "Invalid public key input. Expected $PUBLIC_KEY_SIZE bytes, got ${buffer.length}",
+      );
     }
     return Ed25519PublicKey._(decodeBigIntToUnsigned(buffer));
   }
@@ -75,7 +77,7 @@ class Ed25519PublicKey with PublicKey {
 
   @override
   int flag() => SIGNATURE_SCHEME_TO_FLAG.Ed25519;
-  
+
   @override
   bool verify(Uint8List data, Uint8List signature) {
     if (signature.length != 64) {

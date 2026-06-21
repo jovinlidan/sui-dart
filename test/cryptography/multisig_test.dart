@@ -6,7 +6,7 @@ import 'package:sui_dart/utils/sha.dart';
 
 void main() {
   test('combines signature to multisig', () async {
-    const VALID_SECP256K1_SECRET_KEY = [
+    const validSecp256k1SecretKey = [
       59,
       148,
       11,
@@ -40,7 +40,7 @@ void main() {
       136,
       28,
     ];
-    final secretKey = Uint8List.fromList(VALID_SECP256K1_SECRET_KEY);
+    final secretKey = Uint8List.fromList(validSecp256k1SecretKey);
     final k1 = Ed25519Keypair.fromSecretKey(secretKey);
     final pk1 = k1.getPublicKey();
 
@@ -55,15 +55,26 @@ void main() {
     pks.add(PubkeyWeightPair(pk2, 2));
     pks.add(PubkeyWeightPair(pk3, 3));
     String multisigAddress = MultiSig.toMultiSigAddress(pks, 3);
-    expect(multisigAddress, "0x37b048598ca569756146f4e8ea41666c657406db154a31f11bb5c1cbaf0b98d7");
+    expect(
+      multisigAddress,
+      "0x37b048598ca569756146f4e8ea41666c657406db154a31f11bb5c1cbaf0b98d7",
+    );
 
     final data = Uint8List.fromList([0, 0, 0, 5, 72, 101, 108, 108, 111]);
     final digest = blake2b(data);
 
-    final serSig1 = toSerializedSignature(k1.getKeyScheme(), k1.signData(digest), pk1);
+    final serSig1 = toSerializedSignature(
+      k1.getKeyScheme(),
+      k1.signData(digest),
+      pk1,
+    );
     print(serSig1.toString());
 
-    final serSig2 = toSerializedSignature(k2.getKeyScheme(), k2.signData(digest), pk2);
+    final serSig2 = toSerializedSignature(
+      k2.getKeyScheme(),
+      k2.signData(digest),
+      pk2,
+    );
     print(serSig2.toString());
   });
 }

@@ -1,3 +1,4 @@
+// ignore_for_file: constant_identifier_names, non_constant_identifier_names
 typedef SuiMoveFunctionArgType = dynamic;
 
 typedef SuiMoveNormalizedModules = Map<String, SuiMoveNormalizedModule>;
@@ -10,8 +11,14 @@ class SuiMoveNormalizedModule {
   Map<String, SuiMoveNormalizedStruct> structs;
   Map<String, SuiMoveNormalizedFunction> exposedFunctions;
 
-  SuiMoveNormalizedModule(this.fileFormatVersion, this.address, this.name,
-      this.friends, this.structs, this.exposedFunctions);
+  SuiMoveNormalizedModule(
+    this.fileFormatVersion,
+    this.address,
+    this.name,
+    this.friends,
+    this.structs,
+    this.exposedFunctions,
+  );
 
   factory SuiMoveNormalizedModule.fromJson(dynamic data) {
     final friends = data['friends'];
@@ -57,10 +64,7 @@ class SuiMoveModuleId {
   SuiMoveModuleId(this.address, this.name);
 
   factory SuiMoveModuleId.fromJson(dynamic data) {
-    return SuiMoveModuleId(
-      data['address'],
-      data['name'],
-    );
+    return SuiMoveModuleId(data['address'], data['name']);
   }
 }
 
@@ -79,7 +83,10 @@ class SuiMoveNormalizedStruct {
         .map((x) => SuiMoveNormalizedField.fromJson(x))
         .toList();
     return SuiMoveNormalizedStruct(
-        SuiMoveAbilitySet.fromJson(data['abilities']), paramsList, fieldsList);
+      SuiMoveAbilitySet.fromJson(data['abilities']),
+      paramsList,
+      fieldsList,
+    );
   }
 }
 
@@ -115,8 +122,13 @@ class SuiMoveNormalizedFunction {
   List<SuiMoveNormalizedType> parameters;
   List<SuiMoveNormalizedType> returns;
 
-  SuiMoveNormalizedFunction(this.visibility, this.isEntry, this.typeParameters,
-      this.parameters, this.returns);
+  SuiMoveNormalizedFunction(
+    this.visibility,
+    this.isEntry,
+    this.typeParameters,
+    this.parameters,
+    this.returns,
+  );
 
   factory SuiMoveNormalizedFunction.fromJson(dynamic data) {
     SuiMoveVisibility visibility;
@@ -145,7 +157,12 @@ class SuiMoveNormalizedFunction {
     }
 
     return SuiMoveNormalizedFunction(
-        visibility, data['isEntry'], typeParameters, parameters, returns);
+      visibility,
+      data['isEntry'],
+      typeParameters,
+      parameters,
+      returns,
+    );
   }
 }
 
@@ -187,7 +204,8 @@ class SuiMoveNormalizedStructType {
 }
 
 SuiMoveNormalizedType? extractMutableReference(
-    SuiMoveNormalizedType normalizedType) {
+  SuiMoveNormalizedType normalizedType,
+) {
   if (normalizedType is Map && normalizedType.containsKey('MutableReference')) {
     return normalizedType['MutableReference'];
   }
@@ -201,8 +219,7 @@ SuiMoveNormalizedType? extractReference(SuiMoveNormalizedType normalizedType) {
   return null;
 }
 
-dynamic extractStructTag(
-    SuiMoveNormalizedType normalizedType) {
+dynamic extractStructTag(SuiMoveNormalizedType normalizedType) {
   if (normalizedType is Map && normalizedType.containsKey('Struct')) {
     return normalizedType['Struct'];
   }

@@ -1,20 +1,15 @@
-
 import 'dart:typed_data';
 
 import 'package:sui_dart/cryptography/keypair.dart';
 import 'package:sui_dart/signers/signer_with_provider.dart';
-import 'package:sui_dart/signers/txn_data_serializers/txn_data_serializer.dart';
 import 'package:sui_dart/sui_account.dart';
 import 'package:sui_dart/types/common.dart';
 
 class RawSigner extends SignerWithProvider {
   late final Keypair _keypair;
 
-  RawSigner(
-    Keypair keypair,
-    {String? endpoint,
-    TxnDataSerializer? serializer}
-  ): super(endpoint: endpoint ?? '', serializer: serializer) {
+  RawSigner(Keypair keypair, {String? endpoint, super.serializer})
+    : super(endpoint: endpoint ?? '') {
     _keypair = keypair;
   }
 
@@ -33,12 +28,16 @@ class RawSigner extends SignerWithProvider {
     return SignaturePubkeyPair(
       _keypair.getKeyScheme(),
       _keypair.signData(data),
-      pubKey: _keypair.getPublicKey()
+      pubKey: _keypair.getPublicKey(),
     );
   }
 
   bool verify(Uint8List data, SignaturePubkeyPair signature) {
-    bool success = _keypair.verify(data, signature.signature, signature.pubKey!.toRawBytes());
+    bool success = _keypair.verify(
+      data,
+      signature.signature,
+      signature.pubKey!.toRawBytes(),
+    );
     return success;
   }
 }

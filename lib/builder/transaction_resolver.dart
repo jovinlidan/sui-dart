@@ -6,12 +6,16 @@ import 'package:sui_dart/grpc/generated/sui/rpc/v2/argument.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/input.pb.dart';
 import 'package:sui_dart/grpc/generated/sui/rpc/v2/object_reference.pb.dart';
 import 'package:sui_dart/sui.dart';
-import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction.pb.dart' as grpc_transaction;
+import 'package:sui_dart/grpc/generated/sui/rpc/v2/transaction.pb.dart'
+    as grpc_transaction;
 
 Input callArgToGrpcInput(Map<String, dynamic> arg) {
   switch (arg['\$kind']) {
     case 'Pure':
-      return Input(kind: Input_InputKind.PURE, pure: base64Decode(arg['Pure']['bytes']));
+      return Input(
+        kind: Input_InputKind.PURE,
+        pure: base64Decode(arg['Pure']['bytes']),
+      );
     case 'Object':
       final obj = arg['Object'];
       switch (obj['\$kind']) {
@@ -19,7 +23,10 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
           return Input(
             kind: Input_InputKind.IMMUTABLE_OR_OWNED,
             objectId: obj['ImmOrOwnedObject']['objectId'],
-            version: Int64.parseRadix(obj['ImmOrOwnedObject']['version'].toString(), 10),
+            version: Int64.parseRadix(
+              obj['ImmOrOwnedObject']['version'].toString(),
+              10,
+            ),
             digest: obj['ImmOrOwnedObject']['digest'],
           );
 
@@ -27,7 +34,10 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
           return Input(
             kind: Input_InputKind.SHARED,
             objectId: obj['SharedObject']['objectId'],
-            version: Int64.parseRadix(obj['SharedObject']['initialSharedVersion'].toString(), 10),
+            version: Int64.parseRadix(
+              obj['SharedObject']['initialSharedVersion'].toString(),
+              10,
+            ),
             mutable: obj['SharedObject']['mutable'],
           );
 
@@ -35,7 +45,10 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
           return Input(
             kind: Input_InputKind.RECEIVING,
             objectId: obj['Receiving']['objectId'],
-            version: Int64.parseRadix(obj['Receiving']['version'].toString(), 10),
+            version: Int64.parseRadix(
+              obj['Receiving']['version'].toString(),
+              10,
+            ),
             digest: obj['Receiving']['digest'],
           );
       }
@@ -54,7 +67,9 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
         mutable: u['mutable'],
       );
     case 'UnresolvedPure':
-      throw Exception("UnresolvedPure must be resolved before converting to gRPC");
+      throw Exception(
+        "UnresolvedPure must be resolved before converting to gRPC",
+      );
     case 'FundsWithdrawal':
       final withdrawal = arg['FundsWithdrawal'];
 
@@ -67,7 +82,9 @@ Input callArgToGrpcInput(Map<String, dynamic> arg) {
           coinType: withdrawal['typeArg']['\$kind'] == 'Balance'
               ? withdrawal['typeArg']['Balance']
               : null,
-          source: withdrawal['withdrawFrom']['\$kind'] == 'Sponsor' ? .SPONSOR : .SENDER,
+          source: withdrawal['withdrawFrom']['\$kind'] == 'Sponsor'
+              ? .SPONSOR
+              : .SENDER,
         ),
       );
     default:
@@ -110,7 +127,8 @@ grpc_transaction.Command commandToGrpcCommand(Map<dynamic, dynamic> cmd) {
           // (`List<dynamic>`), so cast here to satisfy proto's
           // `Iterable<String>?` — avoids a runtime type error for move
           // calls that take no type parameters.
-          typeArguments: (cmd['MoveCall']['typeArguments'] as List?)?.cast<String>(),
+          typeArguments: (cmd['MoveCall']['typeArguments'] as List?)
+              ?.cast<String>(),
           arguments: toIterableGrpcArguments(cmd['MoveCall']['arguments']),
         )),
       );
@@ -119,7 +137,9 @@ grpc_transaction.Command commandToGrpcCommand(Map<dynamic, dynamic> cmd) {
       return grpc_transaction.Command(
         transferObjects: grpc_transaction.TransferObjects(
           objects: toIterableGrpcArguments(cmd['TransferObjects']?['objects']),
-          address: toIterableGrpcArguments([(cmd['TransferObjects']['address'])])[0],
+          address: toIterableGrpcArguments([
+            (cmd['TransferObjects']['address']),
+          ])[0],
         ),
       );
 
@@ -175,7 +195,9 @@ grpc_transaction.Command commandToGrpcCommand(Map<dynamic, dynamic> cmd) {
   }
 }
 
-grpc_transaction.Transaction transactionDataToGrpcTransaction(TransactionData data) {
+grpc_transaction.Transaction transactionDataToGrpcTransaction(
+  TransactionData data,
+) {
   final inputs = data.inputs?.map(callArgToGrpcInput).toList();
 
   final commands = data.commands?.map(commandToGrpcCommand).toList();
@@ -211,10 +233,14 @@ grpc_transaction.Transaction transactionDataToGrpcTransaction(TransactionData da
   if (data.expiration != null) {
     if (data.expiration?.epoch == null) {
       tx.expiration = (grpc_transaction.TransactionExpiration()
-        ..kind = grpc_transaction.TransactionExpiration_TransactionExpirationKind.NONE);
+        ..kind = grpc_transaction
+            .TransactionExpiration_TransactionExpirationKind
+            .NONE);
     } else {
       tx.expiration = (grpc_transaction.TransactionExpiration()
-        ..kind = grpc_transaction.TransactionExpiration_TransactionExpirationKind.EPOCH
+        ..kind = grpc_transaction
+            .TransactionExpiration_TransactionExpirationKind
+            .EPOCH
         ..epoch = Int64.parseRadix(data.expiration!.epoch.toString(), 10));
     }
   }

@@ -9,14 +9,16 @@ class RequestOptions {
   Duration? connectTimeout;
   Duration? sendTimeout;
   Duration? receiveTimeout;
-  RequestOptions({this.headers, this.connectTimeout, this.sendTimeout, this.receiveTimeout});
+  RequestOptions({
+    this.headers,
+    this.connectTimeout,
+    this.sendTimeout,
+    this.receiveTimeout,
+  });
 }
 
 class JsonRpcClient {
-  JsonRpcClient(
-    this.url, {
-    this.options,
-  });
+  JsonRpcClient(this.url, {this.options});
 
   final String url;
   RequestOptions? options;
@@ -45,14 +47,16 @@ class JsonRpcClient {
   Future<dynamic> sendRequest(String method, [dynamic parameters]) async {
     if (parameters is Iterable) parameters = parameters.toList();
     if (parameters is! Map && parameters is! List && parameters != null) {
-      throw ArgumentError('Only maps and lists can be used as JSON-RPC '
-          'parameters, was "$parameters".');
+      throw ArgumentError(
+        'Only maps and lists can be used as JSON-RPC '
+        'parameters, was "$parameters".',
+      );
     }
 
     var message = <String, dynamic>{
       "jsonrpc": rpcVersion,
       "method": method,
-      "id": _id
+      "id": _id,
     };
     _id++;
 
@@ -63,16 +67,13 @@ class JsonRpcClient {
     final dioOptions = Options(
       sendTimeout: options?.sendTimeout,
       receiveTimeout: options?.receiveTimeout,
-      headers: options?.headers
+      headers: options?.headers,
     );
 
-    http.options.connectTimeout = options?.connectTimeout ?? const Duration(seconds: 60);
+    http.options.connectTimeout =
+        options?.connectTimeout ?? const Duration(seconds: 60);
 
-    var data = (await http.post(
-      url,
-      data: message,
-      options: dioOptions,
-    )).data;
+    var data = (await http.post(url, data: message, options: dioOptions)).data;
 
     if (data is String) {
       if (data.isEmpty) return data;

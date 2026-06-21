@@ -15,7 +15,7 @@ class CoinStruct extends SuiObjectRef {
     TransactionDigest digest,
     this.balance,
     this.previousTransaction,
-  ): super(digest, coinObjectId, version);
+  ) : super(digest, coinObjectId, version);
 
   factory CoinStruct.fromJson(dynamic data) {
     return CoinStruct(
@@ -36,7 +36,7 @@ class CoinStruct extends SuiObjectRef {
       "version": version,
       "digest": digest,
       "balance": balance,
-      "previousTransaction": previousTransaction
+      "previousTransaction": previousTransaction,
     };
   }
 }
@@ -46,11 +46,7 @@ class PaginatedCoins {
   String? nextCursor;
   bool hasNextPage;
 
-  PaginatedCoins(
-    this.data,
-    this.nextCursor,
-    this.hasNextPage,
-  );
+  PaginatedCoins(this.data, this.nextCursor, this.hasNextPage);
 
   factory PaginatedCoins.fromJson(dynamic data) {
     List<CoinStruct> list = [];
@@ -60,11 +56,7 @@ class PaginatedCoins {
       }
     }
 
-    return PaginatedCoins(
-      list,
-      data['nextCursor'],
-      data['hasNextPage'],
-    );
+    return PaginatedCoins(list, data['nextCursor'], data['hasNextPage']);
   }
 }
 

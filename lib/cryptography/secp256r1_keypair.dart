@@ -1,4 +1,4 @@
-
+// ignore_for_file: constant_identifier_names
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -25,9 +25,11 @@ class Secp256r1Keypair with Keypair {
         throw ArgumentError('Invalid private key.');
       }
       _keypair = keypair;
-    } else { 
-     Uint8List secretKey = secp256r1.generatePrivateKeyBytes();
-     Uint8List publicKey = secp256r1.getPublicKeyFromPrivateKeyBytes(secretKey);
+    } else {
+      Uint8List secretKey = secp256r1.generatePrivateKeyBytes();
+      Uint8List publicKey = secp256r1.getPublicKeyFromPrivateKeyBytes(
+        secretKey,
+      );
       _keypair = Secp256KeypairData(publicKey, secretKey);
     }
   }
@@ -46,10 +48,13 @@ class Secp256r1Keypair with Keypair {
   ///
   /// Throw error if the provided secret key is invalid and validation is not skipped.
   static Secp256r1Keypair fromSecretKey(
-    Uint8List secretKey,
-    { bool? skipValidation }
-  ) {
-    Uint8List publicKey = secp256r1.getPublicKeyFromPrivateKeyBytes(secretKey, false);
+    Uint8List secretKey, {
+    bool? skipValidation,
+  }) {
+    Uint8List publicKey = secp256r1.getPublicKeyFromPrivateKeyBytes(
+      secretKey,
+      false,
+    );
     if (skipValidation == null || !skipValidation) {
       final signData = utf8.encode('sui validation');
       final msgHash = sha256(signData);
@@ -68,8 +73,12 @@ class Secp256r1Keypair with Keypair {
   }
 
   /// Generate a keypair from [mnemonics] string.
-  static Secp256r1Keypair fromMnemonics(String mnemonics,
-      {int accountIndex = 0, int addressIndex = 0, int changeIndex = 0}) {
+  static Secp256r1Keypair fromMnemonics(
+    String mnemonics, {
+    int accountIndex = 0,
+    int addressIndex = 0,
+    int changeIndex = 0,
+  }) {
     String path = "m/74'/784'/$accountIndex'/$changeIndex/$addressIndex";
     return Secp256r1Keypair.deriveKeypair(path, mnemonics);
   }
@@ -80,7 +89,10 @@ class Secp256r1Keypair with Keypair {
   }
 
   Uint8List publicKeyBytes([bool isCompressed = true]) {
-    return secp256r1.getPublicKeyFromPrivateKeyBytes(_keypair.secretKey, isCompressed);
+    return secp256r1.getPublicKeyFromPrivateKeyBytes(
+      _keypair.secretKey,
+      isCompressed,
+    );
   }
 
   @override
@@ -111,11 +123,19 @@ class Secp256r1Keypair with Keypair {
   @override
   bool verify(Uint8List data, Uint8List signature, Uint8List publicKey) {
     final msgHash = sha256(data);
-    return secp256r1.verifySignature(msgHash, SignatureData.fromBytes(signature), publicKey);
+    return secp256r1.verifySignature(
+      msgHash,
+      SignatureData.fromBytes(signature),
+      publicKey,
+    );
   }
-  
+
   @override
-  bool verifySerialized(Uint8List message, String signature, Uint8List publicKey) {
+  bool verifySerialized(
+    Uint8List message,
+    String signature,
+    Uint8List publicKey,
+  ) {
     final parsed = parseSerializedSignature(signature);
     if (parsed.signatureScheme != SignatureScheme.Secp256r1) {
       throw ArgumentError('Invalid signature scheme');

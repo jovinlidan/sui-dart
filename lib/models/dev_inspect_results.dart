@@ -7,8 +7,10 @@ part 'dev_inspect_results.g.dart';
 
 @freezed
 abstract class SuiExecutionResult with _$SuiExecutionResult {
-  const factory SuiExecutionResult({dynamic mutableReferenceOutputs, dynamic returnValues}) =
-      _SuiExecutionResult;
+  const factory SuiExecutionResult({
+    dynamic mutableReferenceOutputs,
+    dynamic returnValues,
+  }) = _SuiExecutionResult;
 
   factory SuiExecutionResult.fromJson(Map<String, dynamic> json) =>
       _$SuiExecutionResultFromJson(json);
@@ -16,11 +18,12 @@ abstract class SuiExecutionResult with _$SuiExecutionResult {
 
 @freezed
 abstract class DevInspectResults with _$DevInspectResults {
-  const factory DevInspectResults(
-      {required TransactionEffects effects,
-      required List<SuiEvent> events,
-      String? error,
-      List<SuiExecutionResult>? results}) = _DevInspectResults;
+  const factory DevInspectResults({
+    required TransactionEffects effects,
+    required List<SuiEvent> events,
+    String? error,
+    List<SuiExecutionResult>? results,
+  }) = _DevInspectResults;
 
   factory DevInspectResults.fromJson(Map<String, dynamic> json) =>
       _$DevInspectResultsFromJson(json);

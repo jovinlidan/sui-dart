@@ -5,19 +5,21 @@ part 'checkpoint.g.dart';
 
 @freezed
 abstract class Checkpoint with _$Checkpoint {
-  const factory Checkpoint(
-      {required String epoch,
-      required String sequenceNumber,
-      required String digest,
-      required String networkTotalTransactions,
-      String? previousDigest,
-      required EpochRollingGasCostSummary epochRollingGasCostSummary,
-      required String timestampMs,
-      required List<String> transactions,
-      required List<dynamic> checkpointCommitments,
-      required String validatorSignature}) = _Checkpoint;
+  const factory Checkpoint({
+    required String epoch,
+    required String sequenceNumber,
+    required String digest,
+    required String networkTotalTransactions,
+    String? previousDigest,
+    required EpochRollingGasCostSummary epochRollingGasCostSummary,
+    required String timestampMs,
+    required List<String> transactions,
+    required List<dynamic> checkpointCommitments,
+    required String validatorSignature,
+  }) = _Checkpoint;
 
-  factory Checkpoint.fromJson(Map<String, dynamic> json) => _$CheckpointFromJson(json);
+  factory Checkpoint.fromJson(Map<String, dynamic> json) =>
+      _$CheckpointFromJson(json);
 }
 
 @freezed

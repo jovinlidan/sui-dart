@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:bip39_plus/bip39_plus.dart' as bip39;
@@ -31,7 +30,7 @@ Uint8List mnemonicToSeed(String mnemonics) {
   if (!isValidMnemonics(mnemonics)) {
     throw ArgumentError("Invalid mnemonics");
   }
-  
+
   return bip39.mnemonicToSeed(mnemonics, passphrase: "");
 }
 
@@ -44,8 +43,11 @@ String mnemonicToSeedHex(String mnemonics) {
   return bip39.mnemonicToSeedHex(mnemonics, passphrase: "");
 }
 
-String generateMnemonic({int strength = 128 }) {
-  return bip39.generateMnemonic(strength: strength, randomBytes: getRandom().nextBytes);
+String generateMnemonic({int strength = 128}) {
+  return bip39.generateMnemonic(
+    strength: strength,
+    randomBytes: getRandom().nextBytes,
+  );
 }
 
 bool isValidMnemonics(String mnemonics) {

@@ -1,7 +1,9 @@
+// ignore_for_file: constant_identifier_names
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:pointycastle/api.dart' show KeyParameter;
 import 'package:pointycastle/random/fortuna_random.dart';
+// ignore: implementation_imports
 import 'package:pointycastle/src/utils.dart' as utils;
 import 'package:sui_dart/cryptography/signature.dart';
 import 'package:sui_dart/sui.dart';
@@ -9,9 +11,11 @@ import 'package:sui_dart/utils/bech32/bech32.dart';
 
 Uint8List encodeBigInt(BigInt? number) => utils.encodeBigInt(number);
 
-Uint8List encodeBigIntAsUnsigned(BigInt number) => utils.encodeBigIntAsUnsigned(number);
+Uint8List encodeBigIntAsUnsigned(BigInt number) =>
+    utils.encodeBigIntAsUnsigned(number);
 
-BigInt decodeBigIntToUnsigned(List<int> magnitude) => utils.decodeBigIntWithSign(1, magnitude);
+BigInt decodeBigIntToUnsigned(List<int> magnitude) =>
+    utils.decodeBigIntWithSign(1, magnitude);
 
 Uint8List padLeftUint8List(Uint8List data, [int len = 32]) {
   assert(data.length <= len);
@@ -43,7 +47,9 @@ const SUI_PRIVATE_KEY_PREFIX = 'suiprivkey';
     throw ArgumentError('Invalid private key prefix');
   }
   final extendedSecretKey = bech32.fromWords(result.data);
-  final signatureScheme = SIGNATURE_SCHEME_TO_FLAG.flagToScheme(extendedSecretKey[0]);
+  final signatureScheme = SIGNATURE_SCHEME_TO_FLAG.flagToScheme(
+    extendedSecretKey[0],
+  );
   final secretKey = Uint8List.fromList(extendedSecretKey.sublist(1));
   return (signatureScheme, secretKey);
 }
@@ -59,5 +65,7 @@ String encodeSuiPrivateKey(Uint8List bytes, SignatureScheme scheme) {
   final privKeyBytes = Uint8List(bytes.length + 1);
   privKeyBytes.setAll(0, [flag]);
   privKeyBytes.setAll(1, bytes);
-  return bech32.encode(Bech32(SUI_PRIVATE_KEY_PREFIX, bech32.toWords(privKeyBytes)));
+  return bech32.encode(
+    Bech32(SUI_PRIVATE_KEY_PREFIX, bech32.toWords(privKeyBytes)),
+  );
 }

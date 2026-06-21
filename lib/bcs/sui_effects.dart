@@ -1,17 +1,24 @@
+// ignore_for_file: non_constant_identifier_names
 import 'package:bcs_dart/bcs.dart';
 import 'package:sui_dart/bcs/sui_bcs.dart';
 
 class SuiEffects {
   static final PackageUpgradeError = Bcs.enumeration('PackageUpgradeError', {
-    'UnableToFetchPackage': Bcs.struct('UnableToFetchPackage', {'packageId': SuiBcs.Address}),
+    'UnableToFetchPackage': Bcs.struct('UnableToFetchPackage', {
+      'packageId': SuiBcs.Address,
+    }),
     'NotAPackage': Bcs.struct('NotAPackage', {'objectId': SuiBcs.Address}),
     'IncompatibleUpgrade': null,
-    'DigestDoesNotMatch': Bcs.struct('DigestDoesNotMatch', {'digest': Bcs.vector(Bcs.u8())}),
-    'UnknownUpgradePolicy': Bcs.struct('UnknownUpgradePolicy', {'policy': Bcs.u8()}),
+    'DigestDoesNotMatch': Bcs.struct('DigestDoesNotMatch', {
+      'digest': Bcs.vector(Bcs.u8()),
+    }),
+    'UnknownUpgradePolicy': Bcs.struct('UnknownUpgradePolicy', {
+      'policy': Bcs.u8(),
+    }),
     'PackageIDDoesNotMatch': Bcs.struct('PackageIDDoesNotMatch', {
       'packageId': SuiBcs.Address,
       'ticketId': SuiBcs.Address,
-    })
+    }),
   });
 
   static final ModuleId = Bcs.struct('ModuleId', {
@@ -36,7 +43,9 @@ class SuiEffects {
       'resultIdx': Bcs.u16(),
       'secondaryIdx': Bcs.u16(),
     }),
-    'InvalidResultArity': Bcs.struct('InvalidResultArity', {'resultIdx': Bcs.u16()}),
+    'InvalidResultArity': Bcs.struct('InvalidResultArity', {
+      'resultIdx': Bcs.u16(),
+    }),
     'InvalidGasCoinUsage': null,
     'InvalidValueUsage': null,
     'InvalidObjectByValue': null,
@@ -49,74 +58,84 @@ class SuiEffects {
     'ConstraintNotSatisfied': null,
   });
 
-  static final ExecutionFailureStatus = Bcs.enumeration('ExecutionFailureStatus', {
-    'InsufficientGas': null,
-    'InvalidGasObject': null,
-    'InvariantViolation': null,
-    'FeatureNotYetSupported': null,
-    'MoveObjectTooBig': Bcs.struct('MoveObjectTooBig', {
-      'objectSize': Bcs.u64(),
-      'maxObjectSize': Bcs.u64(),
-    }),
-    'MovePackageTooBig': Bcs.struct('MovePackageTooBig', {
-      'objectSize': Bcs.u64(),
-      'maxObjectSize': Bcs.u64(),
-    }),
-    'CircularObjectOwnership': Bcs.struct('CircularObjectOwnership', {'object': SuiBcs.Address}),
-    'InsufficientCoinBalance': null,
-    'CoinBalanceOverflow': null,
-    'PublishErrorNonZeroAddress': null,
-    'SuiMoveVerificationError': null,
-    'MovePrimitiveRuntimeError': Bcs.option(MoveLocation),
-    'MoveAbort': Bcs.tuple([MoveLocation, Bcs.u64()]),
-    'VMVerificationOrDeserializationError': null,
-    'VMInvariantViolation': null,
-    'FunctionNotFound': null,
-    'ArityMismatch': null,
-    'TypeArityMismatch': null,
-    'NonEntryFunctionInvoked': null,
-    'CommandArgumentError': Bcs.struct('CommandArgumentError', {
-      'argIdx': Bcs.u16(),
-      'kind': CommandArgumentError,
-    }),
-    'TypeArgumentError': Bcs.struct('TypeArgumentError', {
-      'argumentIdx': Bcs.u16(),
-      'kind': TypeArgumentError,
-    }),
-    'UnusedValueWithoutDrop': Bcs.struct('UnusedValueWithoutDrop', {
-      'resultIdx': Bcs.u16(),
-      'secondaryIdx': Bcs.u16(),
-    }),
-    'InvalidPublicFunctionReturnType': Bcs.struct('InvalidPublicFunctionReturnType', {
-      'idx': Bcs.u16(),
-    }),
-    'InvalidTransferObject': null,
-    'EffectsTooLarge':
-        Bcs.struct('EffectsTooLarge', {'currentSize': Bcs.u64(), 'maxSize': Bcs.u64()}),
-    'PublishUpgradeMissingDependency': null,
-    'PublishUpgradeDependencyDowngrade': null,
-    'PackageUpgradeError': Bcs.struct('PackageUpgradeError', {'upgradeError': PackageUpgradeError}),
-    'WrittenObjectsTooLarge': Bcs.struct('WrittenObjectsTooLarge', {
-      'currentSize': Bcs.u64(),
-      'maxSize': Bcs.u64(),
-    }),
-    'CertificateDenied': null,
-    'SuiMoveVerificationTimedout': null,
-    'SharedObjectOperationNotAllowed': null,
-    'InputObjectDeleted': null,
-    'ExecutionCancelledDueToSharedObjectCongestion': Bcs.struct(
-      'ExecutionCancelledDueToSharedObjectCongestion',
-      {
-        'congestedObjects': Bcs.vector(SuiBcs.Address),
-      },
-    ),
-    'AddressDeniedForCoin': Bcs.struct('AddressDeniedForCoin', {
-      'address': SuiBcs.Address,
-      'coinType': Bcs.string(),
-    }),
-    'CoinTypeGlobalPause': Bcs.struct('CoinTypeGlobalPause', {'coinType': Bcs.string()}),
-    'ExecutionCancelledDueToRandomnessUnavailable': null,
-  });
+  static final ExecutionFailureStatus = Bcs.enumeration(
+    'ExecutionFailureStatus',
+    {
+      'InsufficientGas': null,
+      'InvalidGasObject': null,
+      'InvariantViolation': null,
+      'FeatureNotYetSupported': null,
+      'MoveObjectTooBig': Bcs.struct('MoveObjectTooBig', {
+        'objectSize': Bcs.u64(),
+        'maxObjectSize': Bcs.u64(),
+      }),
+      'MovePackageTooBig': Bcs.struct('MovePackageTooBig', {
+        'objectSize': Bcs.u64(),
+        'maxObjectSize': Bcs.u64(),
+      }),
+      'CircularObjectOwnership': Bcs.struct('CircularObjectOwnership', {
+        'object': SuiBcs.Address,
+      }),
+      'InsufficientCoinBalance': null,
+      'CoinBalanceOverflow': null,
+      'PublishErrorNonZeroAddress': null,
+      'SuiMoveVerificationError': null,
+      'MovePrimitiveRuntimeError': Bcs.option(MoveLocation),
+      'MoveAbort': Bcs.tuple([MoveLocation, Bcs.u64()]),
+      'VMVerificationOrDeserializationError': null,
+      'VMInvariantViolation': null,
+      'FunctionNotFound': null,
+      'ArityMismatch': null,
+      'TypeArityMismatch': null,
+      'NonEntryFunctionInvoked': null,
+      'CommandArgumentError': Bcs.struct('CommandArgumentError', {
+        'argIdx': Bcs.u16(),
+        'kind': CommandArgumentError,
+      }),
+      'TypeArgumentError': Bcs.struct('TypeArgumentError', {
+        'argumentIdx': Bcs.u16(),
+        'kind': TypeArgumentError,
+      }),
+      'UnusedValueWithoutDrop': Bcs.struct('UnusedValueWithoutDrop', {
+        'resultIdx': Bcs.u16(),
+        'secondaryIdx': Bcs.u16(),
+      }),
+      'InvalidPublicFunctionReturnType': Bcs.struct(
+        'InvalidPublicFunctionReturnType',
+        {'idx': Bcs.u16()},
+      ),
+      'InvalidTransferObject': null,
+      'EffectsTooLarge': Bcs.struct('EffectsTooLarge', {
+        'currentSize': Bcs.u64(),
+        'maxSize': Bcs.u64(),
+      }),
+      'PublishUpgradeMissingDependency': null,
+      'PublishUpgradeDependencyDowngrade': null,
+      'PackageUpgradeError': Bcs.struct('PackageUpgradeError', {
+        'upgradeError': PackageUpgradeError,
+      }),
+      'WrittenObjectsTooLarge': Bcs.struct('WrittenObjectsTooLarge', {
+        'currentSize': Bcs.u64(),
+        'maxSize': Bcs.u64(),
+      }),
+      'CertificateDenied': null,
+      'SuiMoveVerificationTimedout': null,
+      'SharedObjectOperationNotAllowed': null,
+      'InputObjectDeleted': null,
+      'ExecutionCancelledDueToSharedObjectCongestion': Bcs.struct(
+        'ExecutionCancelledDueToSharedObjectCongestion',
+        {'congestedObjects': Bcs.vector(SuiBcs.Address)},
+      ),
+      'AddressDeniedForCoin': Bcs.struct('AddressDeniedForCoin', {
+        'address': SuiBcs.Address,
+        'coinType': Bcs.string(),
+      }),
+      'CoinTypeGlobalPause': Bcs.struct('CoinTypeGlobalPause', {
+        'coinType': Bcs.string(),
+      }),
+      'ExecutionCancelledDueToRandomnessUnavailable': null,
+    },
+  );
 
   static final ExecutionStatus = Bcs.enumeration('ExecutionStatus', {
     'Success': null,
@@ -194,8 +213,12 @@ class SuiEffects {
     'eventsDigest': Bcs.option(SuiBcs.ObjectDigest),
     'dependencies': Bcs.vector(SuiBcs.ObjectDigest),
     'lamportVersion': Bcs.u64(),
-    'changedObjects': Bcs.vector(Bcs.tuple([SuiBcs.Address, EffectsObjectChange])),
-    'unchangedSharedObjects': Bcs.vector(Bcs.tuple([SuiBcs.Address, UnchangedSharedKind])),
+    'changedObjects': Bcs.vector(
+      Bcs.tuple([SuiBcs.Address, EffectsObjectChange]),
+    ),
+    'unchangedSharedObjects': Bcs.vector(
+      Bcs.tuple([SuiBcs.Address, UnchangedSharedKind]),
+    ),
     'auxDataDigest': Bcs.option(SuiBcs.ObjectDigest),
   });
 

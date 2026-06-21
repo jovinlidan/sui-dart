@@ -28,14 +28,17 @@ void main() {
     expect(otx.serialize(), isNot(equals(rtx.serialize())));
   });
 
-  test('can be serialized and deserialized to the same values with onlyTransactionKind', () async {
-    final tx = Transaction();
-    tx.add(Commands.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]));
-    final bytes = await tx.build(BuildOptions(onlyTransactionKind: true));
-    final tx2 = Transaction.fromKind(bytes);
-    final bytes2 = await tx2.build(BuildOptions(onlyTransactionKind: true));
-    expect(bytes, bytes2);
-  });
+  test(
+    'can be serialized and deserialized to the same values with onlyTransactionKind',
+    () async {
+      final tx = Transaction();
+      tx.add(Commands.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]));
+      final bytes = await tx.build(BuildOptions(onlyTransactionKind: true));
+      final tx2 = Transaction.fromKind(bytes);
+      final bytes2 = await tx2.build(BuildOptions(onlyTransactionKind: true));
+      expect(bytes, bytes2);
+    },
+  );
 
   test('can be serialized and deserialized to the same values', () {
     final tx = Transaction();
@@ -47,30 +50,36 @@ void main() {
 
   test('allows transfer with the result of split Commands', () {
     final tx = Transaction();
-    final coin = tx.add(Commands.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]));
+    final coin = tx.add(
+      Commands.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]),
+    );
     tx.add(Commands.transferObjects([coin], tx.object('0x2')));
   });
 
-  test('supports nested results through either array index or destructuring', () {
-    final tx = Transaction();
-    final registerResult = tx.add(
-      Commands.moveCall({
-        "target": '0x2::game::register',
-      }),
-    );
+  test(
+    'supports nested results through either array index or destructuring',
+    () {
+      final tx = Transaction();
+      final registerResult = tx.add(
+        Commands.moveCall({"target": '0x2::game::register'}),
+      );
 
-    final nft = registerResult[0];
-    final account = registerResult[1];
+      final nft = registerResult[0];
+      final account = registerResult[1];
 
-    expect(nft, equals(registerResult[0]));
-    expect(account, equals(registerResult[1]));
-  });
+      expect(nft, equals(registerResult[0]));
+      expect(account, equals(registerResult[1]));
+    },
+  );
 
   group('offline build', () {
-    test('builds an empty transaction offline when provided sufficient data', () async {
-      final tx = setup();
-      await tx.build();
-    });
+    test(
+      'builds an empty transaction offline when provided sufficient data',
+      () async {
+        final tx = setup();
+        await tx.build();
+      },
+    );
 
     test('supports epoch expiration', () async {
       final tx = setup();
@@ -115,12 +124,18 @@ void main() {
     test('builds a more complex interaction', () async {
       final tx = setup();
       final coin = tx.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]);
-      tx.add(Commands.mergeCoins(tx.gas, [coin, tx.object(Inputs.objectRef(ref()))]));
+      tx.add(
+        Commands.mergeCoins(tx.gas, [coin, tx.object(Inputs.objectRef(ref()))]),
+      );
       tx.add(
         Commands.moveCall({
           "target": '0x2::devnet_nft::mint',
           "typeArguments": [],
-          "arguments": [tx.pure.string('foo'), tx.pure.string('bar'), tx.pure.string('baz')],
+          "arguments": [
+            tx.pure.string('foo'),
+            tx.pure.string('bar'),
+            tx.pure.string('baz'),
+          ],
         }),
       );
       await tx.build();
@@ -130,12 +145,17 @@ void main() {
       final tx = setup();
       tx.object(Inputs.objectRef(ref()));
       final coin = tx.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]);
-      tx.add(Commands.mergeCoins(tx.gas, [coin, tx.object(Inputs.objectRef(ref()))]));
+      tx.add(
+        Commands.mergeCoins(tx.gas, [coin, tx.object(Inputs.objectRef(ref()))]),
+      );
       tx.add(
         Commands.moveCall({
           "target": '0x2::devnet_nft::mint',
           "typeArguments": [],
-          "arguments": [tx.object(Inputs.objectRef(ref())), tx.object(Inputs.receivingRef(ref()))],
+          "arguments": [
+            tx.object(Inputs.objectRef(ref())),
+            tx.object(Inputs.receivingRef(ref())),
+          ],
         }),
       );
 
@@ -146,64 +166,78 @@ void main() {
       expect(bytes, equals(bytes2));
     });
 
-    test('builds a more complex interaction and verifies consistency', () async {
-      final tx = setup();
-      final coin = tx.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]);
-      tx.add(Commands.mergeCoins(tx.gas, [coin, tx.object(Inputs.objectRef(ref()))]));
-      tx.add(
-        Commands.moveCall({
-          "target": '0x2::devnet_nft::mint',
-          "typeArguments": [],
-          "arguments": [tx.pure.string('foo'), tx.pure.string('bar'), tx.pure.string('baz')],
-        }),
-      );
+    test(
+      'builds a more complex interaction and verifies consistency',
+      () async {
+        final tx = setup();
+        final coin = tx.splitCoins(tx.gas, [tx.pure.u64(BigInt.from(100))]);
+        tx.add(
+          Commands.mergeCoins(tx.gas, [
+            coin,
+            tx.object(Inputs.objectRef(ref())),
+          ]),
+        );
+        tx.add(
+          Commands.moveCall({
+            "target": '0x2::devnet_nft::mint',
+            "typeArguments": [],
+            "arguments": [
+              tx.pure.string('foo'),
+              tx.pure.string('bar'),
+              tx.pure.string('baz'),
+            ],
+          }),
+        );
 
-      final bytes = await tx.build();
-      final tx2 = Transaction.fromBytes(bytes);
-      final bytes2 = await tx2.build();
+        final bytes = await tx.build();
+        final tx2 = Transaction.fromBytes(bytes);
+        final bytes2 = await tx2.build();
 
-      expect(bytes, equals(bytes2));
-    });
+        expect(bytes, equals(bytes2));
+      },
+    );
   });
 }
 
 SuiObjectRef ref() {
   final random = Random();
   return SuiObjectRef(
-    toB58(Uint8List.fromList([
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      1,
-      2,
-    ])),
+    toB58(
+      Uint8List.fromList([
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        1,
+        2,
+      ]),
+    ),
     normalizeSuiAddress(random.nextInt(100000).toString().padRight(64, '0')),
     random.nextInt(100000),
   );

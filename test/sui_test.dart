@@ -22,13 +22,15 @@ void main() {
   test('test Getting coins from the faucet v0', () async {
     final faucet = FaucetClient(SuiUrls.faucetDev);
     await faucet.requestSuiFromFaucetV0(
-        '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2');
+      '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2',
+    );
   });
 
   test('test Getting coins from the faucet v1', () async {
     final faucet = FaucetClient(SuiUrls.faucetDev);
     await faucet.requestSuiFromFaucetV1(
-        '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2');
+      '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2',
+    );
   });
 
   test('test create sui account and import from private key', () {
@@ -48,29 +50,46 @@ void main() {
 
   test('test create sui from mnemonic', () {
     final mnemonics = SuiAccount.generateMnemonic();
-    final ed25519 = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final ed25519 = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     print(ed25519.getAddress());
-    final secp256k1 = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Secp256k1);
+    final secp256k1 = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Secp256k1,
+    );
     print(secp256k1.getAddress());
-    final secp256r1 = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Secp256r1);
+    final secp256r1 = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Secp256r1,
+    );
     print(secp256r1.getAddress());
   });
 
   test('test transfer object', () async {
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     final client = SuiClient(SuiUrls.devnet);
 
     final tx = Transaction();
-    tx.transferObjects(
-        [tx.objectId('0x2619f581cb1864d07c89453a69611202669fdc4784fb59b9cb4278ec60756011')],
-        tx.pureAddress(account.getAddress()));
+    tx.transferObjects([
+      tx.objectId(
+        '0x2619f581cb1864d07c89453a69611202669fdc4784fb59b9cb4278ec60756011',
+      ),
+    ], tx.pureAddress(account.getAddress()));
 
     final result = await client.signAndExecuteTransactionBlock(account, tx);
     print(result.digest);
   });
 
   test('test split and transfer sui', () async {
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     final client = SuiClient(SuiUrls.devnet);
 
     final tx = Transaction();
@@ -82,31 +101,51 @@ void main() {
   });
 
   test('test merge coins', () async {
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     final client = SuiClient(SuiUrls.devnet);
 
     final tx = Transaction();
-    tx.mergeCoins(tx.objectId('0x922ec73939b3288f6da39ebefb0cb88c6c54817441254d448bd2491ac4dd0cbd'),
-        [tx.objectId('0x8dafc96dec7f8d635e052a6da9a4153e37bc4d59ed44c45006e4e9d17d07f80d')]);
+    tx.mergeCoins(
+      tx.objectId(
+        '0x922ec73939b3288f6da39ebefb0cb88c6c54817441254d448bd2491ac4dd0cbd',
+      ),
+      [
+        tx.objectId(
+          '0x8dafc96dec7f8d635e052a6da9a4153e37bc4d59ed44c45006e4e9d17d07f80d',
+        ),
+      ],
+    );
 
     final result = await client.signAndExecuteTransactionBlock(account, tx);
     print(result.digest);
   });
 
   test('test move call', () async {
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     final client = SuiClient(SuiUrls.devnet);
 
     const packageObjectId = '0x...';
     final tx = Transaction();
-    tx.moveCall('$packageObjectId::nft::mint', arguments: [tx.pureString('Example NFT')]);
+    tx.moveCall(
+      '$packageObjectId::nft::mint',
+      arguments: [tx.pureString('Example NFT')],
+    );
 
     final result = await client.signAndExecuteTransactionBlock(account, tx);
     print(result.digest);
   });
 
   test('test publish modules', () async {
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     final client = SuiClient(SuiUrls.devnet);
 
     const moduels = <String>[];
@@ -121,8 +160,9 @@ void main() {
 
   test('test get owned objects', () async {
     final client = SuiClient(SuiUrls.devnet);
-    final objects = await client
-        .getOwnedObjects('0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2');
+    final objects = await client.getOwnedObjects(
+      '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2',
+    );
     print(objects.data.length.toString());
   });
 
@@ -130,13 +170,14 @@ void main() {
     final client = SuiClient(SuiUrls.devnet);
 
     final obj = await client.getObject(
-        '0x0d49dbda185cd0941b71315edb594276731f21b2232d8713f319b02c462a2da7',
-        options: SuiObjectDataOptions(showContent: true));
+      '0x0d49dbda185cd0941b71315edb594276731f21b2232d8713f319b02c462a2da7',
+      options: SuiObjectDataOptions(showContent: true),
+    );
     print(obj.data?.objectId.toString());
 
     final objs = await client.multiGetObjects([
       '0x0d49dbda185cd0941b71315edb594276731f21b2232d8713f319b02c462a2da7',
-      '0x922ec73939b3288f6da39ebefb0cb88c6c54817441254d448bd2491ac4dd0cbd'
+      '0x922ec73939b3288f6da39ebefb0cb88c6c54817441254d448bd2491ac4dd0cbd',
     ], options: SuiObjectDataOptions(showType: true));
     print(objs.length.toString());
   });
@@ -144,14 +185,22 @@ void main() {
   test('test get transaction', () async {
     final client = SuiClient(SuiUrls.devnet);
 
-    final txn = await client.getTransactionBlock('6oH779AUs2WpwW77xCVGbYqK1FYVamRqHjV6A5wCV8Qj',
-        options: SuiTransactionBlockResponseOptions(showEffects: true));
+    final txn = await client.getTransactionBlock(
+      '6oH779AUs2WpwW77xCVGbYqK1FYVamRqHjV6A5wCV8Qj',
+      options: SuiTransactionBlockResponseOptions(showEffects: true),
+    );
     print(txn.digest);
 
-    final txns = await client.multiGetTransactionBlocks([
-      '9znMGToLRRa8yZvjCUfj1FJmq4gpb8QwpibFAUffuto1',
-      '4CEFMajEtM62MthwY1xR3Bcddoh2h5wc7jeKEy7WWsbv'
-    ], options: SuiTransactionBlockResponseOptions(showInput: true, showEffects: true));
+    final txns = await client.multiGetTransactionBlocks(
+      [
+        '9znMGToLRRa8yZvjCUfj1FJmq4gpb8QwpibFAUffuto1',
+        '4CEFMajEtM62MthwY1xR3Bcddoh2h5wc7jeKEy7WWsbv',
+      ],
+      options: SuiTransactionBlockResponseOptions(
+        showInput: true,
+        showEffects: true,
+      ),
+    );
     print(txns.length.toString());
   });
 
@@ -175,29 +224,37 @@ void main() {
     final client = SuiClient(SuiUrls.devnet);
 
     final coins = await client.getCoins(
-        '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2',
-        coinType: SUI_TYPE_ARG);
+      '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2',
+      coinType: SUI_TYPE_ARG,
+    );
     print(coins.data.length.toString());
 
-    final allCoins = await client
-        .getAllCoins('0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2');
+    final allCoins = await client.getAllCoins(
+      '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2',
+    );
     print(allCoins.data.length.toString());
 
-    final suiBalance = await client
-        .getBalance('0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2');
+    final suiBalance = await client.getBalance(
+      '0xa2d8bb82df40770ac5bc8628d8070b041a13386fef17db27b32f3b0f316ae5a2',
+    );
     print(suiBalance.totalBalance.toString());
   });
 
   test('test querying events', () async {
     final client = SuiClient(SuiUrls.mainnet);
-    final events = await client.queryEvents(
-        {"Sender": "0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331"},
-        limit: 2);
+    final events = await client.queryEvents({
+      "Sender":
+          "0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331",
+    }, limit: 2);
     print(events.data.length.toString());
 
     final events2 = await client.queryEventsByFilter(
-        EventFilter(sender: "0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331"),
-        limit: 2);
+      EventFilter(
+        sender:
+            "0x02a212de6a9dfa3a69e22387acfbafbb1a9e591bd9d636e7895dcfc8de05f331",
+      ),
+      limit: 2,
+    );
     print(events2.data.length.toString());
   });
 
@@ -206,7 +263,10 @@ void main() {
     final recipientAccount = SuiAccount.ed25519Account();
     final recipient = recipientAccount.getAddress();
 
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     final client = SuiClient(SuiUrls.devnet, account: account);
     var coins = await client.getCoins(account.getAddress());
     if (coins.data.isEmpty) {
@@ -217,7 +277,12 @@ void main() {
     }
 
     final inputObjectIds = [coins.data.first.coinObjectId];
-    final txn = PaySuiTransaction(inputObjectIds, [recipient], [1000], gasBudget);
+    final txn = PaySuiTransaction(
+      inputObjectIds,
+      [recipient],
+      [1000],
+      gasBudget,
+    );
 
     txn.gasBudget = await client.getGasCostEstimation(txn);
 
@@ -230,7 +295,10 @@ void main() {
     final recipientAccount = SuiAccount.secp256k1Account();
     final recipient = recipientAccount.getAddress();
 
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Secp256k1);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Secp256k1,
+    );
     final client = SuiClient(SuiUrls.devnet, account: account);
     var coins = await client.getCoins(account.getAddress());
     if (coins.data.isEmpty) {
@@ -241,7 +309,12 @@ void main() {
     }
 
     final inputObjectIds = [coins.data.first.coinObjectId];
-    final txn = PaySuiTransaction(inputObjectIds, [recipient], [1000], gasBudget);
+    final txn = PaySuiTransaction(
+      inputObjectIds,
+      [recipient],
+      [1000],
+      gasBudget,
+    );
 
     txn.gasBudget = await client.getGasCostEstimation(txn);
 
@@ -254,7 +327,10 @@ void main() {
     final recipientAccount = SuiAccount.secp256r1Account();
     final recipient = recipientAccount.getAddress();
 
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Secp256r1);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Secp256r1,
+    );
     final client = SuiClient(SuiUrls.devnet, account: account);
     var coins = await client.getCoins(account.getAddress());
     if (coins.data.isEmpty) {
@@ -265,7 +341,12 @@ void main() {
     }
 
     final inputObjectIds = [coins.data.first.coinObjectId];
-    final txn = PaySuiTransaction(inputObjectIds, [recipient], [1000], gasBudget);
+    final txn = PaySuiTransaction(
+      inputObjectIds,
+      [recipient],
+      [1000],
+      gasBudget,
+    );
 
     txn.gasBudget = await client.getGasCostEstimation(txn);
 
@@ -277,7 +358,10 @@ void main() {
     final recipientAccount = SuiAccount.ed25519Account();
     final recipient = recipientAccount.getAddress();
 
-    final account = SuiAccount.fromMnemonics(mnemonics, SignatureScheme.Ed25519);
+    final account = SuiAccount.fromMnemonics(
+      mnemonics,
+      SignatureScheme.Ed25519,
+    );
     final client = SuiClient(SuiUrls.devnet, account: account);
     final suiBalance = await client.getBalance(account.getAddress());
     if (suiBalance.totalBalance == BigInt.zero) {
@@ -291,7 +375,10 @@ void main() {
     final coin = tx.add(Transactions.splitCoins(tx.gas, [tx.pureInt(1000)]));
     tx.add(Transactions.transferObjects([coin], tx.pureAddress(recipient)));
 
-    final waitForLocalExecutionTx = await client.signAndExecuteTransactionBlock(account, tx);
+    final waitForLocalExecutionTx = await client.signAndExecuteTransactionBlock(
+      account,
+      tx,
+    );
     print(waitForLocalExecutionTx.digest);
   });
 }
