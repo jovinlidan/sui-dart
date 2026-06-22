@@ -136,3 +136,7 @@
 * Chore: Tighten dependency lower bounds and widen `web_socket_channel` to `^3.0.3`.
 * Refactor: Move platform-specific HTTP adapters under `lib/src/` so the package reports correct platform support (Android, iOS, Windows, macOS, Linux).
 * Style: Resolve all `dart analyze` warnings — add public-API type annotations, remove dead code, and escape doc comments.
+
+## 0.5.1
+
+* Fix: Relax `meta` constraint to `^1.18.0` (was `^1.18.3`). `^1.18.3` cannot resolve on current Flutter stable, which pins `meta 1.18.0`; the package only uses `@immutable`.
