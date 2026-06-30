@@ -4,6 +4,7 @@ import 'package:sui_dart/builder/transaction.dart';
 import 'package:sui_dart/builder/tx_resolution_client.dart';
 import 'package:sui_dart/grpc/client.dart';
 import 'package:sui_dart/grpc/types.dart' as grpc;
+import 'package:sui_dart/sui_account.dart';
 import 'package:sui_dart/types/coins.dart';
 import 'package:sui_dart/types/normalized.dart';
 import 'package:sui_dart/types/objects.dart';
@@ -139,6 +140,27 @@ class GrpcResolutionClient implements TxResolutionClient {
 
   @override
   Future<dynamic> getProtocolConfig() async => null;
+}
+
+/// Builds, signs, and executes transactions entirely over gRPC.
+extension SuiGrpcClientTransactions on SuiGrpcClient {
+  /// Builds [tx] to BCS bytes, resolving coins/objects/gas over gRPC.
+  Future<Uint8List> buildTransaction(Transaction tx, {String? sender}) {
+    if (sender != null) tx.setSenderIfNotSet(sender);
+    return tx.build(BuildOptions(resolutionClient: GrpcResolutionClient(this)));
+  }
+
+  /// Builds [tx] over gRPC, signs it with [account], and executes it over gRPC.
+  Future<grpc.TransactionResponse> signAndExecuteTransaction(
+    SuiAccount account,
+    Transaction tx, {
+    grpc.TransactionIncludeOptions? include,
+  }) async {
+    tx.setSenderIfNotSet(account.getAddress());
+    final bytes = await buildTransaction(tx);
+    final signed = account.keyPair.signTransactionBlock(bytes);
+    return executeTransaction(bytes, [signed.signature], include: include);
+  }
 }
 
 /// The builder only needs the shared-object initial version (to detect a shared
