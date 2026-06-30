@@ -6,6 +6,7 @@ export 'bcs/sui_pure.dart';
 export 'builder/transaction_block_data.dart';
 export 'builder/transactions.dart';
 export 'builder/transaction.dart';
+export 'builder/tx_resolution_client.dart';
 export 'builder/commands.dart';
 export 'builder/executor/serial_transaction_executor.dart';
 export 'builder/intents/coin_with_balance.dart';

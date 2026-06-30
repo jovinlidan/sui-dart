@@ -12,6 +12,7 @@ import 'package:sui_dart/builder/pure.dart';
 import 'package:sui_dart/builder/serializer.dart';
 import 'package:sui_dart/builder/transaction_block_data.dart';
 import 'package:sui_dart/builder/transaction_resolver.dart';
+import 'package:sui_dart/builder/tx_resolution_client.dart';
 import 'package:sui_dart/builder/v1.dart';
 import 'package:sui_dart/cryptography/keypair.dart';
 import 'package:sui_dart/sui_client.dart';
@@ -80,14 +81,17 @@ const DefaultOfflineLimits = {
   "maxTxSizeBytes": 128 * 1024,
 };
 
-SuiClient expectClient(BuildOptions options) {
+TxResolutionClient expectClient(BuildOptions options) {
+  if (options.resolutionClient != null) {
+    return options.resolutionClient!;
+  }
   if (options.client == null) {
     throw ArgumentError(
       "No provider passed to Transaction#build, but transaction data was not sufficient to build offline.",
     );
   }
 
-  return options.client!;
+  return JsonRpcResolutionClient(options.client!);
 }
 
 const LIMITS = {
@@ -121,7 +125,14 @@ List<List<T>> chunk<T>(List<T> arr, int size) {
 }
 
 class BuildOptions {
+  /// JSON-RPC client used for build-time chain reads. For gRPC, pass
+  /// [resolutionClient] instead (e.g. a `GrpcResolutionClient`).
   SuiClient? client;
+
+  /// Transport-agnostic resolution client. When set, it is used instead of
+  /// [client] for all build-time reads (coins, objects, gas price, dry run, …).
+  TxResolutionClient? resolutionClient;
+
   bool onlyTransactionKind;
 
   /// Define a protocol config to build against, instead of having it fetched from the provider at build time.
@@ -132,6 +143,7 @@ class BuildOptions {
 
   BuildOptions({
     this.client,
+    this.resolutionClient,
     this.onlyTransactionKind = false,
     this.protocolConfig,
     this.limits,
@@ -144,6 +156,7 @@ class SerializeTransactionOptions extends BuildOptions {
   SerializeTransactionOptions({
     this.supportedIntents,
     super.client,
+    super.resolutionClient,
     super.onlyTransactionKind,
     super.protocolConfig,
     super.limits,
@@ -156,6 +169,7 @@ class SignOptions extends BuildOptions {
   SignOptions({
     required this.signer,
     super.client,
+    super.resolutionClient,
     super.onlyTransactionKind,
     super.protocolConfig,
     super.limits,
@@ -1149,12 +1163,13 @@ class Transaction {
       throw ArgumentError('Missing transaction sender');
     }
 
-    final client = options.client;
+    final hasClient =
+        options.client != null || options.resolutionClient != null;
 
-    if (options.protocolConfig == null &&
-        options.limits == null &&
-        client != null) {
-      options.protocolConfig = await client.getProtocolConfig();
+    if (options.protocolConfig == null && options.limits == null && hasClient) {
+      // gRPC has no protocol-config read and returns null here; the build then
+      // falls back to DefaultOfflineLimits (or an explicit `limits`).
+      options.protocolConfig = await expectClient(options).getProtocolConfig();
     }
 
     await _resolveIntents(options);

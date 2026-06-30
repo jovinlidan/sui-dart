@@ -6,7 +6,7 @@ import 'package:sui_dart/builder/commands.dart';
 import 'package:sui_dart/builder/inputs.dart';
 import 'package:sui_dart/builder/transaction.dart';
 import 'package:sui_dart/builder/transaction_block_data.dart';
-import 'package:sui_dart/sui_client.dart';
+import 'package:sui_dart/builder/tx_resolution_client.dart';
 import 'package:sui_dart/types/coins.dart';
 import 'package:sui_dart/types/common.dart';
 import 'package:sui_dart/types/objects.dart';
@@ -151,12 +151,12 @@ Future<void> resolveCoinBalance(
     );
   }
 
-  final client = options.client;
-  if (client == null) {
+  if (options.client == null && options.resolutionClient == null) {
     throw ArgumentError(
       'Client must be provided to build transactions with CoinWithBalance intents',
     );
   }
+  final client = expectClient(options);
 
   final usedIds = <String>{};
   for (final input in transactionData.inputs) {
@@ -303,7 +303,7 @@ Future<void> resolveCoinBalance(
 }
 
 Future<List<CoinStruct>> _loadCoins(
-  SuiClient client,
+  TxResolutionClient client,
   String owner,
   String coinType,
   BigInt needed,

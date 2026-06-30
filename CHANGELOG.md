@@ -207,3 +207,9 @@ Synced to `f898c13`.
 * `coinWithBalance` / `createBalance` intents (`lib/builder/intents/coin_with_balance.dart`): `tx.add(coinWithBalance({type, balance}))` yields a coin (or balance) of an exact amount, with the sender's coins selected, merged, and split at build time. Backed by a new async intent-resolution pipeline (`Transaction.addIntentResolver`) and `TransactionBlockDataBuilder.replaceCommand` (which remaps argument indices after splicing). SUI uses the gas coin unless `useGasCoin: false`. Requires a client and sender. The address-balance withdrawal path is not used; surplus remains an owned coin.
 * `Transaction.toJsonAsync` / `prepareForSerialization` / `isPreparedForSerialization`: async JSON serialization that resolves intents first (without requiring gas/sender), with a `supportedIntents` option to leave intents for the recipient to resolve. The synchronous `toJson()` is unchanged.
 * `SerialTransactionExecutor` (`lib/builder/executor/serial_transaction_executor.dart`): signs and executes transactions one at a time for a single account, reusing the gas coin from each transaction's effects so back-to-back transactions don't wait for indexing. Includes a `SerialQueue` utility. (Caches only the gas coin, not arbitrary owned-object versions; there is no parallel executor.)
+
+## Unreleased
+
+### Added
+
+* `TxResolutionClient` (`lib/builder/tx_resolution_client.dart`) — a transport-agnostic interface for the chain reads the transaction builder performs at build time (coins, objects, gas price, dry run, move function signatures, protocol limits). `BuildOptions.resolutionClient` accepts one; when only the JSON-RPC `client` is provided it is wrapped automatically (`JsonRpcResolutionClient`). Groundwork for building transactions over gRPC.
