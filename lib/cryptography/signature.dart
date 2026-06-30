@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:sui_dart/bcs/sui_bcs.dart';
 import 'package:sui_dart/cryptography/ed25519_publickey.dart';
 import 'package:sui_dart/cryptography/keypair.dart';
+import 'package:sui_dart/cryptography/passkey_publickey.dart';
 import 'package:sui_dart/cryptography/secp256_publickey.dart';
 import 'package:sui_dart/multisig/multsig_publickey.dart';
 import 'package:sui_dart/signers/signer_with_provider.dart';
@@ -11,7 +12,7 @@ import 'package:sui_dart/zklogin/address.dart';
 import 'package:sui_dart/zklogin/jwt_utils.dart';
 import 'package:sui_dart/zklogin/signature.dart';
 
-enum SignatureScheme { Ed25519, Secp256k1, Secp256r1, MultiSig, ZkLogin }
+enum SignatureScheme { Ed25519, Secp256k1, Secp256r1, MultiSig, ZkLogin, Passkey }
 
 abstract class SIGNATURE_SCHEME_TO_FLAG {
   static const int Ed25519 = 0x00;
@@ -19,6 +20,7 @@ abstract class SIGNATURE_SCHEME_TO_FLAG {
   static const int Secp256r1 = 0x02;
   static const int MultiSig = 0x03;
   static const int ZkLogin = 0x05;
+  static const int Passkey = 0x06;
 
   static int schemeToFlag(SignatureScheme scheme) {
     switch (scheme) {
@@ -32,6 +34,8 @@ abstract class SIGNATURE_SCHEME_TO_FLAG {
         return MultiSig;
       case SignatureScheme.ZkLogin:
         return ZkLogin;
+      case SignatureScheme.Passkey:
+        return Passkey;
     }
   }
 
@@ -47,6 +51,8 @@ abstract class SIGNATURE_SCHEME_TO_FLAG {
         return SignatureScheme.MultiSig;
       case ZkLogin:
         return SignatureScheme.ZkLogin;
+      case Passkey:
+        return SignatureScheme.Passkey;
       default:
         throw ArgumentError("Undefined Signature Flag $flag");
     }
@@ -101,6 +107,15 @@ SignaturePubkeyPair parseSerializedSignature(String serializedSignature) {
       "addressSeed": addressSeed,
     };
     return SignaturePubkeyPair(signatureScheme, bytes, zkLogin: zkLgoin);
+  }
+
+  if (signatureScheme == SignatureScheme.Passkey) {
+    final parsed = parseSerializedPasskeySignature(bytes);
+    return SignaturePubkeyPair(
+      signatureScheme,
+      bytes,
+      pubKey: PasskeyPublicKey(parsed.publicKey),
+    );
   }
 
   PublicKey getPublicKey(SignatureScheme scheme, Uint8List bytes) {

@@ -195,3 +195,12 @@ Synced to `f898c13`.
 
 * Regenerated `lib/grpc/generated/` from the latest protobuf definitions. `AccumulatorWrite` now carries the authenticated-events shape (`value_kind` + `integer_value` / `integer_tuple` / `event_digest_value`, the `EventDigestEntry` message, and the `AccumulatorValue` enum); `object` and `transaction_execution_service` messages picked up their new fields.
 * Added the `ForkingService` (`sui/forking/v1alpha`) client and exposed it as `SuiGrpcClient.forkingService` (admin-only; for `sui-fork` instances).
+
+## Unreleased
+
+Synced to `f898c13`.
+
+### Added
+
+* Passkey (WebAuthn) signature verification: `PasskeyPublicKey` and `parseSerializedPasskeySignature` (`lib/cryptography/passkey_publickey.dart`), with `SignatureScheme.Passkey` (flag `0x06`) wired into `parseSerializedSignature`, `publicKeyFromRawBytes`, and `publicKeyFromSuiBytes`. Verification reconstructs the WebAuthn signing payload and checks the inner secp256r1 signature against the embedded key.
+* Passkey signing (`lib/cryptography/passkey_keypair.dart`): `PasskeyKeypair` plus a `PasskeyProvider` interface the host app backs with a platform WebAuthn/credentials binding. Handles DER signature parsing, low-S normalization, deriving the secp256r1 key from the DER `SubjectPublicKeyInfo`, and assembling the serialized passkey signature; `signAndRecover`/`findCommonPublicKey` identify an existing passkey's key. Signing is async.

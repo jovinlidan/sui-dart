@@ -403,6 +403,8 @@ PublicKey publicKeyFromRawBytes(
     case "ZkLogin":
       // A supplied address disambiguates legacy vs current zkLogin derivation; else auto-detect.
       return ZkLoginPublicIdentifier.fromBytes(bytes, address: address);
+    case "Passkey":
+      return PasskeyPublicKey(bytes);
     default:
       throw ArgumentError("Unsupported signature scheme $signatureScheme");
   }
