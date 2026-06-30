@@ -490,6 +490,7 @@ class GrpcCoreClient {
     if (include?.events == true) paths.add('events');
     if (include?.balanceChanges == true) paths.add('balance_changes');
     if (include?.bcs == true) paths.add('transaction.bcs');
+    if (include?.commandResults == true) paths.add('command_outputs');
 
     return FieldMask(paths: paths);
   }

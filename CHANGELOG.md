@@ -215,3 +215,7 @@ Synced to `f898c13`.
 * `TxResolutionClient` (`lib/builder/tx_resolution_client.dart`) — a transport-agnostic interface for the chain reads the transaction builder performs at build time (coins, objects, gas price, dry run, move function signatures, protocol limits). `BuildOptions.resolutionClient` accepts one; when only the JSON-RPC `client` is provided it is wrapped automatically (`JsonRpcResolutionClient`).
 * `GrpcResolutionClient` (`lib/grpc/grpc_resolution_client.dart`) — build transactions over gRPC: `tx.build(BuildOptions(resolutionClient: GrpcResolutionClient(grpcClient)))`. Coin selection, object resolution, gas price, gas-budget dry-run (via `simulateTransaction`), and move-function signatures all resolve over gRPC. Validated against mainnet.
 * `SuiGrpcClient.buildTransaction` / `signAndExecuteTransaction` — build, sign, and execute transactions end-to-end over gRPC, no JSON-RPC client required.
+
+### Fixed
+
+* gRPC: `simulateTransaction(commandResults: true)` (and `inspectTxn`/devInspect) now actually return Move call return values. The read mask omitted the `command_outputs` path, so the server replied with empty command outputs — silently breaking every devInspect-return-value read (e.g. reading a u64 from a Move getter).
