@@ -229,3 +229,9 @@ Synced to `f898c13`.
 ### Fixed
 
 * gRPC `simulateTransaction(events: true)` / devInspect now return emitted events — the read mask requested `events` instead of `transaction.events` (events are nested under `transaction`), so the server returned none.
+
+## 0.8.3
+
+### Added
+
+* `ObjectIncludeOptions.display` + `ObjectData.display`: gRPC object reads can fetch the rendered Sui Display (`name`, `image_url`, …) as a `Map`. Null when the type has no Display template.

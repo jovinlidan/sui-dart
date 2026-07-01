@@ -478,6 +478,7 @@ class GrpcCoreClient {
     if (include?.content == true) paths.add('contents');
     if (include?.json == true) paths.add('json');
     if (include?.objectBcs == true) paths.add('bcs');
+    if (include?.display == true) paths.add('display');
 
     return FieldMask(paths: paths);
   }
@@ -516,6 +517,9 @@ class GrpcCoreClient {
           : null,
       json: (include?.json == true && obj.hasJson())
           ? _protoValueToMap(obj.json)
+          : null,
+      display: (include?.display == true && obj.hasDisplay())
+          ? _protoValueToMap(obj.display.output)
           : null,
     );
   }

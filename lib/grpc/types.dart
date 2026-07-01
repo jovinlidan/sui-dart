@@ -5,12 +5,14 @@ class ObjectIncludeOptions {
   final bool previousTransaction;
   final bool objectBcs;
   final bool json;
+  final bool display;
 
   const ObjectIncludeOptions({
     this.content = false,
     this.previousTransaction = false,
     this.objectBcs = false,
     this.json = false,
+    this.display = false,
   });
 }
 
@@ -103,6 +105,10 @@ class ObjectData {
   final Uint8List? objectBcs;
   final Map<String, dynamic>? json;
 
+  /// Rendered Sui Display (`name`, `image_url`, …). Null unless the object's
+  /// type has a Display template and [ObjectIncludeOptions.display] was set.
+  final Map<String, dynamic>? display;
+
   const ObjectData({
     required this.objectId,
     required this.version,
@@ -113,6 +119,7 @@ class ObjectData {
     this.previousTransaction,
     this.objectBcs,
     this.json,
+    this.display,
   });
 }
 
