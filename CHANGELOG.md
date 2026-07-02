@@ -235,3 +235,10 @@ Synced to `f898c13`.
 ### Added
 
 * `ObjectIncludeOptions.display` + `ObjectData.display`: gRPC object reads can fetch the rendered Sui Display (`name`, `image_url`, …) as a `Map`. Null when the type has no Display template.
+
+## 0.8.4
+
+### Fixed
+
+* gRPC event reads: the events read mask used `transaction.events`, which the node rejects as an invalid path (`INVALID_ARGUMENT`), so `getTransaction` / `executeTransaction` / `simulateTransaction(events: true)` returned no events. Corrected to the top-level `events` field, verified against mainnet. Reverts the incorrect 0.8.2 change.
+* gRPC dry-run: `dryRunTransaction` simulated without requesting `effects`, so auto gas-budget estimation had no `gasUsed` and a failed simulation reported success. It now requests `effects`.
